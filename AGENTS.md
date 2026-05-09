@@ -42,3 +42,11 @@ Git and review workflow:
 2. Create feature branches for all follow-up work.
 3. Review staged changes before commit.
 4. Never treat this sandbox as the source of truth for the production project.
+
+GitHub-first workflow:
+
+1. The **GitHub branch `sandbox/main`** is the source of truth for the GLM sandbox.
+2. All GLM work flows through GitHub PRs — not through the local folder.
+3. The local folder is a **disposable snapshot**, not the authoritative copy.
+4. The local folder does **not** need to be updated after every PR. It is only needed for Codex, manual local tests, copying to production, or building a fresh snapshot.
+5. Before Codex: download ZIP from `sandbox/main` on GitHub, delete the old local folder, unpack the ZIP fresh. Never unpack on top of an existing folder.

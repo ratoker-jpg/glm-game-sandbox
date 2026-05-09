@@ -123,3 +123,40 @@ Checks run:
 Production path status:
 - Confirmed: production folder was not touched.
 - Confirmed: no writes were made outside the sandbox folder.
+
+---
+
+Задача: WORKFLOW-01 — Зафиксировать GitHub-first workflow и локальный snapshot-подход
+Дата: 2026-05-10
+Ветка: glm/workflow-01-github-first-local-snapshot (от sandbox/main)
+
+Цель:
+- Зафиксировать, что source of truth для GLM sandbox — GitHub branch sandbox/main.
+- Указать, что локальную папку не нужно обновлять после каждого PR.
+- Описать безопасный процесс обновления локального snapshot перед Codex.
+- Убрать обязательность helper после каждого merge.
+
+Изменённые файлы:
+- README_GLM_SANDBOX.md (добавлен раздел «GitHub-first workflow» с подразделами: source of truth, когда нужен snapshot, процесс перед Codex, использование helper)
+- AGENTS.md (добавлен подраздел «GitHub-first workflow» с 5 правилами)
+- docs/prompts/PROMPT_NEW_CHAT_GPT_FOUR_ELEMENTS_GLM_FIRST.txt (добавлен GitHub-first workflow в контур проекта; убрана обязательность helper после merge в разделах 3 и 7)
+- docs/prompts/PROMPT_NEW_CHAT_GLM_FOUR_ELEMENTS_SANDBOX.txt (добавлен GitHub-first workflow в секцию 1: GLM не должен требовать git pull/helper после каждого PR)
+- PATCH_REPORT.txt (добавлена эта запись)
+
+Что зафиксировано:
+1. GitHub branch sandbox/main — единственный source of truth для sandbox.
+2. Локальная папка — одноразовый snapshot, не авторитетная копия.
+3. Локальный snapshot нужен только: Codex, ручная проверка, перенос в production, сборка свежего snapshot.
+4. Перед Codex: скачать ZIP из sandbox/main, удалить старую папку, распаковать заново. НЕ распаковывать поверх.
+5. Helper option 4 — только по триггерам, не после каждого PR.
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+- Визуальная проверка diff: изменены только документация и промпты, код и ассеты не затронуты.
+
+Подтверждение безопасности:
+- Игровой код не изменён.
+- Ассеты не затронуты.
+- src/main.js не тронут.
+- Google Drive sync не включён.
+- Production paths не затронуты.

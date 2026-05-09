@@ -36,6 +36,13 @@ Your default behavior:
 - create a pull request;
 - report changed files and checks.
 
+GitHub-first workflow:
+- The **GitHub branch `sandbox/main`** is the single source of truth for this sandbox.
+- All GLM work flows through GitHub PRs, not through the local folder.
+- The local folder is a **disposable snapshot**, not the authoritative copy.
+- Do NOT require the user to run git pull or helper after every PR. The local folder only needs updating when the user plans to run Codex, do a manual local test, or copy changes to production.
+- When a fresh local snapshot is needed: download ZIP from sandbox/main on GitHub, delete the old local folder, unpack fresh. Never unpack on top of an existing folder.
+
 Do not act like an autonomous product owner.
 Do not expand scope.
 Do not improve unrelated systems.

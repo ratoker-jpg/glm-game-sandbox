@@ -1,3 +1,3190 @@
+Task: SANDBOX-00 - prepare GLM sandbox
+Timestamp: 2026-05-09 20:17:44 +03:00
+
+Sandbox path:
+C:\Users\Den\Desktop\GLM_test\glm_game_sandbox
+
+Production path status:
+- Confirmed: production folder was not touched.
+- Confirmed: no writes were made outside the sandbox folder.
+
+Project root inspection:
+- Present: AGENTS.md
+- Present: README.md
+- Present: index.html
+- Present: src/
+- Present: assets/
+- Present: docs/
+- Present: package.json
+- Present: BAT helpers in repo root
+
+Files changed:
+- AGENTS.md
+- README.md
+- README_GLM_SANDBOX.md
+- .gitignore
+- 05_RUN_VISUAL_SCENARIOS.bat
+- tools/visual_scenarios.mjs
+- PATCH_REPORT.txt
+
+Files disabled or renamed:
+- 04_SYNC_WORK_MIRROR_TO_GOOGLE_DRIVE.bat -> 04_SYNC_WORK_MIRROR_TO_GOOGLE_DRIVE.DISABLED_IN_GLM_SANDBOX.bat
+- tools/sync_work_mirror.py -> tools/sync_work_mirror.DISABLED_IN_GLM_SANDBOX.py
+- tools/sync_visual_screenshots.py -> tools/sync_visual_screenshots.DISABLED_IN_GLM_SANDBOX.py
+
+Folders removed from sandbox:
+- node_modules/
+- backup/
+- _reports/
+- test-results/
+- _exports/
+- _archive/
+
+Folders ignored or kept out of git:
+- node_modules/
+- backup/
+- _reports/
+- test-results/
+- _exports/
+- _archive/
+- .env
+- *.log
+- *.tmp
+- *.bak
+- screenshot/cache/temp artifacts via .gitignore
+- _gpt_state/ intentionally left in working copy and not planned for staging
+- _inbox/ intentionally left in working copy and not planned for staging
+
+Dangerous reference audit:
+- Executable mirror sync BAT was disabled by rename.
+- Direct Python mirror sync helpers were disabled by rename.
+- Visual screenshot flow was changed to stay local only.
+- Remaining references still exist in docs, _gpt_state, _inbox, package-lock.json, and disabled files.
+- Remaining references are informational or historical in this patch, not active sync entrypoints.
+
+Git status summary:
+- Git repository initialized in sandbox.
+- Active branch set to sandbox/main.
+- Before staging, repo contains untracked project files as expected for a fresh init.
+- Plan for staging: exclude _gpt_state/ and _inbox/ from the initial clean sandbox commit.
+
+GitHub status:
+- GitHub CLI status check result: gh not found on this machine in current PATH.
+- No token workaround was attempted.
+- No remote was created automatically.
+
+Checks run:
+- node --check src/main.js -> PASS
+- node --check tools/visual_scenarios.mjs -> PASS
+- package.json inspected -> only devDependencies present, no npm scripts to run
+- root audit re-run after cleanup -> active mirror writers disabled; remaining refs are mostly historical/docs/context
+
+Risks:
+- Some non-executable docs still mention production paths and mirror workflow.
+- package-lock.json still contains legacy package name four_elements_core_base.
+- _gpt_state/ and _inbox/ still contain historical context and production-path references if a future user chooses to stage them.
+- Root BAT helpers 01/02 still mention production-era comments, though the dangerous sync launcher itself is disabled.
+
+Exact next steps for user / GPT / GLM:
+1. Review the initial sandbox commit on branch sandbox/main.
+2. Add a private GitHub remote manually after gh is installed/authenticated, or use:
+   git remote add origin <PRIVATE_REPO_URL>
+   git push -u origin sandbox/main
+3. Keep all future work on feature branches created from sandbox/main.
+4. Do not re-enable Google Drive sync inside this sandbox.
+5. If desired, do a follow-up cleanup patch to ignore or remove _gpt_state/ and _inbox/ before sharing the repo more broadly.
+
+---
+
+Task: GHPAGES-02 - Add GitHub Pages hardening and live demo link
+Timestamp: 2026-05-10 18:07:00 +03:00
+Branch: glm/ghpages-02-live-demo-nojekyll (from sandbox/main)
+
+Purpose:
+- Add .nojekyll to prevent GitHub Pages from ignoring folders starting with underscore or dot.
+- Add a live demo link to README.md so visitors can launch the game directly.
+- Record the change in PATCH_REPORT.txt.
+
+Changed files:
+- .nojekyll (new, empty)
+- README.md (added live demo link block, kept sandbox warning and all existing rules)
+- PATCH_REPORT.txt (appended this entry)
+
+Gameplay code and assets confirmation:
+- Confirmed: no gameplay code was modified.
+- Confirmed: no asset files were touched.
+- Confirmed: src/main.js was not modified.
+- Confirmed: Google Drive sync remains disabled.
+
+Checks run:
+- node --check src/main.js -> PASS
+- Visual diff review: only .nojekyll, README.md, PATCH_REPORT.txt changed.
+
+Production path status:
+- Confirmed: production folder was not touched.
+- Confirmed: no writes were made outside the sandbox folder.
+
+---
+
+Р—Р°РґР°С‡Р°: WORKFLOW-02 вЂ” РЈРїСЂРѕСЃС‚РёС‚СЊ РїСЂРѕС†РµСЃСЃ: Fast lane Р±РµР· PR РґР»СЏ РЅРёР·РєРѕСЂРёСЃРєРѕРІС‹С… Р·Р°РґР°С‡
+Р”Р°С‚Р°: 2026-05-10
+Lane: Fast
+Р’РµС‚РєР°: sandbox/main (direct push)
+
+Р¦РµР»СЊ:
+- Р’РІРµСЃС‚Рё РґРІР° СЂРµР¶РёРјР° СЂР°Р±РѕС‚С‹: Fast lane (direct push) Рё Review lane (PR РѕР±СЏР·Р°С‚РµР»РµРЅ).
+- Fast lane: РґР»СЏ docs, prompts, PATCH_REPORT, .nojekyll, С‚РµРєСЃС‚РѕРІС‹С… РїСЂР°РІРѕРє Р±РµР· Р»РѕРіРёРєРё вЂ” commit + push РЅР°РїСЂСЏРјСѓСЋ РІ sandbox/main, Р±РµР· PR.
+- Review lane: РґР»СЏ src/main.js, src/core, src/config, assets, gameplay, СЌРєРѕРЅРѕРјРёРєР°, combat, pathfinding, save/load, РјРЅРѕРіРѕС„Р°Р№Р»РѕРІС‹С… РёР·РјРµРЅРµРЅРёР№, СЂРёСЃРєРѕРІР°РЅРЅС‹С… Р·Р°РґР°С‡ вЂ” feature branch + PR.
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- README_GLM_SANDBOX.md (GitHub workflow: РґРѕР±Р°РІР»РµРЅС‹ Fast lane Рё Review lane СЃ РїСЂР°РІРёР»Р°РјРё; РѕР±РЅРѕРІР»С‘РЅ forbidden list)
+- AGENTS.md (РїСЂР°РІРёР»Рѕ 1 РѕР±РЅРѕРІР»РµРЅРѕ: Fast lane вЂ” direct push; РїСЂР°РІРёР»Рѕ 2: Review lane вЂ” PR; СЃРµРєС†РёСЏ Git and review workflow РѕР±РЅРѕРІР»РµРЅР°)
+- docs/prompts/PROMPT_NEW_CHAT_GPT_FOUR_ELEMENTS_GLM_FIRST.txt (GLM СЂРѕР»СЊ: Fast lane / Review lane; СЃРµРєС†РёСЏ 3: РІС‹Р±РѕСЂ lane; СЃРµРєС†РёСЏ 4: СЂР°Р·РґРµР»РµРЅРёРµ Р·Р°РґР°С‡ РїРѕ lane; СЃРµРєС†РёСЏ 6: РѕР±РЅРѕРІР»С‘РЅРЅС‹Рµ hard rules; СЃРµРєС†РёСЏ 7: merge checklist С‚РѕР»СЊРєРѕ Review lane)
+- docs/prompts/PROMPT_NEW_CHAT_GLM_FOUR_ELEMENTS_SANDBOX.txt (СЃРµРєС†РёСЏ 1: Two lanes; СЃРµРєС†РёСЏ 2: РѕР±РЅРѕРІР»С‘РЅРЅС‹Рµ hard rules; СЃРµРєС†РёСЏ 3: Fast lane / Review lane branch rules; СЃРµРєС†РёСЏ 5: PATCH_REPORT СЃ lane; СЃРµРєС†РёСЏ 8: final response СЃ lane Рё commit hash)
+- PATCH_REPORT.txt (РґРѕР±Р°РІР»РµРЅР° СЌС‚Р° Р·Р°РїРёСЃСЊ)
+
+Р§С‚Рѕ Р·Р°С„РёРєСЃРёСЂРѕРІР°РЅРѕ:
+1. Fast lane вЂ” direct push РІ sandbox/main РґР»СЏ РЅРёР·РєРѕСЂРёСЃРєРѕРІС‹С… Р·Р°РґР°С‡ (docs, prompts, С‚РµРєСЃС‚).
+2. Review lane вЂ” feature branch + PR РґР»СЏ СЂРёСЃРєРѕРІР°РЅРЅС‹С… Р·Р°РґР°С‡ (РєРѕРґ, Р°СЃСЃРµС‚С‹, gameplay).
+3. PR РЅРµ РѕР±СЏР·Р°С‚РµР»РµРЅ РґР»СЏ Fast lane.
+4. Р•СЃР»Рё РЅРµ СѓРІРµСЂРµРЅС‹ вЂ” default Review lane.
+5. PATCH_REPORT Рё final report С‚РµРїРµСЂСЊ СЃРѕРґРµСЂР¶Р°С‚ lane Рё commit hash.
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+- Р’РёР·СѓР°Р»СЊРЅР°СЏ РїСЂРѕРІРµСЂРєР° diff: РёР·РјРµРЅРµРЅС‹ С‚РѕР»СЊРєРѕ РґРѕРєСѓРјРµРЅС‚Р°С†РёСЏ Рё РїСЂРѕРјРїС‚С‹, РєРѕРґ Рё Р°СЃСЃРµС‚С‹ РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚С‹.
+
+РџРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ Р±РµР·РѕРїР°СЃРЅРѕСЃС‚Рё:
+- РРіСЂРѕРІРѕР№ РєРѕРґ РЅРµ РёР·РјРµРЅС‘РЅ.
+- РђСЃСЃРµС‚С‹ РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚С‹.
+- src/main.js РЅРµ С‚СЂРѕРЅСѓС‚.
+- Google Drive sync РЅРµ РІРєР»СЋС‡С‘РЅ.
+- Production paths РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚С‹.
+
+РџСЂРёРјРµС‡Р°РЅРёРµ:
+- PR РЅРµ СЃРѕР·РґР°РІР°Р»СЃСЏ, С‚Р°Рє РєР°Рє СЌС‚Рѕ Fast lane Р·Р°РґР°С‡Р° (docs/prompts only).
+
+---
+
+Р—Р°РґР°С‡Р°: PATCH-SCOUT-01 вЂ” РїРѕРґРєР»СЋС‡РёС‚СЊ scout unit shell
+Р”Р°С‚Р°: 2026-05-10
+Lane: Review
+Р’РµС‚РєР°: glm/patch-scout-01-unit-shell (РѕС‚ sandbox/main)
+
+Р¦РµР»СЊ:
+- РџРѕРґРєР»СЋС‡РёС‚СЊ scout РєР°Рє РјРёРЅРёРјР°Р»СЊРЅС‹Р№ unit shell: РєРѕРґ РёРіСЂС‹ Р·РЅР°РµС‚ С‚РёРї scout, РіСЂСѓР·РёС‚ Рё РѕС‚СЂРёСЃРѕРІС‹РІР°РµС‚ РµРіРѕ 8-direction idle sprites.
+- РќР• РїРѕР»РЅРѕС†РµРЅРЅР°СЏ РјРµС…Р°РЅРёРєР° СЂР°Р·РІРµРґС‡РёРєР° вЂ” С‚РѕР»СЊРєРѕ shell.
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/config/units.js вЂ” РґРѕР±Р°РІР»РµРЅ scout РІ FE_UNITS: name, hp, speed, view, canAttack:false
+- src/config/sprite_profiles.js вЂ” РґРѕР±Р°РІР»РµРЅ scout РІ FE_SPRITE_PROFILES.units: footprint, size, anchor, alphaCutoff
+- src/core/asset_loader.js вЂ” РґРѕР±Р°РІР»РµРЅ scout РІ units (fallback image) Рё unitAnimations (8-dir idle С‡РµСЂРµР· loadUnitAnimation)
+- src/main.js вЂ” РґРѕР±Р°РІР»РµРЅ scout РІ 4 СЃРїРёСЃРєР°: spawnBuilderDust, updateBuilderDust, getCalibratedUnit (dev hotkeys), updateBuilderDust РІС‹Р·РѕРІ РІ game loop
+
+РџР°СЂР°РјРµС‚СЂС‹ scout:
+- name: 'Р Р°Р·РІРµРґС‡РёРє'
+- hp: 70
+- speed: 0.72 (РІС‹С€Рµ light_tank 0.55 Рё harvester 0.46, РЅРѕ Р±РµР· Р±Р°Р»Р°РЅСЃРёСЂРѕРІРєРё)
+- view: 7
+- cargo: 0
+- canAttack: false
+- costElement: 1, productionTime: 18
+
+РџСѓС‚СЊ Рє Р°СЃСЃРµС‚Р°Рј:
+- assets/factions/<faction>/units/scout_8dirs/scout_idle_dir<d>_0.png
+- 8 РЅР°РїСЂР°РІР»РµРЅРёР№, idle-only, move frames = idle (РєР°Рє harvester Рё light_tank)
+
+Р§С‚Рѕ РќР• СЃРґРµР»Р°РЅРѕ СЃРїРµС†РёР°Р»СЊРЅРѕ:
+- Scout РќР• РґРѕР±Р°РІР»РµРЅ РІ РїСЂРѕРёР·РІРѕРґСЃС‚РІРѕ (factory UI / units_factory queue) вЂ” СЌС‚Рѕ С‚СЂРµР±СѓРµС‚ РѕС‚РґРµР»СЊРЅРѕРіРѕ РїР°С‚С‡Р° СЃ UI/СЌРєРѕРЅРѕРјРёС‡РµСЃРєРѕР№ Р»РѕРіРёРєРѕР№.
+- Scout РќР• РґРѕР±Р°РІР»РµРЅ РІ factoryCanAffordAnyUnit вЂ” РЅРµ РїСЂРѕРёР·РІРѕРґРёС‚СЃСЏ.
+- Scout РќР• РґРѕР±Р°РІР»РµРЅ РІ combat / attack СЃРёСЃС‚РµРјСѓ вЂ” canAttack:false.
+- AI / bot scouting РќР• РґРѕР±Р°РІР»РµРЅ.
+- Pathfinding РќР• РёР·РјРµРЅС‘РЅ вЂ” scout РёСЃРїРѕР»СЊР·СѓРµС‚ СЃС‚Р°РЅРґР°СЂС‚РЅС‹Р№ unit_controller.
+- Save/load РќР• РёР·РјРµРЅС‘РЅ вЂ” createUnit Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё СЃРѕР·РґР°С‘С‚ scout СЃ РєРѕСЂСЂРµРєС‚РЅС‹РјРё РїРѕР»СЏРјРё.
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+- node --check src/config/units.js -> PASS
+- node --check src/config/sprite_profiles.js -> PASS
+- node --check src/core/asset_loader.js -> PASS
+- node --check src/core/unit_controller.js -> PASS
+- РЎС‚Р°С‚РёС‡РµСЃРєР°СЏ РїСЂРѕРІРµСЂРєР° scout Р°СЃСЃРµС‚РѕРІ: 32 С„Р°Р№Р»Р° (4 С„СЂР°РєС†РёРё Г— 8 РЅР°РїСЂР°РІР»РµРЅРёР№) вЂ” РІСЃРµ РЅР° РјРµСЃС‚Рµ
+
+РџРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ Р±РµР·РѕРїР°СЃРЅРѕСЃС‚Рё:
+- РђСЃСЃРµС‚С‹ РЅРµ РёР·РјРµРЅРµРЅС‹: РґР° (Р°СЃСЃРµС‚С‹ Р±С‹Р»Рё РґРѕР±Р°РІР»РµРЅС‹ СЂР°РЅРµРµ РІ ASSET-SCOUT-01)
+- src/main.js РёР·РјРµРЅС‘РЅ: РґР° (4 РјРёРЅРёРјР°Р»СЊРЅС‹С… РїСЂР°РІРєРё вЂ” РґРѕР±Р°РІР»РµРЅРёРµ scout РІ СЃРїРёСЃРєРё dust/dev)
+- gameplay РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- economy РёР·РјРµРЅРµРЅР°: РЅРµС‚
+- combat РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- pathfinding РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- Google Drive sync С‚СЂРѕРЅСѓС‚: РЅРµС‚
+- production paths С‚СЂРѕРЅСѓС‚С‹: РЅРµС‚
+
+---
+
+Р—Р°РґР°С‡Р°: PATCH-SCOUT-01B вЂ” РёСЃРїСЂР°РІРёС‚СЊ СЃРїРѕСЃРѕР± dev-С‚РµСЃС‚Р° scout С‡РµСЂРµР· РєРѕРЅСЃРѕР»СЊ
+Р”Р°С‚Р°: 2026-05-10
+Lane: Review
+Р’РµС‚РєР°: glm/patch-scout-01b-dev-spawn (РѕС‚ glm/patch-scout-01-unit-shell)
+
+РџСЂРѕР±Р»РµРјР°:
+Р’ РѕС‚С‡С‘С‚Рµ PATCH-SCOUT-01 Р±С‹Р»Р° СѓРєР°Р·Р°РЅР° РєРѕРјР°РЅРґР° РґР»СЏ С‚РµСЃС‚Р° scout РёР· РєРѕРЅСЃРѕР»Рё:
+  createUnit('scout', 10, 10)
+РќРѕ createUnit вЂ” РІРЅСѓС‚СЂРµРЅРЅСЏСЏ С„СѓРЅРєС†РёСЏ IIFE РІ main.js, РЅРµ СЌРєСЃРїРѕСЂС‚РёСЂРѕРІР°РЅР° РІ window.
+РљРѕРјР°РЅРґР° РїР°РґР°Р»Р° СЃ: Uncaught ReferenceError: createUnit is not defined
+
+Р¦РµР»СЊ:
+Р”РѕР±Р°РІРёС‚СЊ Р±РµР·РѕРїР°СЃРЅС‹Р№ dev-only СЃРїРѕСЃРѕР± СЃРѕР·РґР°С‚СЊ scout (Рё Р»СЋР±РѕР№ РґСЂСѓРіРѕР№ СЋРЅРёС‚) РёР· Р±СЂР°СѓР·РµСЂРЅРѕР№ РєРѕРЅСЃРѕР»Рё.
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/main.js вЂ” РґРѕР±Р°РІР»РµРЅР° С„СѓРЅРєС†РёСЏ window.FE_DEV_SPAWN_UNIT СЂСЏРґРѕРј СЃ FE_EXPORT_SNAPSHOT
+
+РљР°Рє СЂР°Р±РѕС‚Р°РµС‚ FE_DEV_SPAWN_UNIT(type, x, y):
+- РџСЂРѕРІРµСЂСЏРµС‚, С‡С‚Рѕ РёРіСЂР° Р·Р°РїСѓС‰РµРЅР° (game.screen === 'game')
+- РџСЂРѕРІРµСЂСЏРµС‚, С‡С‚Рѕ С‚РёРї СЋРЅРёС‚Р° СЃСѓС‰РµСЃС‚РІСѓРµС‚ РІ UNIT_DEFS
+- Р•СЃР»Рё x/y РЅРµ СѓРєР°Р·Р°РЅС‹ вЂ” СЃРїР°РІРЅРёС‚ СЂСЏРґРѕРј СЃ hq_base РёРіСЂРѕРєР°
+- РџСЂРѕРІРµСЂСЏРµС‚ РіСЂР°РЅРёС†С‹ РєР°СЂС‚С‹
+- РЎРѕР·РґР°С‘С‚ СЋРЅРёС‚ С‡РµСЂРµР· РІРЅСѓС‚СЂРµРЅРЅРёР№ createUnit Рё РґРѕР±Р°РІР»СЏРµС‚ РІ game.units
+- РџРёС€РµС‚ РїРѕРЅСЏС‚РЅС‹Р№ console.warn СЃ РёРјРµРЅРµРј, id Рё РєРѕРѕСЂРґРёРЅР°С‚Р°РјРё
+- Р’РѕР·РІСЂР°С‰Р°РµС‚ СЃРѕР·РґР°РЅРЅС‹Р№ unit РёР»Рё null РїСЂРё РѕС€РёР±РєРµ
+
+РќРѕРІР°СЏ РєРѕРјР°РЅРґР° С‚РµСЃС‚Р°:
+  FE_DEV_SPAWN_UNIT('scout', 10, 10)
+  FE_DEV_SPAWN_UNIT('scout')           вЂ” СЂСЏРґРѕРј СЃ HQ
+  FE_DEV_SPAWN_UNIT('light_tank', 5, 5) вЂ” СЂР°Р±РѕС‚Р°РµС‚ РґР»СЏ Р»СЋР±РѕРіРѕ С‚РёРїР°
+
+Р§С‚Рѕ РќР• СЃРґРµР»Р°РЅРѕ СЃРїРµС†РёР°Р»СЊРЅРѕ:
+- createUnit РќР• СЌРєСЃРїРѕСЂС‚РёСЂРѕРІР°РЅ РЅР°РїСЂСЏРјСѓСЋ вЂ” РґРѕСЃС‚СѓРї С‚РѕР»СЊРєРѕ С‡РµСЂРµР· FE_DEV_SPAWN_UNIT
+- scout РќР• РґРѕР±Р°РІР»РµРЅ РІ РїСЂРѕРёР·РІРѕРґСЃС‚РІРѕ/factory
+- combat РќР• РёР·РјРµРЅС‘РЅ
+- pathfinding РќР• РёР·РјРµРЅС‘РЅ
+- economy РќР• РёР·РјРµРЅРµРЅР°
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+- РЎС‚Р°С‚РёС‡РµСЃРєР°СЏ РїСЂРѕРІРµСЂРєР°: window.FE_DEV_SPAWN_UNIT РґРѕР±Р°РІР»РµРЅ РІ main.js (СЃС‚СЂРѕРєР° 11864)
+
+Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ:
+- assets РёР·РјРµРЅРµРЅС‹: РЅРµС‚
+- economy РёР·РјРµРЅРµРЅР°: РЅРµС‚
+- combat РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- pathfinding РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- production/factory РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- Google Drive sync С‚СЂРѕРЅСѓС‚: РЅРµС‚
+
+---
+
+Р—Р°РґР°С‡Р°: PATCH-SCOUT-01C вЂ” РёСЃРїСЂР°РІРёС‚СЊ РІРёР·СѓР°Р»СЊРЅСѓСЋ РїРѕСЃР°РґРєСѓ scout Рё СѓРїСЂР°РІР»РµРЅРёРµ РґРІРёР¶РµРЅРёРµРј
+Р”Р°С‚Р°: 2026-05-10
+Lane: Review
+Р’РµС‚РєР°: glm/patch-scout-01c-visual-control (РѕС‚ sandbox/main)
+
+РџСЂРѕР±Р»РµРјР°:
+1. Scout РІРёР·СѓР°Р»СЊРЅРѕ СЃР»РёС€РєРѕРј РєСЂСѓРїРЅС‹Р№ (size:[92,92]), РїР»РѕС…Рѕ РїРѕСЃР°Р¶РµРЅ РЅР° РєР»РµС‚РєРµ.
+2. HP bar РїРµСЂРµРєСЂС‹РІР°РµС‚ РєРѕСЂРїСѓСЃ, selection ring СЃР»РёС€РєРѕРј РЅРёР·РєРѕ.
+3. Scout РЅРµ РµРґРµС‚ РїРѕ РєРѕРјР°РЅРґРµ РґРІРёР¶РµРЅРёСЏ вЂ” РЅРµ РїРѕР»СѓС‡Р°РµС‚ updateUnitMovement РІ game loop.
+4. Scout РЅРµ РёРјРµРµС‚ СЃРѕР±СЃС‚РІРµРЅРЅРѕРіРѕ dir map / dir offsets вЂ” РёСЃРїРѕР»СЊР·СѓРµС‚ builder РєР°Рє С„РѕР»Р»Р±СЌРє.
+5. Scout РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚ РІ dust-РїР°СЂР°РјРµС‚СЂР°С…, click marker types, selection ring tune.
+
+Р§С‚Рѕ РёСЃРїСЂР°РІР»РµРЅРѕ:
+
+1. Visual profile (sprite_profiles.js):
+   - size: [92,92] в†’ [80,80] вЂ” scout РјРµРЅСЊС€Рµ С‚Р°РЅРєР°, РЅРѕ РєСЂСѓРїРЅРµРµ РјРµР»РєРёС… СЋРЅРёС‚РѕРІ
+   - hpOffset: 44 в†’ 34 вЂ” HP bar РІС‹С€Рµ РєРѕСЂРїСѓСЃР°
+
+2. HP bar РїРѕР·РёС†РёСЏ (main.js):
+   - Р”РѕР±Р°РІР»РµРЅ scout РІ С†РµРїРѕС‡РєСѓ hpY СЂР°СЃС‡С‘С‚Р°: anchorScreenY - 52 * z
+   - HP bar С‚РµРїРµСЂСЊ РЅР°Рґ РєРѕСЂРїСѓСЃРѕРј, РЅРµ РїРµСЂРµРєСЂС‹РІР°РµС‚ РµРіРѕ
+
+3. Selection ring (main.js):
+   - Р”РѕР±Р°РІР»РµРЅ scout РІ ringTuneByType: { x:0, y:-16, rx:0.88, ry:0.84 }
+   - Ring РїРѕРґ СЋРЅРёС‚РѕРј, РєРѕРјРїР°РєС‚РЅРµРµ С‡РµРј Сѓ builder
+
+4. Direction map + offsets (runtime_flags.js + main.js):
+   - Р”РѕР±Р°РІР»РµРЅ FE_SCOUT_DIR_MAP = [2,0,0,6,6,4,4,2]
+   - Р”РѕР±Р°РІР»РµРЅ FE_SCOUT_DIR_OFFSETS (8 РЅР°РїСЂР°РІР»РµРЅРёР№, РЅР°С‡Р°Р»СЊРЅС‹Рµ РЅСѓР»Рё)
+   - Р”РѕР±Р°РІР»РµРЅ FE_SCOUT_FORCE_DIR = null
+   - main.js: scout РІРєР»СЋС‡С‘РЅ РІ С†РµРїРѕС‡РєСѓ dirMap Рё dirOffsets
+
+5. Movement (main.js):
+   - Р”РѕР±Р°РІР»РµРЅР° РІРµС‚РєР° РІ game loop: if (u.type==='scout') updateUnitMovement(u,dt);
+   - Scout С‚РµРїРµСЂСЊ РґРІРёРіР°РµС‚СЃСЏ РїРѕ РєРѕРјР°РЅРґРµ С‡РµСЂРµР· СЃС‚Р°РЅРґР°СЂС‚РЅС‹Р№ movement pipeline
+
+6. Dust (runtime_flags.js + main.js):
+   - FE_SCOUT_DUST_WHEEL_Y, RADIUS_MULT, ALPHA_MULT, TRAIL_COUNT, BURST_COUNT
+   - Scout РІРєР»СЋС‡С‘РЅ РІ С†РµРїРѕС‡РєСѓ wheelYOffsetFlag, defaultWheelYOffset, radiusMult, alphaMult
+
+7. Click marker (runtime_flags.js):
+   - Scout РґРѕР±Р°РІР»РµРЅ РІ FE_UNIT_CLICK_MARKER_TYPES
+
+8. Unit menu (main.js):
+   - Р”РѕР±Р°РІР»РµРЅ scout РІ openUnitMenu СЃ РєРЅРѕРїРєР°РјРё "РЎС‚РѕРї" Рё "РћС‚РјРµРЅР°"
+
+9. Dev hotkeys (main.js):
+   - Scout РІРєР»СЋС‡С‘РЅ РІ getDirOffsetsForUnit, getForceDirForUnit, setForceDirForUnit
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/config/sprite_profiles.js вЂ” size, hpOffset РґР»СЏ scout
+- src/config/runtime_flags.js вЂ” FE_SCOUT_DIR_MAP, DIR_OFFSETS, FORCE_DIR, dust params, click marker
+- src/main.js вЂ” dirMap, dirOffsets, hpY, selection ring, movement loop, dust params, unit menu, dev hotkeys
+- PATCH_REPORT.txt
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+- node --check src/config/sprite_profiles.js -> PASS
+- node --check src/config/runtime_flags.js -> PASS
+- node --check src/config/units.js -> PASS
+- node --check src/core/asset_loader.js -> PASS
+
+РљР°Рє С‚РµСЃС‚РёСЂРѕРІР°С‚СЊ:
+1. Р—Р°РїСѓСЃС‚РёС‚СЊ РёРіСЂСѓ
+2. РћС‚РєСЂС‹С‚СЊ РєРѕРЅСЃРѕР»СЊ: FE_DEV_SPAWN_UNIT('scout')
+3. РљР»РёРєРЅСѓС‚СЊ РЅР° scout вЂ” РІС‹РґРµР»СЏРµС‚СЃСЏ, РІРёРґРЅС‹ ring Рё HP bar
+4. РљР»РёРєРЅСѓС‚СЊ РЅР° СЃРІРѕР±РѕРґРЅСѓСЋ РєР»РµС‚РєСѓ вЂ” scout РµРґРµС‚
+5. РљРѕРЅС‚РµРєСЃС‚РЅРѕРµ РјРµРЅСЋ: "Р Р°Р·РІРµРґС‡РёРє" / "РЎС‚РѕРї" / "РћС‚РјРµРЅР°"
+
+Р§С‚Рѕ РќР• СЃРґРµР»Р°РЅРѕ СЃРїРµС†РёР°Р»СЊРЅРѕ:
+- Scout РќР• РґРѕР±Р°РІР»РµРЅ РІ РїСЂРѕРёР·РІРѕРґСЃС‚РІРѕ (factory UI)
+- Combat РќР• РёР·РјРµРЅС‘РЅ вЂ” scout СЃ canAttack:false
+- AI / bot scouting РќР• РґРѕР±Р°РІР»РµРЅ
+- Pathfinding РќР• РёР·РјРµРЅС‘РЅ вЂ” scout РёСЃРїРѕР»СЊР·СѓРµС‚ СЃС‚Р°РЅРґР°СЂС‚РЅС‹Р№ BFS
+- Save/load РќР• РёР·РјРµРЅС‘РЅ
+- РђСЃСЃРµС‚С‹ РќР• РёР·РјРµРЅРµРЅС‹
+
+Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ:
+- assets РёР·РјРµРЅРµРЅС‹: РЅРµС‚
+- economy РёР·РјРµРЅРµРЅР°: РЅРµС‚
+- combat РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- pathfinding РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- production/factory РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- Google Drive sync С‚СЂРѕРЅСѓС‚: РЅРµС‚
+
+---
+
+Р—Р°РґР°С‡Р°: PATCH-SCOUT-01D вЂ” РёСЃРїСЂР°РІРёС‚СЊ orientation / dir mapping scout
+Р”Р°С‚Р°: 2026-05-10
+Lane: Review
+Р’РµС‚РєР°: glm/patch-scout-01d-dir-mapping (РѕС‚ sandbox/main)
+
+РџСЂРѕР±Р»РµРјР°:
+Scout РµРґРµС‚ Р±РѕРєРѕРј вЂ” РІРёР·СѓР°Р»СЊРЅРѕ СЃРјРѕС‚СЂРёС‚ РЅРµ РІ СЃС‚РѕСЂРѕРЅСѓ С„Р°РєС‚РёС‡РµСЃРєРѕРіРѕ РґРІРёР¶РµРЅРёСЏ.
+РџСЂРё РґРІРёР¶РµРЅРёРё south-west РїРѕРєР°Р·С‹РІР°РµС‚ sprite, РєРѕС‚РѕСЂС‹Р№ СЃРјРѕС‚СЂРёС‚ north-east, Рё С‚.Рґ.
+
+РџСЂРёС‡РёРЅР°:
+FE_SCOUT_DIR_MAP Р±С‹Р» СЃРєРѕРїРёСЂРѕРІР°РЅ СЃ harvester/light_tank: [2,0,0,6,6,4,4,2].
+РќРѕ scout sprites РёСЃРїРѕР»СЊР·СѓСЋС‚ РґСЂСѓРіСѓСЋ РѕСЂРёРµРЅС‚Р°С†РёСЋ: sprite dirN РІРёР·СѓР°Р»СЊРЅРѕ СЃРјРѕС‚СЂРёС‚
+РІ РЅР°РїСЂР°РІР»РµРЅРёРё (N+1)%8, С‚.Рµ. РІРµСЃСЊ РЅР°Р±РѕСЂ РїРѕРІС‘СЂРЅСѓС‚ РЅР° +1 step CW РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ
+СЃС‚Р°РЅРґР°СЂС‚РЅРѕР№ 8-dir РєРѕРЅРІРµРЅС†РёРё (dir0=east, dir2=south, dir4=west, dir6=north).
+
+РЎС‚Р°СЂС‹Р№ DIR_MAP РґР°РІР°Р»:
+- rawDir=3 (SW) в†’ sprite=6 (СЃРјРѕС‚СЂРёС‚ NE) вЂ” СЋРЅРёС‚ РµРґРµС‚ Р±РѕРєРѕРј/РЅР°Р·Р°Рґ
+- rawDir=7 (NE) в†’ sprite=2 (СЃРјРѕС‚СЂРёС‚ S)  вЂ” СЋРЅРёС‚ РµРґРµС‚ Р±РѕРєРѕРј
+
+Р§С‚Рѕ РёСЃРїСЂР°РІР»РµРЅРѕ:
+
+1. FE_SCOUT_DIR_MAP (runtime_flags.js):
+   - РЎС‚Р°СЂС‹Р№: [2, 0, 0, 6, 6, 4, 4, 2] (РєРѕРїРёСЏ harvester)
+   - РќРѕРІС‹Р№:  [7, 0, 1, 2, 3, 4, 5, 6]
+   - Р¤РѕСЂРјСѓР»Р°: DIR_MAP[rawDir] = (rawDir + 7) % 8
+   - РљРѕРјРїРµРЅСЃРёСЂСѓРµС‚ РїРѕРІРѕСЂРѕС‚ СЃРїСЂР°Р№С‚РѕРІ РЅР° +1 CW
+
+2. unitDir8 forceDir (main.js):
+   - Р”РѕР±Р°РІР»РµРЅ scout Рё light_tank РІ С†РµРїРѕС‡РєСѓ forceDir РІРЅСѓС‚СЂРё unitDir8()
+   - Р Р°РЅСЊС€Рµ forceDir РїСЂРёРјРµРЅСЏР»СЃСЏ С‚РѕР»СЊРєРѕ Рє harvester Рё builder
+   - РўРµРїРµСЂСЊ FE_SCOUT_FORCE_DIR Рё FE_LIGHT_TANK_FORCE_DIR СЂР°Р±РѕС‚Р°СЋС‚ РєРѕСЂСЂРµРєС‚РЅРѕ
+     РїСЂРё dev-РєР°Р»РёР±СЂРѕРІРєРµ С‡РµСЂРµР· РіРѕСЂСЏС‡РёРµ РєР»Р°РІРёС€Рё
+
+РџСЂРѕРІРµСЂРєР° РЅРѕРІРѕР№ DIR_MAP:
+- rawDir=0 (E)  в†’ sprite=7 в†’ faces (7+1)%8=0=E  вњ“
+- rawDir=1 (SE) в†’ sprite=0 в†’ faces (0+1)%8=1=SE вњ“
+- rawDir=2 (S)  в†’ sprite=1 в†’ faces (1+1)%8=2=S  вњ“
+- rawDir=3 (SW) в†’ sprite=2 в†’ faces (2+1)%8=3=SW вњ“
+- rawDir=4 (W)  в†’ sprite=3 в†’ faces (3+1)%8=4=W  вњ“
+- rawDir=5 (NW) в†’ sprite=4 в†’ faces (4+1)%8=5=NW вњ“
+- rawDir=6 (N)  в†’ sprite=5 в†’ faces (5+1)%8=6=N  вњ“
+- rawDir=7 (NE) в†’ sprite=6 в†’ faces (6+1)%8=7=NE вњ“
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/config/runtime_flags.js вЂ” FE_SCOUT_DIR_MAP РѕР±РЅРѕРІР»С‘РЅ
+- src/main.js вЂ” forceDir РІ unitDir8: РґРѕР±Р°РІР»РµРЅС‹ scout Рё light_tank
+- PATCH_REPORT.txt
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+- node --check src/config/runtime_flags.js -> PASS
+
+Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ:
+- assets РёР·РјРµРЅРµРЅС‹: РЅРµС‚
+- economy РёР·РјРµРЅРµРЅР°: РЅРµС‚
+- combat РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- pathfinding РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- production/factory РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- size / hpOffset / selection ring: РЅРµ С‚СЂРѕРЅСѓС‚С‹
+- angle->dir Р»РѕРіРёРєР°: РЅРµ РёР·РјРµРЅРµРЅР° (rawDir СЂР°СЃС‡С‘С‚ С‚РѕС‚ Р¶Рµ)
+- Google Drive sync С‚СЂРѕРЅСѓС‚: РЅРµС‚
+
+---
+
+Р—Р°РґР°С‡Р°: PATCH-SCOUT-01E вЂ” final visual tuning scout
+Р”Р°С‚Р°: 2026-05-10
+Lane: Review
+Р’РµС‚РєР°: glm/patch-scout-01e-visual-tuning (РѕС‚ sandbox/main)
+
+РџСЂРѕР±Р»РµРјР°:
+1. FE_SCOUT_DIR_MAP [7,0,1,2,3,4,5,6] РёР· 01D РЅРµ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓРµС‚ С„Р°РєС‚РёС‡РµСЃРєРѕР№ СЂСѓС‡РЅРѕР№
+   dev-РєР°Р»РёР±СЂРѕРІРєРµ вЂ” scout РІСЃС‘ РµС‰С‘ СЃРјРѕС‚СЂРёС‚ РјРёРјРѕ РЅР°РїСЂР°РІР»РµРЅРёСЏ РґРІРёР¶РµРЅРёСЏ.
+2. Scout СЃРјРµС‰С‘РЅ РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ С†РµРЅС‚СЂР° РєР»РµС‚РєРё / РёР·РѕРјРµС‚СЂРёС‡РµСЃРєРѕРіРѕ СЂРѕРјР±Р°.
+3. Scout СЃР»РёС€РєРѕРј РјРµР»РєРёР№ РїСЂРё size=[80,80] вЂ” РІС‹РіР»СЏРґРёС‚ РјРµРЅСЊС€Рµ, С‡РµРј РѕР¶РёРґР°РµС‚СЃСЏ
+   РґР»СЏ РІРёРґРёРјРѕРіРѕ СЂР°Р·РІРµРґС‡РёРєР°.
+
+Р§С‚Рѕ РёСЃРїСЂР°РІР»РµРЅРѕ:
+
+1. FE_SCOUT_DIR_MAP (runtime_flags.js):
+   - РЎС‚Р°СЂС‹Р№: [7, 0, 1, 2, 3, 4, 5, 6] (VLM-РѕС†РµРЅРєР° РёР· 01D)
+   - РќРѕРІС‹Р№:  [3, 2, 1, 0, 7, 6, 5, 4] (РїРѕРґС‚РІРµСЂР¶РґС‘РЅ СЂСѓС‡РЅРѕР№ dev-РєР°Р»РёР±СЂРѕРІРєРѕР№)
+   - РљР°СЂС‚Р° РѕС‚СЂР°Р¶Р°РµС‚ СЂРµР°Р»СЊРЅСѓСЋ РѕСЂРёРµРЅС‚Р°С†РёСЋ scout sprite frames:
+     rawDir 0(E)в†’sprite3, 1(SE)в†’2, 2(S)в†’1, 3(SW)в†’0,
+     4(W)в†’7, 5(NW)в†’6, 6(N)в†’5, 7(NE)в†’4
+
+2. Scout size (sprite_profiles.js):
+   - РЎС‚Р°СЂС‹Р№: size: [80, 80]
+   - РќРѕРІС‹Р№:  size: [84, 84]
+   - РЈРІРµР»РёС‡РµРЅРёРµ РЅР° 4px вЂ” scout С‡СѓС‚СЊ РєСЂСѓРїРЅРµРµ, РЅРѕ РѕСЃС‚Р°С‘С‚СЃСЏ РјРµРЅСЊС€Рµ builder (92)
+     Рё Р·РЅР°С‡РёС‚РµР»СЊРЅРѕ РјРµРЅСЊС€Рµ light_tank (104)
+
+3. Scout centering (runtime_flags.js):
+   - FE_SCOUT_DIR_OFFSETS РѕР±РЅРѕРІР»РµРЅС‹ СЃ РЅСѓР»РµРІС‹С… Р·РЅР°С‡РµРЅРёР№
+   - Р§С‘С‚РЅС‹Рµ РЅР°РїСЂР°РІР»РµРЅРёСЏ (0,2,4,6): y=2 вЂ” РєР°СЂРґРёРЅР°Р»СЊРЅС‹Рµ РѕСЃРё С‡СѓС‚СЊ РЅРёР¶Рµ
+   - РќРµС‡С‘С‚РЅС‹Рµ РЅР°РїСЂР°РІР»РµРЅРёСЏ (1,3,5,7): y=1 вЂ” РґРёР°РіРѕРЅР°Р»СЊРЅС‹Рµ РѕСЃРё
+   - РЎРјРµС‰РµРЅРёСЏ РІС‹СЂР°РІРЅРёРІР°СЋС‚ РІРёР·СѓР°Р»СЊРЅСѓСЋ РїРѕСЃР°РґРєСѓ scout РїРѕ С†РµРЅС‚СЂСѓ СЂРѕРјР±Р°
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/config/runtime_flags.js вЂ” FE_SCOUT_DIR_MAP, FE_SCOUT_DIR_OFFSETS
+- src/config/sprite_profiles.js вЂ” size РґР»СЏ scout
+- PATCH_REPORT.txt
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/config/runtime_flags.js -> PASS
+- node --check src/config/sprite_profiles.js -> PASS
+
+Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ:
+- assets РёР·РјРµРЅРµРЅС‹: РЅРµС‚
+- economy РёР·РјРµРЅРµРЅР°: РЅРµС‚
+- combat РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- pathfinding РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- production/factory РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- movement logic РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚Р°
+- angleв†’rawDir Р»РѕРіРёРєР° РЅРµ РёР·РјРµРЅРµРЅР°
+- Google Drive sync С‚СЂРѕРЅСѓС‚: РЅРµС‚
+
+---
+
+Р—Р°РґР°С‡Р°: PATCH-SCOUT-01F вЂ” С‚РѕС‡РЅР°СЏ С†РµРЅС‚СЂРѕРІРєР° scout РїРѕ С„РѕС‚Рѕ
+Р”Р°С‚Р°: 2026-05-10
+Lane: Review
+Р’РµС‚РєР°: glm/patch-scout-01f-centering (РѕС‚ sandbox/main)
+
+РџСЂРѕР±Р»РµРјР°:
+РџРѕСЃР»Рµ 01E scout РІСЃС‘ РµС‰С‘ СЂР°СЃРїРѕР»РѕР¶РµРЅ СЃР»РёС€РєРѕРј РІС‹СЃРѕРєРѕ РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ СЂРѕРјР±Р° РєР»РµС‚РєРё.
+РЎРјРµС‰РµРЅРёРµ y=1..2 px Р±С‹Р»Рѕ РЅРµРґРѕСЃС‚Р°С‚РѕС‡РЅС‹Рј вЂ” С‚СЂРµР±СѓРµС‚СЃСЏ ~20 px РІРЅРёР·.
+
+Р¤Р°РєС‚РёС‡РµСЃРєРёР№ Р·Р°РјРµСЂ РїРѕ СЂРµС„РµСЂРµРЅСЃ-СЃРєСЂРёРЅСѓ (dev-overlay):
+- dir 2 С†РµР»РµРІРѕР№ offset: {"x":-1,"y":22}
+- dir 2 С‚РµРєСѓС‰РёР№ (01E):   {"x":0, "y":2}
+- РљРѕСЂСЂРµРєС†РёСЏ: x 0в†’-1, y 2в†’22 (в‰€+20 px РІРЅРёР·, -1 px РІР»РµРІРѕ)
+
+Р§С‚Рѕ РёСЃРїСЂР°РІР»РµРЅРѕ:
+
+1. FE_SCOUT_DIR_OFFSETS (runtime_flags.js):
+   РЎС‚Р°СЂС‹Рµ offsets (01E):
+     0: {x:0, y:2}   1: {x:0, y:1}
+     2: {x:0, y:2}   3: {x:0, y:1}
+     4: {x:0, y:2}   5: {x:0, y:1}
+     6: {x:0, y:2}   7: {x:0, y:1}
+   
+   РќРѕРІС‹Рµ offsets (01F):
+     0: {x:-1, y:22}  1: {x:-1, y:21}
+     2: {x:-1, y:22}  3: {x:-1, y:21}
+     4: {x:-1, y:22}  5: {x:-1, y:21}
+     6: {x:-1, y:22}  7: {x:-1, y:21}
+   
+   dir 2 РІС‹СЃС‚Р°РІР»РµРЅ С‚РѕС‡РЅРѕ РїРѕ С„РѕС‚Рѕ: {"x":-1,"y":22}
+   РћСЃС‚Р°Р»СЊРЅС‹Рµ РЅР°РїСЂР°РІР»РµРЅРёСЏ вЂ” С‚Р° Р¶Рµ Р±Р°Р·РѕРІР°СЏ РєРѕСЂСЂРµРєС†РёСЏ (+20 px Y, -1 px X)
+
+2. FE_SCOUT_DIR_MAP вЂ” РќР• РјРµРЅСЏР»СЃСЏ (СЂР°Р±РѕС‡РёР№ [3,2,1,0,7,6,5,4] РёР· 01E)
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/config/runtime_flags.js вЂ” FE_SCOUT_DIR_OFFSETS
+- PATCH_REPORT.txt
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/config/runtime_flags.js -> PASS
+
+Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ:
+- assets РёР·РјРµРЅРµРЅС‹: РЅРµС‚
+- FE_SCOUT_DIR_MAP РЅРµ РјРµРЅСЏР»СЃСЏ
+- size РЅРµ РјРµРЅСЏР»СЃСЏ ([84,84])
+- movement logic РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚Р°
+- angleв†’rawDir Р»РѕРіРёРєР° РЅРµ РёР·РјРµРЅРµРЅР°
+- economy / combat / factory РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚С‹
+- Google Drive sync С‚СЂРѕРЅСѓС‚: РЅРµС‚
+
+---
+
+Р—Р°РґР°С‡Р°: PATCH-SCOUT-01G вЂ” РїРѕРїСЂР°РІРёС‚СЊ selection ring Рё СѓР±СЂР°С‚СЊ РјРµРЅСЋ scout
+Р”Р°С‚Р°: 2026-05-10
+Lane: Review
+Р’РµС‚РєР°: glm/patch-scout-01g-ring-menu (РѕС‚ sandbox/main)
+
+РџСЂРѕР±Р»РµРјР°:
+1. Selection ring Сѓ scout СЂР°СЃРїРѕР»РѕР¶РµРЅ СЃР»РёС€РєРѕРј РЅРёР·РєРѕ вЂ” Р·Р°РјРµС‚РЅРѕ РЅРёР¶Рµ СЋРЅРёС‚Р°.
+2. РџСЂРё РєР»РёРєРµ РЅР° scout РѕС‚РєСЂС‹РІР°РµС‚СЃСЏ РјРµРЅСЋ "Р Р°Р·РІРµРґС‡РёРє / РЎС‚РѕРї / РћС‚РјРµРЅР°",
+   С‚РѕРіРґР° РєР°Рє scout РґРѕР»Р¶РµРЅ РІРµСЃС‚Рё СЃРµР±СЏ РєР°Рє light_tank: РІС‹РґРµР»СЏРµС‚СЃСЏ, РїРѕРєР°Р·С‹РІР°РµС‚
+   ring Рё HP, РїРѕР»СѓС‡Р°РµС‚ РєРѕРјР°РЅРґС‹ РґРІРёР¶РµРЅРёСЏ, РЅРѕ РќР• РѕС‚РєСЂС‹РІР°РµС‚ РѕС‚РґРµР»СЊРЅРѕРµ РјРµРЅСЋ.
+
+Р§С‚Рѕ РёСЃРїСЂР°РІР»РµРЅРѕ:
+
+1. Selection ring (main.js, ringTuneByType):
+   - РЎС‚Р°СЂС‹Р№: scout: { x: 0, y: -16, rx: 0.88, ry: 0.84 }
+   - РќРѕРІС‹Р№:  scout: { x: 0, y: -38, rx: 0.88, ry: 0.84 }
+   - Ring РїРѕРґРЅСЏС‚ РЅР° 22 px РІРІРµСЂС… (y: -16 в†’ -38), С‚РµРїРµСЂСЊ РїРѕРґ РєРѕСЂРїСѓСЃРѕРј/РєРѕР»С‘СЃР°РјРё
+
+2. Scout menu СѓР±СЂР°РЅ (main.js, openUnitMenu):
+   - Р Р°РЅСЊС€Рµ: scout РёРјРµР» СЃРІРѕР№ else-if Р±Р»РѕРє СЃ setContextAt "Р Р°Р·РІРµРґС‡РёРє / РЎС‚РѕРї / РћС‚РјРµРЅР°"
+   - РўРµРїРµСЂСЊ: scout РґРѕР±Р°РІР»РµРЅ РІ early-return СЂСЏРґРѕРј СЃ light_tank
+   - РљРѕРґ: if (u.type==='light_tank' || u.type==='scout') { updateSelectedInfo(); return; }
+   - Р‘Р»РѕРє else-if РґР»СЏ scout СѓРґР°Р»С‘РЅ
+   - РџРѕРІРµРґРµРЅРёРµ РІС‹Р±РѕСЂР° scout С‚РµРїРµСЂСЊ Р°РЅР°Р»РѕРіРёС‡РЅРѕ light_tank
+
+РќРµ РјРµРЅСЏР»РёСЃСЊ:
+- FE_SCOUT_DIR_MAP вЂ” РЅРµ С‚СЂРѕРЅСѓС‚
+- FE_SCOUT_DIR_OFFSETS вЂ” РЅРµ С‚СЂРѕРЅСѓС‚С‹
+- scout size [84,84] вЂ” РЅРµ С‚СЂРѕРЅСѓС‚
+- movement logic вЂ” РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚Р°
+- angleв†’rawDir вЂ” РЅРµ РёР·РјРµРЅРµРЅР°
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/main.js вЂ” ringTuneByType.scout.y, openUnitMenu scout early-return
+- PATCH_REPORT.txt
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+
+Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ:
+- assets РёР·РјРµРЅРµРЅС‹: РЅРµС‚
+- economy РёР·РјРµРЅРµРЅР°: РЅРµС‚
+- combat РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- pathfinding РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- production/factory РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- Google Drive sync С‚СЂРѕРЅСѓС‚: РЅРµС‚
+
+---
+
+Р—Р°РґР°С‡Р°: PATCH-SCOUT-02 вЂ” РґРѕР±Р°РІРёС‚СЊ scout РІ РїСЂРѕРёР·РІРѕРґСЃС‚РІРѕ units_factory
+Р”Р°С‚Р°: 2026-05-10
+Lane: Review
+Р’РµС‚РєР°: glm/patch-scout-02-factory-production (РѕС‚ sandbox/main)
+
+Р¦РµР»СЊ:
+Scout РґРѕР»Р¶РµРЅ РїСЂРѕРёР·РІРѕРґРёС‚СЊСЃСЏ С‡РµСЂРµР· units_factory UI/queue, Р° РЅРµ С‚РѕР»СЊРєРѕ С‡РµСЂРµР· FE_DEV_SPAWN_UNIT.
+
+Р§С‚Рѕ СЃРґРµР»Р°РЅРѕ:
+
+1. Factory production menu (main.js, openFactoryMenu, СЃС‚СЂРѕРєР° ~9702):
+   - РЎС‚Р°СЂС‹Р№: ['builder','harvester','light_tank']
+   - РќРѕРІС‹Р№:  ['builder','harvester','light_tank','scout']
+   - Р’ UI С„Р°Р±СЂРёРєРё РїРѕСЏРІРёР»Р°СЃСЊ РєРЅРѕРїРєР° В«Р Р°Р·РІРµРґС‡РёРєВ» СЃ С†РµРЅРѕР№ Рё РІСЂРµРјРµРЅРµРј РїСЂРѕРёР·РІРѕРґСЃС‚РІР°
+
+2. Factory affordability check (main.js, factoryCanAffordAnyUnit, СЃС‚СЂРѕРєР° ~2335):
+   - РЎС‚Р°СЂС‹Р№: ['builder', 'harvester', 'light_tank']
+   - РќРѕРІС‹Р№:  ['builder', 'harvester', 'light_tank', 'scout']
+   - Factory indicator РєРѕСЂСЂРµРєС‚РЅРѕ РїРѕРєР°Р·С‹РІР°РµС‚ РґРѕСЃС‚СѓРїРЅРѕСЃС‚СЊ scout РїСЂРё РЅР°Р»РёС‡РёРё 1 СЌР»РµРјРµРЅС‚Р°
+
+3. Production speed (main.js, productionSpeedForUnit, СЃС‚СЂРѕРєР° ~2442):
+   - Scout РґРѕР±Р°РІР»РµРЅ РІ civilianProductionSpeed (РєР°Рє builder Рё harvester)
+   - РЎС‚Р°СЂС‹Р№: if (type === 'harvester' || type === 'builder')
+   - РќРѕРІС‹Р№:  if (type === 'harvester' || type === 'builder' || type === 'scout')
+   - Scout вЂ” Р»С‘РіРєРёР№ РЅРµРІРѕРµРЅРЅС‹Р№ СЋРЅРёС‚, РїСЂРѕРёР·РІРѕРґСЏС‰РёР№СЃСЏ РїРѕ РіСЂР°Р¶РґР°РЅСЃРєРѕР№ СЃРєРѕСЂРѕСЃС‚Рё
+
+РЎС‚РѕРёРјРѕСЃС‚СЊ scout (СѓР¶Рµ Р·Р°РґР°РЅР° РІ units.js):
+- costElement: 1 (1 СЌР»РµРјРµРЅС‚ С„СЂР°РєС†РёРё)
+- productionTime: 18 СЃРµРє
+- РЎРїР°РІРЅ: С‡РµСЂРµР· СЃСѓС‰РµСЃС‚РІСѓСЋС‰СѓСЋ Р»РѕРіРёРєСѓ findSpawnCellNearBuilding в†’ createUnit
+
+РќРµ РјРµРЅСЏР»РёСЃСЊ:
+- FE_SCOUT_DIR_MAP вЂ” РЅРµ С‚СЂРѕРЅСѓС‚
+- FE_SCOUT_DIR_OFFSETS вЂ” РЅРµ С‚СЂРѕРЅСѓС‚С‹
+- scout size [84,84] вЂ” РЅРµ С‚СЂРѕРЅСѓС‚
+- scout sprite profile вЂ” РЅРµ С‚СЂРѕРЅСѓС‚
+- selection ring вЂ” РЅРµ С‚СЂРѕРЅСѓС‚
+- movement logic вЂ” РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚Р°
+- angleв†’rawDir вЂ” РЅРµ РёР·РјРµРЅРµРЅР°
+- pathfinding вЂ” РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚
+- combat вЂ” РЅРµ РґРѕР±Р°РІР»РµРЅ (canAttack:false)
+- AI вЂ” РЅРµ РґРѕР±Р°РІР»РµРЅ
+- assets вЂ” РЅРµ РёР·РјРµРЅРµРЅС‹
+- economy core вЂ” РЅРµ РёР·РјРµРЅС‘РЅ (РёСЃРїРѕР»СЊР·РѕРІР°РЅР° СЃСѓС‰РµСЃС‚РІСѓСЋС‰Р°СЏ Р»РѕРіРёРєР°)
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/main.js вЂ” factoryCanAffordAnyUnit, openFactoryMenu, productionSpeedForUnit
+- PATCH_REPORT.txt
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+
+Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ:
+- assets РёР·РјРµРЅРµРЅС‹: РЅРµС‚
+- combat РґРѕР±Р°РІР»РµРЅ: РЅРµС‚
+- AI РґРѕР±Р°РІР»РµРЅ: РЅРµС‚
+- pathfinding РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- economy core РёР·РјРµРЅС‘РЅ: РЅРµС‚ (РёСЃРїРѕР»СЊР·РѕРІР°РЅР° СЃСѓС‰РµСЃС‚РІСѓСЋС‰Р°СЏ СЃС…РµРјР°)
+- Google Drive sync С‚СЂРѕРЅСѓС‚: РЅРµС‚
+
+---
+
+Р—Р°РґР°С‡Р°: GLM-UI-01 вЂ” РѕР±РЅРѕРІРёС‚СЊ С‚РµРєСЃС‚ РґРµРјРѕ-СЃР±РѕСЂРєРё РІ РіР»Р°РІРЅРѕРј РјРµРЅСЋ
+Р”Р°С‚Р°: 2026-05-10
+Lane: Review
+Р’РµС‚РєР°: glm/ui-01-main-menu-demo-text-v2 (РѕС‚ sandbox/main)
+
+Р¦РµР»СЊ:
+Р—Р°РјРµРЅРёС‚СЊ СѓСЃС‚Р°СЂРµРІС€РёР№ С‚РµС…РЅРёС‡РµСЃРєРёР№ С‚РµРєСЃС‚ РІ РіР»Р°РІРЅРѕРј РјРµРЅСЋ РЅР° РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРёР№
+РґРµРјРѕ-СЃР±РѕСЂРѕС‡РЅС‹Р№ С‚РµРєСЃС‚. Р“Р»Р°РІРЅРѕРµ РјРµРЅСЋ РїРѕРєР°Р·С‹РІР°РµС‚ В«Core Economy + Territory Fix v0.4В»
+Рё РѕРїРёСЃР°РЅРёРµ v0.4 вЂ” СЌС‚Рѕ СЂР°Р·СЂР°Р±РѕС‚С‡РµСЃРєРёРµ СЃС‚СЂРѕРєРё, РЅРµ РїСЂРµРґРЅР°Р·РЅР°С‡РµРЅРЅС‹Рµ РґР»СЏ РїСѓР±Р»РёС‡РЅРѕР№
+РґРµРјРѕ-СЃР±РѕСЂРєРё РЅР° GitHub Pages.
+
+Р§С‚Рѕ СЃРґРµР»Р°РЅРѕ:
+
+1. Subtitle (index.html, class="subtitle"):
+   - РЎС‚Р°СЂС‹Р№: Core Economy + Territory Fix v0.4
+   - РќРѕРІС‹Р№:  РџСѓР±Р»РёС‡РЅР°СЏ РґРµРјРѕ-СЃР±РѕСЂРєР° В· GitHub Pages
+
+2. Small note (index.html, class="small-note"):
+   - РЎС‚Р°СЂС‹Р№: v0.4: СЃС‹СЂСЊС‘, СЌРЅРµСЂРіРёСЏ, СЌР»РµРјРµРЅС‚С‹, РјРµРґР»РµРЅРЅР°СЏ С‚РµСЂСЂРёС‚РѕСЂРёСЏ, Р»РёРјРёС‚С‹, HUD Рё СЃРѕС…СЂР°РЅРµРЅРёСЏ.
+   - РќРѕРІС‹Р№:  Р”РµРјРѕ-СЃР±РѕСЂРєР°: СЌРєРѕРЅРѕРјРёРєР°, С‚РµСЂСЂРёС‚РѕСЂРёСЏ, СЋРЅРёС‚С‹ Рё СЃРѕС…СЂР°РЅРµРЅРёСЏ РІ СЂР°Р·СЂР°Р±РѕС‚РєРµ.
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- index.html вЂ” 2 СЃС‚СЂРѕРєРё Р·Р°РјРµРЅРµРЅС‹ (subtitle + small-note)
+- PATCH_REPORT.txt вЂ” РґРѕР±Р°РІР»РµРЅР° СЌС‚Р° Р·Р°РїРёСЃСЊ
+
+РќРµ РјРµРЅСЏР»РёСЃСЊ:
+- src/main.js вЂ” РЅРµ С‚СЂРѕРЅСѓС‚
+- src/config/* вЂ” РЅРµ С‚СЂРѕРЅСѓС‚С‹
+- src/core/* вЂ” РЅРµ С‚СЂРѕРЅСѓС‚С‹
+- assets вЂ” РЅРµ РёР·РјРµРЅРµРЅС‹
+- gameplay / economy / combat вЂ” РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚С‹
+- РћСЃС‚Р°РІС€РёРµСЃСЏ СѓРїРѕРјРёРЅР°РЅРёСЏ v0.4 РІ JS-РєРѕРјРјРµРЅС‚Р°СЂРёСЏС… Рё <title> вЂ” РЅРµ С‚СЂРѕРЅСѓС‚С‹
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+- Р’РёР·СѓР°Р»СЊРЅР°СЏ РїСЂРѕРІРµСЂРєР° diff: С‚РѕР»СЊРєРѕ 2 СЃС‚СЂРѕРєРё РІ index.html + PATCH_REPORT.txt
+
+Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ:
+- РРіСЂРѕРІРѕР№ РєРѕРґ РЅРµ РёР·РјРµРЅС‘РЅ
+- РђСЃСЃРµС‚С‹ РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚С‹
+- Google Drive sync РЅРµ РІРєР»СЋС‡С‘РЅ
+- Production paths РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚С‹
+
+---
+
+Р—Р°РґР°С‡Р°: GLM-STRATEGY-01 вЂ” РїРѕР»РЅС‹Р№ СЃС‚СЂР°С‚РµРіРёС‡РµСЃРєРёР№ Р°СѓРґРёС‚ РїСЂРѕРµРєС‚Р°
+Р”Р°С‚Р°: 2026-05-10
+Lane: Fast
+Р’РµС‚РєР°: sandbox/main (direct push)
+
+Р¦РµР»СЊ:
+РЁРёСЂРѕРєРёР№ СЃС‚СЂР°С‚РµРіРёС‡РµСЃРєРёР№ Р°СѓРґРёС‚ РїСЂРѕРµРєС‚Р° Four Elements Remake СЃ Р°РЅР°Р»РёР·РѕРј
+РІСЃРµС… РєР»СЋС‡РµРІС‹С… РЅР°РїСЂР°РІР»РµРЅРёР№ Рё РїСЂРµРґР»РѕР¶РµРЅРёСЏРјРё РїРѕ СЂР°Р·РІРёС‚РёСЋ.
+Р­С‚Рѕ РќР• РїР°С‚С‡ вЂ” РєРѕРґ, Р°СЃСЃРµС‚С‹ Рё gameplay РќР• РјРµРЅСЏР»РёСЃСЊ.
+
+Р§С‚Рѕ СЃРґРµР»Р°РЅРѕ:
+1. РџСЂРѕС‡РёС‚Р°РЅС‹ РІСЃРµ РїСЂРѕРµРєС‚РЅС‹Рµ С„Р°Р№Р»С‹: README, AGENTS, configs, docs/project/*, src/main.js, src/core/*, src/config/*, tests/*
+2. РџСЂРѕР°РЅР°Р»РёР·РёСЂРѕРІР°РЅ src/main.js (12 128 СЃС‚СЂРѕРє): С„СѓРЅРєС†РёРё, СЃРёСЃС‚РµРјС‹, С‚РµС…РґРѕР»Рі, Р°СЂС…РёС‚РµРєС‚СѓСЂР°
+3. РџСЂРѕР°РЅР°Р»РёР·РёСЂРѕРІР°РЅС‹ РІСЃРµ 14 docs/project С„Р°Р№Р»РѕРІ
+4. РџСЂРѕР°РЅР°Р»РёР·РёСЂРѕРІР°РЅС‹ core РјРѕРґСѓР»Рё (asset_loader, save_manager, unit_controller, storage_guard)
+5. РџСЂРѕР°РЅР°Р»РёР·РёСЂРѕРІР°РЅС‹ РІСЃРµ 5 Playwright С‚РµСЃС‚РѕРІ
+6. РќР°РїРёСЃР°РЅ comprehensive РѕС‚С‡С‘С‚: docs/project/GLM_STRATEGY_REVIEW_20260510.md
+
+РћС‚С‡С‘С‚ СЃРѕРґРµСЂР¶РёС‚ 17 СЂР°Р·РґРµР»РѕРІ:
+1. Executive Summary
+2. Current Project State (С‡С‚Рѕ СЂРµР°Р»РёР·РѕРІР°РЅРѕ / MVP / РІСЂРµРјРµРЅРЅРѕРµ / С‚РµС…РґРѕР»Рі)
+3. Map Generation Ideas (8 РёРґРµР№ СЃ РѕС†РµРЅРєР°РјРё)
+4. Unit Animation and Visual Feedback Ideas (7 РїРѕРґРєР°С‚РµРіРѕСЂРёР№)
+5. Economy Ideas (quick wins / medium-term / late-game)
+6. Factions and Asymmetry (4 С„СЂР°РєС†РёРё + random)
+7. Combat System Ideas (MVP / medium / defense tower / bomber)
+8. Enemy Bot / AI Ideas (scripted / rule-based / advanced / fog policy)
+9. Gameplay Features Missing from Roadmap (13 РёРґРµР№)
+10. UI / UX Ideas (8 РїРѕРґРєР°С‚РµРіРѕСЂРёР№)
+11. Architecture and main.js Refactor (4 С„Р°Р·С‹ extraction, 10 Р±РµР·РѕРїР°СЃРЅС‹С… PR)
+12. Engine / Platform Future (8 РІР°СЂРёР°РЅС‚РѕРІ СЃ РѕС†РµРЅРєР°РјРё)
+13. Online / Multiplayer Possibilities (7 РІР°СЂРёР°РЅС‚РѕРІ)
+14. Testing / QA / Tooling (8 РёРґРµР№ + PR/regression checklist)
+15. Recommended Roadmap (1-2 РЅРµРґРµР»Рё / 1 РјРµСЃСЏС† / later)
+16. Top 10 Recommendations (СЃ РїСЂРёРѕСЂРёС‚РµС‚Р°РјРё Рё СЂРёСЃРєР°РјРё)
+17. What NOT to Do Yet (10 РїСѓРЅРєС‚РѕРІ)
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- docs/project/GLM_STRATEGY_REVIEW_20260510.md (new)
+- PATCH_REPORT.txt (РґРѕР±Р°РІР»РµРЅР° СЌС‚Р° Р·Р°РїРёСЃСЊ)
+
+РџСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS (smoke only, Р±РµР· РёР·РјРµРЅРµРЅРёР№)
+- git diff --name-only: С‚РѕР»СЊРєРѕ docs/project/GLM_STRATEGY_REVIEW_20260510.md + PATCH_REPORT.txt
+
+Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ:
+- src/* РЅРµ РёР·РјРµРЅС‘РЅ
+- assets/* РЅРµ РёР·РјРµРЅС‘РЅ
+- index.html РЅРµ РёР·РјРµРЅС‘РЅ
+- gameplay РЅРµ РёР·РјРµРЅС‘РЅ
+- Google Drive sync РЅРµ С‚СЂРѕРЅСѓС‚
+- Production paths РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚С‹
+
+---
+
+Р—Р°РґР°С‡Р°: REF-MAIN-GLM-02 вЂ” dead code cleanup РёР· audited main.js candidates
+Р”Р°С‚Р°: 2026-05-10
+Lane: Review
+Р’РµС‚РєР°: glm/ref-main-02-dead-code-cleanup (РѕС‚ sandbox/main)
+
+Р¦РµР»СЊ:
+РЈРґР°Р»РёС‚СЊ С‚РѕР»СЊРєРѕ РґРѕРєР°Р·Р°РЅРЅС‹Р№ dead/unreachable/no-op РєРѕРґ РёР· src/main.js РЅР° РѕСЃРЅРѕРІРµ
+РѕС‚С‡С‘С‚Р° REF_MAIN_GLM_01_MICRO_REFACTOR_CANDIDATES.md (Candidate 1).
+Р­С‚Рѕ micro-refactor cleanup вЂ” С‚РѕР»СЊРєРѕ СѓРґР°Р»РµРЅРёРµ, Р±РµР· РЅРѕРІС‹С… С„Р°Р№Р»РѕРІ, Р±РµР· index.html,
+Р±РµР· gameplay РёР·РјРµРЅРµРЅРёР№.
+
+РЈРґР°Р»С‘РЅРЅС‹Рµ Р±Р»РѕРєРё (9 Р±Р»РѕРєРѕРІ, 209 СЃС‚СЂРѕРє):
+
+1. applyTestBuildingCostsX10() вЂ” С„СѓРЅРєС†РёСЏ (54 СЃС‚СЂРѕРєРё) + Р·Р°РєРѕРјРјРµРЅС‚РёСЂРѕРІР°РЅРЅС‹Р№ РІС‹Р·РѕРІ + РєРѕРјРјРµРЅС‚Р°СЂРёРё-РѕР±С‘СЂС‚РєРё
+   Р”РѕРєР°Р·Р°С‚РµР»СЊСЃС‚РІРѕ: РµРґРёРЅСЃС‚РІРµРЅРЅС‹Р№ РІС‹Р·РѕРІ Р·Р°РєРѕРјРјРµРЅС‚РёСЂРѕРІР°РЅ: // applyTestBuildingCostsX10();
+   + РІ С‚РµР»Рµ Р±Р°Рі: СЃС‚СЂРѕРєР° 38 РґРµР»Р°РµС‚ def.cost = Math.max(1, (def.cost)) вЂ” РЅРµ РґРµР»РёС‚ РЅР° 10
+
+2. Dead tail РІ setLightTankAttack() вЂ” 34 СЃС‚СЂРѕРєРё unreachable РєРѕРґР° РїРѕСЃР»Рµ unconditional return
+   Р”РѕРєР°Р·Р°С‚РµР»СЊСЃС‚РІРѕ: return setLightTankAttackGeneric(...) вЂ” unconditional, РєРѕРґ РїРѕСЃР»Рµ return РЅРµРґРѕСЃС‚РёР¶РёРј
+
+3. Dead tail РІ spawnLightTankForOwner() вЂ” 29 СЃС‚СЂРѕРє unreachable РєРѕРґР° РїРѕСЃР»Рµ unconditional return
+   Р”РѕРєР°Р·Р°С‚РµР»СЊСЃС‚РІРѕ: return spawned; вЂ” unconditional, РєРѕРґ РїРѕСЃР»Рµ return РЅРµРґРѕСЃС‚РёР¶РёРј
+
+4. Dead tail РІ FE_PATCH_07ASetupSkirmishStart() вЂ” 29 СЃС‚СЂРѕРє unreachable РєРѕРґР° РїРѕСЃР»Рµ return {...}
+   Р”РѕРєР°Р·Р°С‚РµР»СЊСЃС‚РІРѕ: return { enemyBase, playerHarvesters, ... } вЂ” unconditional, РєРѕРґ РїРѕСЃР»Рµ return РЅРµРґРѕСЃС‚РёР¶РёРј
+
+5. Dead tail РІ setLightTankAttackApproach() вЂ” 38 СЃС‚СЂРѕРє unreachable РєРѕРґР° РїРѕСЃР»Рµ unconditional return
+   Р”РѕРєР°Р·Р°С‚РµР»СЊСЃС‚РІРѕ: return setLightTankAttackApproachGeneric(...) вЂ” unconditional, РєРѕРґ РїРѕСЃР»Рµ return РЅРµРґРѕСЃС‚РёР¶РёРј
+
+6. drawIsoShadow() вЂ” no-op С„СѓРЅРєС†РёСЏ: С‚РµР»Рѕ = return;
+   Р”РѕРєР°Р·Р°С‚РµР»СЊСЃС‚РІРѕ: rg РґР°С‘С‚ 1 РІС…РѕР¶РґРµРЅРёРµ (РѕРїСЂРµРґРµР»РµРЅРёРµ), 0 call sites
+
+7. FE_PATCH_06ADrawEnemyBaseMarker() вЂ” no-op С„СѓРЅРєС†РёСЏ: С‚РµР»Рѕ = return;
+   Р”РѕРєР°Р·Р°С‚РµР»СЊСЃС‚РІРѕ: rg РґР°С‘С‚ 1 РІС…РѕР¶РґРµРЅРёРµ (РѕРїСЂРµРґРµР»РµРЅРёРµ), 0 call sites
+
+8. drawEnemyUnitMarker() вЂ” no-op С„СѓРЅРєС†РёСЏ: С‚РµР»Рѕ = return;
+   Р”РѕРєР°Р·Р°С‚РµР»СЊСЃС‚РІРѕ: rg РґР°С‘С‚ 1 РІС…РѕР¶РґРµРЅРёРµ (РѕРїСЂРµРґРµР»РµРЅРёРµ), 0 call sites
+
+9. drawEnemyBuildingMarker() вЂ” no-op С„СѓРЅРєС†РёСЏ: С‚РµР»Рѕ = return;
+   Р”РѕРєР°Р·Р°С‚РµР»СЊСЃС‚РІРѕ: rg РґР°С‘С‚ 1 РІС…РѕР¶РґРµРЅРёРµ (РѕРїСЂРµРґРµР»РµРЅРёРµ), 0 call sites
+
+РС‚РѕРіРѕ СѓРґР°Р»РµРЅРѕ: 209 СЃС‚СЂРѕРє
+main.js РґРѕ: 12 128 СЃС‚СЂРѕРє
+main.js РїРѕСЃР»Рµ: 11 919 СЃС‚СЂРѕРє
+Р Р°Р·РЅРёС†Р°: -209 СЃС‚СЂРѕРє (-1.7%)
+
+Р§С‚Рѕ РќР• С‚СЂРѕРЅСѓС‚Рѕ (РїРѕ РїСЂР°РІРёР»Р°Рј Р·Р°РґР°С‡Рё):
+- FE_UNIT_CONTROLLER_ENABLED block вЂ” feature flag, РЅРµ dead code
+- src/core/unit_controller.js вЂ” РѕС‚РґРµР»СЊРЅС‹Р№ С„Р°Р№Р», С‚СЂРµР±СѓРµС‚ Review lane
+- backup С„Р°Р№Р»С‹ (main_broken_04c3.js Рё С‚.Рґ.) вЂ” С‚СЂРµР±СѓСЋС‚ Review lane
+- Candidate 2-5 РёР· Р°СѓРґРёС‚Р° вЂ” РќР• РІС‹РїРѕР»РЅСЏР»РёСЃСЊ РІ СЌС‚РѕР№ Р·Р°РґР°С‡Рµ
+- index.html вЂ” РЅРµ РјРµРЅСЏР»СЃСЏ
+- gameplay, render, input, combat, bot, builder, harvester, save/load, map gen вЂ” РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚С‹
+- debugLog extraction вЂ” РЅРµ С‚СЂРѕРЅСѓС‚
+- combat debug overlay вЂ” РЅРµ С‚СЂРѕРЅСѓС‚
+- enemy economy panel вЂ” РЅРµ С‚СЂРѕРЅСѓС‚
+- snapshot/export вЂ” РЅРµ С‚СЂРѕРЅСѓС‚
+- constants extraction вЂ” РЅРµ С‚СЂРѕРЅСѓС‚
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/main.js (209 СЃС‚СЂРѕРє СѓРґР°Р»РµРЅРѕ)
+- PATCH_REPORT.txt (РґРѕР±Р°РІР»РµРЅР° СЌС‚Р° Р·Р°РїРёСЃСЊ)
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+- rg-РІРµСЂРёС„РёРєР°С†РёСЏ РєР°Р¶РґРѕРіРѕ dead-Р±Р»РѕРєР° РїРµСЂРµРґ СѓРґР°Р»РµРЅРёРµРј: РІСЃРµ 9 Р±Р»РѕРєРѕРІ РїРѕРґС‚РІРµСЂР¶РґРµРЅС‹
+- git diff --stat: src/main.js | 209 deletions
+
+Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ:
+- assets РёР·РјРµРЅРµРЅС‹: РЅРµС‚
+- index.html РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- РЅРѕРІС‹Рµ JS-С„Р°Р№Р»С‹ СЃРѕР·РґР°РЅС‹: РЅРµС‚
+- gameplay РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- economy РёР·РјРµРЅРµРЅР°: РЅРµС‚
+- combat РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- pathfinding РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- render РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- input/selection РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- bot AI РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- save/load РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- map generation РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- Google Drive sync С‚СЂРѕРЅСѓС‚: РЅРµС‚
+- production paths С‚СЂРѕРЅСѓС‚С‹: РЅРµС‚
+
+Rollback:
+git revert вЂ” РІСЃРµ СѓРґР°Р»С‘РЅРЅС‹Рµ СЃС‚СЂРѕРєРё РјРѕР¶РЅРѕ РІРѕСЃСЃС‚Р°РЅРѕРІРёС‚СЊ РёР· git history
+
+---
+
+Р—Р°РґР°С‡Р°: REF-MAIN-GLM-03 вЂ” extract combat debug overlay from src/main.js
+Р”Р°С‚Р°: 2026-05-10
+Lane: Review
+Р’РµС‚РєР°: glm/ref-main-03-combat-debug-overlay-extract (РѕС‚ sandbox/main)
+
+Р¦РµР»СЊ:
+Р’С‹РЅРµСЃС‚Рё combat debug overlay-Р±Р»РѕРє (FE_LT_04C6* вЂ” 6 С„СѓРЅРєС†РёР№, ~143 СЃС‚СЂРѕРєРё)
+РёР· src/main.js РІ РѕС‚РґРµР»СЊРЅС‹Р№ dev/debug РјРѕРґСѓР»СЊ src/dev/combat_debug_overlay.js.
+Р­С‚Рѕ micro-refactor extraction вЂ” РЅРµ gameplay patch, РЅРµ combat refactor.
+
+Р§С‚Рѕ РІС‹РЅРµСЃРµРЅРѕ:
+
+6 С„СѓРЅРєС†РёР№ FE_LT_04C6*:
+1. FE_LT_04C6SelectedPlayerLightTanks в†’ selectedPlayerLightTanksFrom (pure, params-based)
+2. FE_LT_04C6DrawRangeDiamond в†’ drawRangeDiamond (ctx, tileToScreen, unit, range)
+3. FE_LT_04C6DrawAttackMoveMarker в†’ drawAttackMoveMarker (ctx, tileToScreen, target)
+4. FE_LT_04C6DrawTargetLine в†’ drawTargetLine (ctx, tileToScreen, unit, target, targetCenter)
+5. FE_LT_04C6DrawPanel в†’ drawPanel (ctx, units, attackMoveArmed, resolveAttackTarget)
+6. FE_LT_04C6DrawCombatDebugOverlay в†’ drawOverlay (deps object СЃ IIFE-scope vars)
+
+РџР»СЋСЃ:
+- window.FE_LT_04C6_COMBAT_DEBUG_OVERLAY_ENABLED flag в†’ РІРЅСѓС‚СЂРµРЅРЅРёР№ _enabled РІ РјРѕРґСѓР»Рµ
+- Num9 hotkey toggle в†’ window.FE_COMBAT_DEBUG_OVERLAY.toggle()
+
+РђСЂС…РёС‚РµРєС‚СѓСЂР° РЅРѕРІРѕРіРѕ РјРѕРґСѓР»СЏ:
+- Р’СЃРµ С„СѓРЅРєС†РёРё РїСЂРёРЅРёРјР°СЋС‚ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РїР°СЂР°РјРµС‚СЂР°РјРё (ctx, tileToScreen, etc.)
+- РќРµ Р·Р°С…РІР°С‚С‹РІР°РµС‚ IIFE scope РїСЂРё Р·Р°РіСЂСѓР·РєРµ вЂ” Р±РµР·РѕРїР°СЃРЅРѕ
+- window.FE_COMBAT_DEBUG_OVERLAY.drawOverlay(deps) вЂ” РіР»Р°РІРЅС‹Р№ entry point
+- game РґРѕСЃС‚СѓРїРµРЅ С‡РµСЂРµР· window.FE_CORE.game РїСЂРё РІС‹Р·РѕРІРµ (РЅРµ РїСЂРё Р·Р°РіСЂСѓР·РєРµ)
+
+РР·РјРµРЅРµРЅРёСЏ РІ main.js:
+1. РЈРґР°Р»РµРЅС‹ 6 inline С„СѓРЅРєС†РёР№ FE_LT_04C6* + РѕР±С‘СЂС‚РєРё РєРѕРјРјРµРЅС‚Р°СЂРёРµРІ (143 СЃС‚СЂРѕРєРё)
+2. РЈРґР°Р»С‘РЅ window.FE_LT_04C6_COMBAT_DEBUG_OVERLAY_ENABLED flag (1 СЃС‚СЂРѕРєР°)
+3. Р’ render(): Р·Р°РјРµРЅС‘РЅ FE_LT_04C6DrawCombatDebugOverlay() РЅР°
+   window.FE_COMBAT_DEBUG_OVERLAY.drawOverlay({...deps...})
+4. Р’ keydown handler Num9: Р·Р°РјРµРЅС‘РЅ direct flag toggle РЅР°
+   window.FE_COMBAT_DEBUG_OVERLAY.toggle()
+
+РР·РјРµРЅРµРЅРёСЏ РІ index.html:
+- Р”РѕР±Р°РІР»РµРЅ <script src="src/dev/combat_debug_overlay.js?v=ref_main_glm_03"></script>
+  РїРµСЂРµРґ src/main.js (РїРѕСЃР»Рµ debug_tools.js)
+
+main.js РґРѕ: 11 919 СЃС‚СЂРѕРє
+main.js РїРѕСЃР»Рµ: 11 783 СЃС‚СЂРѕРє
+Р Р°Р·РЅРёС†Р°: -136 СЃС‚СЂРѕРє (-1.1%)
+
+combat_debug_overlay.js: 218 СЃС‚СЂРѕРє (РЅРѕРІС‹Р№ С„Р°Р№Р»)
+
+Р§С‚Рѕ РќР• С‚СЂРѕРЅСѓС‚Рѕ (РїРѕ РїСЂР°РІРёР»Р°Рј Р·Р°РґР°С‡Рё):
+- combat behavior / attack logic / damage / range / cooldown вЂ” РЅРµС‚
+- target selection вЂ” РЅРµС‚
+- enemy bot вЂ” РЅРµС‚
+- movement / pathfinding вЂ” РЅРµС‚
+- render() вЂ” С‚РѕР»СЊРєРѕ Р·Р°РјРµРЅР° РІС‹Р·РѕРІР° overlay, РѕСЃС‚Р°Р»СЊРЅРѕР№ render РЅРµС‚СЂРѕРЅСѓС‚
+- input / selection вЂ” РЅРµС‚
+- save/load вЂ” РЅРµС‚
+- map generation вЂ” РЅРµС‚
+- economy вЂ” РЅРµС‚
+- scout вЂ” РЅРµС‚
+- assets вЂ” РЅРµС‚
+- configs вЂ” РЅРµС‚
+- Candidate 3-5 вЂ” РќР• РІС‹РїРѕР»РЅСЏР»РёСЃСЊ
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/dev/combat_debug_overlay.js (РЅРѕРІС‹Р№, 218 СЃС‚СЂРѕРє)
+- src/main.js (136 СЃС‚СЂРѕРє СѓРґР°Р»РµРЅРѕ, 10 СЃС‚СЂРѕРє РґРѕР±Р°РІР»РµРЅРѕ)
+- index.html (+1 script tag)
+- PATCH_REPORT.txt (РґРѕР±Р°РІР»РµРЅР° СЌС‚Р° Р·Р°РїРёСЃСЊ)
+- docs/project/REF_MAIN_GLM_01_MICRO_REFACTOR_CANDIDATES.md (Candidate 2 РѕС‚РјРµС‡РµРЅ DONE)
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+- node --check src/dev/combat_debug_overlay.js -> PASS
+- rg: FE_LT_04C6* вЂ” 0 РІС…РѕР¶РґРµРЅРёР№ РІ src/main.js (РІСЃРµ СѓРґР°Р»РµРЅС‹)
+- index.html: РЅРѕРІС‹Р№ script tag РїРµСЂРµРґ src/main.js
+
+Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ:
+- combat behavior РЅРµ РёР·РјРµРЅС‘РЅ вЂ” overlay С‚РѕР»СЊРєРѕ РѕС‚СЂРёСЃРѕРІС‹РІР°РµС‚ debug info
+- enemy bot РЅРµ РёР·РјРµРЅС‘РЅ
+- gameplay РЅРµ РёР·РјРµРЅС‘РЅ вЂ” overlay РѕС‚РєР»СЋС‡С‘РЅ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
+- rollback: РІРµСЂРЅСѓС‚СЊ С„СѓРЅРєС†РёРё РІ main.js, СѓРґР°Р»РёС‚СЊ script tag
+
+Manual smoke:
+1. РРіСЂР° Р·Р°РіСЂСѓР¶Р°РµС‚СЃСЏ
+2. Р’С‹Р±РѕСЂ С„СЂР°РєС†РёРё РїСЂРѕС…РѕРґРёС‚
+3. Light_tank combat СЂР°Р±РѕС‚Р°РµС‚
+4. Num9 вЂ” overlay РїРѕСЏРІР»СЏРµС‚СЃСЏ/РёСЃС‡РµР·Р°РµС‚
+5. Р‘РµР· Num9 вЂ” gameplay РёРґРµРЅС‚РёС‡РµРЅ
+
+---
+
+Р—Р°РґР°С‡Р°: REF-MAIN-GLM-04 вЂ” extract enemy economy debug panel from src/main.js
+Р”Р°С‚Р°: 2026-05-10
+Lane: Review
+Р’РµС‚РєР°: glm/ref-main-04-enemy-economy-debug-panel-extract (РѕС‚ sandbox/main)
+
+Р¦РµР»СЊ:
+Р’С‹РЅРµСЃС‚Рё enemy economy debug panel-Р±Р»РѕРє (FE_DEBUG_EnemyEconomy* вЂ” 10 С„СѓРЅРєС†РёР№ + setInterval + F2 handler, ~232 СЃС‚СЂРѕРєРё)
+РёР· src/main.js РІ РѕС‚РґРµР»СЊРЅС‹Р№ dev/debug РјРѕРґСѓР»СЊ src/dev/enemy_economy_debug_panel.js.
+Р­С‚Рѕ micro-refactor extraction вЂ” РЅРµ gameplay patch, РЅРµ economy refactor, РЅРµ bot refactor.
+
+Р§С‚Рѕ РІС‹РЅРµСЃРµРЅРѕ:
+
+10 С„СѓРЅРєС†РёР№ FE_DEBUG_EnemyEconomy* + toggle + interval:
+1. FE_DEBUG_EnemyEconomyPanelAllowed в†’ isAllowed (checks window.FE_DEBUG_ENEMY_ECONOMY_PANEL_ENABLED)
+2. FE_DEBUG_EnemyEconomyEnsurePanel в†’ ensurePanel (DOM panel creation/lookup)
+3. FE_DEBUG_EnemyEconomySafeNumber в†’ safeNumber (pure, no deps)
+4. FE_DEBUG_EnemyEconomyReadBucket в†’ readBucket (game param)
+5. FE_DEBUG_EnemyEconomyHtmlEscape в†’ htmlEscape (pure, no deps)
+6. FE_DEBUG_EnemyEconomyUnitOwner в†’ unitOwnerOf (uses _deps.unitOwner)
+7. FE_DEBUG_EnemyEconomyBuildingOwner в†’ buildingOwnerOf (uses _deps.buildingOwner)
+8. FE_DEBUG_EnemyEconomyCollectState в†’ collectState (uses _deps + window.FE_CORE.game)
+9. FE_DEBUG_EnemyEconomyFormatHarvester в†’ formatHarvester (pure, uses own helpers)
+10. FE_DEBUG_EnemyEconomyRenderPanel в†’ renderPanel (main entry point, uses _deps + window.FE_CORE.game)
+11. FE_DEBUG_ToggleEnemyEconomyPanel в†’ toggle (calls renderPanel(true))
+
+РџР»СЋСЃ:
+- 3 IIFE-scope vars в†’ РІРЅСѓС‚СЂРµРЅРЅРёРµ _visible, _panelEl, _lastUpdate РІ РјРѕРґСѓР»Рµ
+- setInterval auto-refresh в†’ СѓРїСЂР°РІР»СЏРµС‚СЃСЏ РІРЅСѓС‚СЂРё РјРѕРґСѓР»СЏ С‡РµСЂРµР· init()
+- F2 keydown handler в†’ window.FE_ENEMY_ECONOMY_DEBUG_PANEL.toggle()
+
+РђСЂС…РёС‚РµРєС‚СѓСЂР° РЅРѕРІРѕРіРѕ РјРѕРґСѓР»СЏ:
+- Browser global IIFE: window.FE_ENEMY_ECONOMY_DEBUG_PANEL = (function() { ... })();
+- init(deps) вЂ” С…СЂР°РЅРёС‚ IIFE-scope function references (unitOwner, buildingOwner, etc.)
+- game РґРѕСЃС‚СѓРїРµРЅ С‡РµСЂРµР· window.FE_CORE.game РїСЂРё РІС‹Р·РѕРІРµ (РЅРµ РїСЂРё Р·Р°РіСЂСѓР·РєРµ)
+- Р’СЃРµ РґР°РЅРЅС‹Рµ game/enemyResources/buildings/units вЂ” С‚РѕР»СЊРєРѕ READ-ONLY
+- РњРѕРґСѓР»СЊ РќР• РјСѓС‚РёСЂСѓРµС‚ СЃРѕСЃС‚РѕСЏРЅРёРµ РёРіСЂС‹
+- РЎС‚РёР»СЊ РјРѕРґСѓР»СЏ РёРґРµРЅС‚РёС‡РµРЅ combat_debug_overlay.js (REF-MAIN-GLM-03)
+
+РР·РјРµРЅРµРЅРёСЏ РІ main.js:
+1. РЈРґР°Р»РµРЅС‹ 10 inline С„СѓРЅРєС†РёР№ FE_DEBUG_EnemyEconomy* (232 СЃС‚СЂРѕРєРё)
+2. РЈРґР°Р»РµРЅС‹ 3 IIFE-scope vars (FE_DEBUG_ENEMY_ECONOMY_PANEL_VISIBLE, _EL, _LAST_UPDATE)
+3. РЈРґР°Р»С‘РЅ setInterval Р±Р»РѕРє
+4. Р—Р°РјРµРЅС‘РЅ РЅР°: window.FE_ENEMY_ECONOMY_DEBUG_PANEL.init({...deps...})
+5. Р’ keydown handler F2: Р·Р°РјРµРЅС‘РЅ FE_DEBUG_ToggleEnemyEconomyPanel() РЅР°
+   window.FE_ENEMY_ECONOMY_DEBUG_PANEL.toggle()
+
+РР·РјРµРЅРµРЅРёСЏ РІ index.html:
+- Р”РѕР±Р°РІР»РµРЅ <script src="src/dev/enemy_economy_debug_panel.js?v=ref_main_glm_04"></script>
+  РїРµСЂРµРґ src/main.js (РїРѕСЃР»Рµ combat_debug_overlay.js)
+
+main.js РґРѕ: 11 783 СЃС‚СЂРѕРє
+main.js РїРѕСЃР»Рµ: 11 567 СЃС‚СЂРѕРє
+Р Р°Р·РЅРёС†Р°: -216 СЃС‚СЂРѕРє (-1.8%)
+
+enemy_economy_debug_panel.js: 266 СЃС‚СЂРѕРє (РЅРѕРІС‹Р№ С„Р°Р№Р»)
+
+Р§С‚Рѕ РќР• С‚СЂРѕРЅСѓС‚Рѕ (РїРѕ РїСЂР°РІРёР»Р°Рј Р·Р°РґР°С‡Рё):
+- enemy economy behavior вЂ” РЅРµС‚ (РјРѕРґСѓР»СЊ С‚РѕР»СЊРєРѕ read-only)
+- separator processing вЂ” РЅРµС‚
+- factory production вЂ” РЅРµС‚
+- enemyResources mutation вЂ” РЅРµС‚
+- bot decisions/AI behavior вЂ” РЅРµС‚
+- combat вЂ” РЅРµС‚
+- render loop С†РµР»РёРєРѕРј вЂ” РЅРµС‚
+- input/selection вЂ” РЅРµС‚
+- movement/pathfinding вЂ” РЅРµС‚
+- save/load вЂ” РЅРµС‚
+- map generation вЂ” РЅРµС‚
+- scout вЂ” РЅРµС‚
+- assets вЂ” РЅРµС‚
+- configs вЂ” РЅРµС‚
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/dev/enemy_economy_debug_panel.js (new, 266 СЃС‚СЂРѕРє)
+- src/main.js (216 СЃС‚СЂРѕРє СѓРґР°Р»РµРЅРѕ, ~16 СЃС‚СЂРѕРє РґРѕР±Р°РІР»РµРЅРѕ вЂ” init + F2 handler)
+- index.html (+1 script tag)
+- PATCH_REPORT.txt (РґРѕР±Р°РІР»РµРЅР° СЌС‚Р° Р·Р°РїРёСЃСЊ)
+- docs/project/REF_MAIN_GLM_01_MICRO_REFACTOR_CANDIDATES.md (Candidate 3 РѕС‚РјРµС‡РµРЅ DONE)
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+- node --check src/dev/enemy_economy_debug_panel.js -> PASS
+- rg: FE_DEBUG_EnemyEconomy* вЂ” 0 РѕРїСЂРµРґРµР»РµРЅРёР№ РІ src/main.js (РІСЃРµ СѓРґР°Р»РµРЅС‹)
+- index.html: РЅРѕРІС‹Р№ script tag РїРµСЂРµРґ src/main.js
+- РјРѕРґСѓР»СЊ РЅРµ РјСѓС‚РёСЂСѓРµС‚ game/enemyResources (С‚РѕР»СЊРєРѕ read)
+
+Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ:
+- enemy economy behavior РЅРµ РёР·РјРµРЅС‘РЅ вЂ” РјРѕРґРѕР»СЊ С‚РѕР»СЊРєРѕ С‡РёС‚Р°РµС‚ Рё РѕС‚РѕР±СЂР°Р¶Р°РµС‚
+- separator/factory/production РЅРµ РёР·РјРµРЅРµРЅС‹
+- enemy bot behavior РЅРµ РёР·РјРµРЅС‘РЅ
+- render/input/save-load/mapgen РЅРµ РёР·РјРµРЅРµРЅС‹
+- rollback: РІРµСЂРЅСѓС‚СЊ С„СѓРЅРєС†РёРё РІ main.js, СѓРґР°Р»РёС‚СЊ script tag
+
+Risks / manual smoke checklist:
+1. РРіСЂР° Р·Р°РіСЂСѓР¶Р°РµС‚СЃСЏ
+2. Р’С‹Р±РѕСЂ С„СЂР°РєС†РёРё РїСЂРѕС…РѕРґРёС‚ РґР°Р»СЊС€Рµ
+3. F2 вЂ” enemy economy debug panel РїРѕСЏРІР»СЏРµС‚СЃСЏ
+4. F2 РµС‰С‘ СЂР°Р· вЂ” РёСЃС‡РµР·Р°РµС‚
+5. Р‘РµР· F2 вЂ” gameplay РёРґРµРЅС‚РёС‡РµРЅ
+6. Panel РїРѕРєР°Р·С‹РІР°РµС‚ enemy resources, buildings, harvesters, bot phase
+7. Panel auto-refreshes every 250ms
+8. РќРµС‚ console errors РѕС‚ РјРѕРґСѓР»СЏ
+
+---
+
+Р—Р°РґР°С‡Р°: REF-MAIN-GLM-05 вЂ” extract snapshot/export system from src/main.js
+Р”Р°С‚Р°: 2026-05-10
+Lane: Review
+Р’РµС‚РєР°: glm/ref-main-05-snapshot-export-extract (РѕС‚ sandbox/main)
+
+Р¦РµР»СЊ:
+Р’С‹РЅРµСЃС‚Рё snapshot/export debug-СЃРёСЃС‚РµРјСѓ (feMakeSnapshot, feSnapshotSafe, feSnapshotDiagnoseCell,
+feSnapshotAroundUnit, feSnapshotBuildInfo, FE_EXPORT_SNAPSHOT, F8 handler) РёР· src/main.js
+РІ РѕС‚РґРµР»СЊРЅС‹Р№ dev/debug РјРѕРґСѓР»СЊ src/dev/snapshot_export.js.
+Р­С‚Рѕ micro-refactor extraction вЂ” РЅРµ gameplay patch, РЅРµ save/load refactor.
+
+Р§С‚Рѕ РІС‹РЅРµСЃРµРЅРѕ:
+
+5 С„СѓРЅРєС†РёР№ + export + F8 handler:
+1. feSnapshotSafe в†’ feSnapshotSafe (pure recursive safe-clone, no IIFE deps)
+2. feSnapshotDiagnoseCell в†’ feSnapshotDiagnoseCell (uses _deps: inBounds, isObstacleBlocked, mineAt, buildingAt, unitAt, passable)
+3. feSnapshotAroundUnit в†’ feSnapshotAroundUnit (calls feSnapshotDiagnoseCell)
+4. feSnapshotBuildInfo в†’ feSnapshotBuildInfo (uses _deps: BUILDING_SIZE, canPlaceBuilding, adjacentFreeCellsForRect, findPath)
+5. feMakeSnapshot в†’ feMakeSnapshot (uses window.FE_CORE.game + _deps: getStorageLimits, getSelected)
+6. window.FE_EXPORT_SNAPSHOT в†’ exportSnapshot (JSON blob + browser download)
+7. F8 keydown handler в†’ registered in init()
+8. console.warn message в†’ issued in init()
+
+РђСЂС…РёС‚РµРєС‚СѓСЂР° РЅРѕРІРѕРіРѕ РјРѕРґСѓР»СЏ:
+- Browser global IIFE: window.FE_SNAPSHOT_EXPORT = (function() { ... })();
+- init(deps) вЂ” С…СЂР°РЅРёС‚ IIFE-scope function references
+- game РґРѕСЃС‚СѓРїРµРЅ С‡РµСЂРµР· window.FE_CORE.game РїСЂРё РІС‹Р·РѕРІРµ (РЅРµ РїСЂРё Р·Р°РіСЂСѓР·РєРµ)
+- selected РїРµСЂРµРґР°С‘С‚СЃСЏ С‡РµСЂРµР· deps.getSelected() вЂ” ()=> selected
+- window.FE_EXPORT_SNAPSHOT РїРµСЂРµРЅР°Р·РЅР°С‡Р°РµС‚СЃСЏ РІ init() РґР»СЏ РѕР±СЂР°С‚РЅРѕР№ СЃРѕРІРјРµСЃС‚РёРјРѕСЃС‚Рё
+- Р’СЃРµ РґР°РЅРЅС‹Рµ game вЂ” С‚РѕР»СЊРєРѕ READ-ONLY
+- РњРѕРґСѓР»СЊ РќР• РјСѓС‚РёСЂСѓРµС‚ СЃРѕСЃС‚РѕСЏРЅРёРµ РёРіСЂС‹
+
+РР·РјРµРЅРµРЅРёСЏ РІ main.js:
+1. РЈРґР°Р»РµРЅС‹ 5 inline С„СѓРЅРєС†РёР№ fe* (feSnapshotSafe, feSnapshotDiagnoseCell, feSnapshotAroundUnit, feSnapshotBuildInfo, feMakeSnapshot)
+2. РЈРґР°Р»С‘РЅ window.FE_EXPORT_SNAPSHOT definition
+3. РЈРґР°Р»С‘РЅ F8 keydown handler
+4. РЈРґР°Р»С‘РЅ console.warn message
+5. Р—Р°РјРµРЅРµРЅРѕ РЅР°: window.FE_SNAPSHOT_EXPORT.init({...deps...})
+6. FE_DEV_SPAWN_UNIT РѕСЃС‚Р°С‘С‚СЃСЏ РІ main.js вЂ” СЌС‚Рѕ РѕС‚РґРµР»СЊРЅС‹Р№ dev tool
+
+РР·РјРµРЅРµРЅРёСЏ РІ index.html:
+- Р”РѕР±Р°РІР»РµРЅ <script src="src/dev/snapshot_export.js?v=ref_main_glm_05"></script>
+  РїРµСЂРµРґ src/main.js (РїРѕСЃР»Рµ enemy_economy_debug_panel.js)
+
+main.js РґРѕ: 11 567 СЃС‚СЂРѕРє
+main.js РїРѕСЃР»Рµ: 11 382 СЃС‚СЂРѕРє
+Р Р°Р·РЅРёС†Р°: -185 СЃС‚СЂРѕРє (-1.6%)
+
+snapshot_export.js: 254 СЃС‚СЂРѕРєРё (РЅРѕРІС‹Р№ С„Р°Р№Р»)
+
+Р§С‚Рѕ РќР• С‚СЂРѕРЅСѓС‚Рѕ (РїРѕ РїСЂР°РІРёР»Р°Рј Р·Р°РґР°С‡Рё):
+- save/load behavior вЂ” РЅРµС‚
+- localStorage keys вЂ” РЅРµС‚
+- С„РѕСЂРјР° СЃРѕС…СЂР°РЅРµРЅРёР№ вЂ” РЅРµС‚
+- game state structure вЂ” РЅРµС‚
+- runtime gameplay вЂ” РЅРµС‚
+- economy вЂ” РЅРµС‚
+- enemy bot behavior вЂ” РЅРµС‚
+- combat вЂ” РЅРµС‚
+- render loop вЂ” РЅРµС‚
+- input/selection вЂ” РЅРµС‚
+- movement/pathfinding вЂ” РЅРµС‚
+- map generation вЂ” РЅРµС‚
+- scout вЂ” РЅРµС‚
+- assets вЂ” РЅРµС‚
+- configs вЂ” РЅРµС‚
+- FE_DEV_SPAWN_UNIT вЂ” РѕСЃС‚Р°С‘С‚СЃСЏ РІ main.js
+- getBuilderDebugSnapshot вЂ” РѕСЃС‚Р°С‘С‚СЃСЏ РІ main.js (РѕС‚РґРµР»СЊРЅР°СЏ СЃРёСЃС‚РµРјР° debugLog)
+- safeCloneForLog вЂ” РѕСЃС‚Р°С‘С‚СЃСЏ РІ main.js (production code)
+- Candidate 5 вЂ” РЅРµ РІС‹РїРѕР»РЅСЏР»СЃСЏ
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/dev/snapshot_export.js (new, 254 СЃС‚СЂРѕРєРё)
+- src/main.js (185 СЃС‚СЂРѕРє СѓРґР°Р»РµРЅРѕ, ~17 СЃС‚СЂРѕРє РґРѕР±Р°РІР»РµРЅРѕ вЂ” init)
+- index.html (+1 script tag)
+- PATCH_REPORT.txt (РґРѕР±Р°РІР»РµРЅР° СЌС‚Р° Р·Р°РїРёСЃСЊ)
+- docs/project/REF_MAIN_GLM_01_MICRO_REFACTOR_CANDIDATES.md (Candidate 4 РѕС‚РјРµС‡РµРЅ DONE)
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+- node --check src/dev/snapshot_export.js -> PASS
+- rg: feMakeSnapshot / feSnapshotSafe / feSnapshotDiagnoseCell вЂ” 0 РѕРїСЂРµРґРµР»РµРЅРёР№ РІ src/main.js
+- rg: FE_EXPORT_SNAPSHOT вЂ” РїРµСЂРµРЅР°Р·РЅР°С‡РµРЅ С‡РµСЂРµР· init(), РґРѕСЃС‚СѓРїРµРЅ РєР°Рє window.FE_EXPORT_SNAPSHOT
+- index.html: РЅРѕРІС‹Р№ script tag РїРµСЂРµРґ src/main.js
+- РјРѕРґСѓР»СЊ РЅРµ РјСѓС‚РёСЂСѓРµС‚ game (С‚РѕР»СЊРєРѕ read)
+
+Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ:
+- save/load РЅРµ РёР·РјРµРЅС‘РЅ вЂ” РјРѕРґСѓР»СЊ С‚РѕР»СЊРєРѕ С‡РёС‚Р°РµС‚ Рё СЌРєСЃРїРѕСЂС‚РёСЂСѓРµС‚
+- game state РЅРµ РјСѓС‚РёСЂСѓРµС‚СЃСЏ
+- FE_EXPORT_SNAPSHOT API СЃРѕС…СЂР°РЅС‘РЅ
+- FE_DEV_SPAWN_UNIT РѕСЃС‚Р°С‘С‚СЃСЏ РІ main.js
+- rollback: РІРµСЂРЅСѓС‚СЊ С„СѓРЅРєС†РёРё РІ main.js, СѓРґР°Р»РёС‚СЊ script tag
+
+Risks / manual smoke checklist:
+1. РРіСЂР° Р·Р°РіСЂСѓР¶Р°РµС‚СЃСЏ
+2. Р’С‹Р±РѕСЂ С„СЂР°РєС†РёРё РїСЂРѕС…РѕРґРёС‚ РґР°Р»СЊС€Рµ
+3. F8 вЂ” СЃРєР°С‡РёРІР°РµС‚СЃСЏ JSON snapshot С„Р°Р№Р»
+4. FE_EXPORT_SNAPSHOT() РІ РєРѕРЅСЃРѕР»Рё вЂ” СЂР°Р±РѕС‚Р°РµС‚
+5. typeof window.FE_EXPORT_SNAPSHOT === 'function' РІ РєРѕРЅСЃРѕР»Рё
+6. FE_DEV_SPAWN_UNIT('scout') вЂ” СЂР°Р±РѕС‚Р°РµС‚ (РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚)
+7. Р‘РµР· F8 вЂ” gameplay РёРґРµРЅС‚РёС‡РµРЅ
+8. РќРµС‚ console errors
+
+---
+
+Р—Р°РґР°С‡Р°: REF-MAIN-GLM-06 вЂ” extract standalone constants from src/main.js
+Р”Р°С‚Р°: 2026-05-10
+Lane: Review
+Р’РµС‚РєР°: glm/ref-main-06-standalone-constants-extract (РѕС‚ sandbox/main)
+
+Р¦РµР»СЊ:
+Р’С‹РЅРµСЃС‚Рё 7 standalone pure constants РёР· src/main.js РІ РѕС‚РґРµР»СЊРЅС‹Р№ core module
+src/core/standalone_constants.js. Р­С‚Рѕ Candidate 5 РёР· Р°СѓРґРёС‚Р°
+REF_MAIN_GLM_01_MICRO_REFACTOR_CANDIDATES.md.
+
+Р­С‚Рѕ micro-refactor extraction вЂ” РЅРµ gameplay patch, РЅРµ balance change,
+РЅРµ economy/config refactor.
+
+Р’С‹РЅРµСЃРµРЅРЅС‹Рµ РєРѕРЅСЃС‚Р°РЅС‚С‹ (7 С€С‚СѓРє):
+1. SAVE_KEY = 'four_elements_core_base_v04_save'
+2. SETTINGS_KEY = 'four_elements_core_base_v04_settings'
+3. TILE_W = 76
+4. TILE_H = 38
+5. MAP_SIZES = { standard: {...}, large: {...} }
+6. BASE_STORAGE = { minerals:200, energy:300, purple:20, greenEl:20, cyanEl:20, yellowEl:20 }
+7. FACTION_ELEMENT_KEY = { purple:'purple', green:'greenEl', cyan:'cyanEl', yellow:'yellowEl' }
+
+Р’СЃРµ РєРѕРЅСЃС‚Р°РЅС‚С‹ вЂ” pure/static:
+- СЃС‚СЂРѕРєРѕРІС‹Рµ Рё С‡РёСЃР»РѕРІС‹Рµ Р»РёС‚РµСЂР°Р»С‹, РѕР±СЉРµРєС‚РЅС‹Рµ Р»РёС‚РµСЂР°Р»С‹
+- Р±РµР· С„СѓРЅРєС†РёР№
+- Р±РµР· runtime reads
+- Р±РµР· РѕР±СЂР°С‰РµРЅРёСЏ Рє game/window (РєСЂРѕРјРµ window.FE_STANDALONE_CONSTANTS РїСЂРё Р·Р°РіСЂСѓР·РєРµ)
+- Р·РЅР°С‡РµРЅРёСЏ РЅРµРёР·РјРµРЅРЅС‹
+
+Р§С‚Рѕ РќР• С‚СЂРѕРЅСѓС‚Рѕ:
+- BUILDING_SIZE вЂ” Р·Р°РІРёСЃРёС‚ РѕС‚ window.FE_BUILDING_SIZE
+- BUILDINGS вЂ” Р·Р°РІРёСЃРёС‚ РѕС‚ window.FE_BUILDINGS
+- UNIT_DEFS вЂ” Р·Р°РІРёСЃРёС‚ РѕС‚ window.FE_UNITS
+- FACTIONS вЂ” Р·Р°РІРёСЃРёС‚ РѕС‚ window.FE_FACTIONS
+- MINE_TYPES вЂ” Р·Р°РІРёСЃРёС‚ РѕС‚ window.FE_MINE_TYPES
+- OBSTACLE_ASSETS вЂ” Р·Р°РІРёСЃРёС‚ РѕС‚ window.FE_OBSTACLE_ASSETS
+- SPRITE_PROFILES вЂ” Р·Р°РІРёСЃРёС‚ РѕС‚ window.FE_SPRITE_PROFILES
+- FE_PATCH_07A3_ENEMY_VISUAL_FACTION вЂ” РѕСЃС‚Р°РІР»РµРЅ РґР»СЏ РїСЂРѕСЃС‚РѕС‚С‹
+- Р·РЅР°С‡РµРЅРёСЏ РєРѕРЅСЃС‚Р°РЅС‚ вЂ” РЅРµ РёР·РјРµРЅРµРЅС‹
+- save/load вЂ” РЅРµ РёР·РјРµРЅС‘РЅ
+- game state structure вЂ” РЅРµ РёР·РјРµРЅС‘РЅ
+- runtime gameplay вЂ” РЅРµ РёР·РјРµРЅС‘РЅ
+- economy вЂ” РЅРµ РёР·РјРµРЅС‘РЅ
+- enemy bot behavior вЂ” РЅРµ РёР·РјРµРЅС‘РЅ
+- combat вЂ” РЅРµ РёР·РјРµРЅС‘РЅ
+- render loop вЂ” РЅРµ РёР·РјРµРЅС‘РЅ
+- input/selection вЂ” РЅРµ РёР·РјРµРЅС‘РЅ
+- movement/pathfinding вЂ” РЅРµ РёР·РјРµРЅС‘РЅ
+- map generation вЂ” РЅРµ РёР·РјРµРЅС‘РЅ
+- scout вЂ” РЅРµ РёР·РјРµРЅС‘РЅ
+- assets вЂ” РЅРµ РёР·РјРµРЅС‘РЅ
+- configs вЂ” РЅРµ РёР·РјРµРЅС‘РЅ
+- window.FE_CORE (TILE_W, TILE_H) вЂ” РїСЂРѕРґРѕР»Р¶Р°РµС‚ СЂР°Р±РѕС‚Р°С‚СЊ С‡РµСЂРµР· destructuring
+- localStorage keys вЂ” РЅРµ РёР·РјРµРЅРµРЅС‹
+- С„РѕСЂРјР° СЃРѕС…СЂР°РЅРµРЅРёР№ вЂ” РЅРµ РёР·РјРµРЅРµРЅР°
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/core/standalone_constants.js (new, 31 СЃС‚СЂРѕРєР°)
+- src/main.js (24 СЃС‚СЂРѕРєРё СѓРґР°Р»РµРЅРѕ, 2 СЃС‚СЂРѕРєРё РґРѕР±Р°РІР»РµРЅРѕ вЂ” destructuring + comment)
+- index.html (+1 script tag)
+- PATCH_REPORT.txt (РґРѕР±Р°РІР»РµРЅР° СЌС‚Р° Р·Р°РїРёСЃСЊ)
+- docs/project/REF_MAIN_GLM_01_MICRO_REFACTOR_CANDIDATES.md (Candidate 5 РѕС‚РјРµС‡РµРЅ DONE)
+
+main.js РґРѕ: 11 382 СЃС‚СЂРѕРє
+main.js РїРѕСЃР»Рµ: 11 358 СЃС‚СЂРѕРє
+Р Р°Р·РЅРёС†Р°: -24 СЃС‚СЂРѕРєРё
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+- node --check src/core/standalone_constants.js -> PASS
+- rg: СЃС‚Р°СЂС‹Рµ РѕРїСЂРµРґРµР»РµРЅРёСЏ РєРѕРЅСЃС‚Р°РЅС‚ (string literals) вЂ” 0 РІС…РѕР¶РґРµРЅРёР№ РІ src/main.js
+- rg: РІСЃРµ СЃСЃС‹Р»РєРё РЅР° SAVE_KEY/SETTINGS_KEY/TILE_W/TILE_H/MAP_SIZES/BASE_STORAGE/FACTION_ELEMENT_KEY вЂ” СЂР°Р±РѕС‚Р°СЋС‚ С‡РµСЂРµР· destructuring
+- index.html: РЅРѕРІС‹Р№ script tag РїРµСЂРµРґ src/main.js
+- window.FE_CORE.TILE_W / TILE_H вЂ” РїСЂРѕРґРѕР»Р¶Р°РµС‚ СЂР°Р±РѕС‚Р°С‚СЊ (РґРµСЃС‚СЂСѓРєС‚СѓСЂРёР·Р°С†РёСЏ РѕРїСЂРµРґРµР»СЏРµС‚ Р»РѕРєР°Р»СЊРЅС‹Рµ const РґРѕ FE_CORE)
+- Р·РЅР°С‡РµРЅРёСЏ РєРѕРЅСЃС‚Р°РЅС‚ РЅРµ РёР·РјРµРЅРµРЅС‹
+
+Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ:
+- save/load РЅРµ РёР·РјРµРЅС‘РЅ вЂ” SAVE_KEY С‚Рѕ Р¶Рµ Р·РЅР°С‡РµРЅРёРµ
+- game state РЅРµ РјСѓС‚РёСЂСѓРµС‚СЃСЏ
+- TILE_W=76, TILE_H=38 вЂ” С‚Рµ Р¶Рµ Р·РЅР°С‡РµРЅРёСЏ
+- MAP_SIZES вЂ” С‚Рµ Р¶Рµ Р·РЅР°С‡РµРЅРёСЏ
+- BASE_STORAGE вЂ” С‚Рµ Р¶Рµ Р·РЅР°С‡РµРЅРёСЏ
+- FACTION_ELEMENT_KEY вЂ” С‚Рµ Р¶Рµ Р·РЅР°С‡РµРЅРёСЏ
+- window.FE_STANDALONE_CONSTANTS РґРѕСЃС‚СѓРїРµРЅ С‡РµСЂРµР· РєРѕРЅСЃРѕР»СЊ РґР»СЏ РїСЂРѕРІРµСЂРєРё
+- window.FE_CORE.TILE_W / TILE_H вЂ” РїСЂРѕРґРѕР»Р¶Р°РµС‚ СЂР°Р±РѕС‚Р°С‚СЊ
+- rollback: РІРµСЂРЅСѓС‚СЊ const РѕР±СЉСЏРІР»РµРЅРёСЏ РІ main.js, СѓРґР°Р»РёС‚СЊ script tag Рё standalone_constants.js
+
+Risks / manual smoke checklist:
+1. РРіСЂР° Р·Р°РіСЂСѓР¶Р°РµС‚СЃСЏ
+2. Р’С‹Р±РѕСЂ С„СЂР°РєС†РёРё РїСЂРѕС…РѕРґРёС‚ РґР°Р»СЊС€Рµ
+3. window.FE_STANDALONE_CONSTANTS.TILE_W === 76 РІ РєРѕРЅСЃРѕР»Рё
+4. window.FE_STANDALONE_CONSTANTS.BASE_STORAGE.minerals === 200
+5. window.FE_STANDALONE_CONSTANTS.FACTION_ELEMENT_KEY.purple === 'purple'
+6. window.FE_CORE.TILE_W === 76 (FE_CORE bridge РЅРµ СЃР»РѕРјР°РЅ)
+7. Save/load СЂР°Р±РѕС‚Р°РµС‚
+8. РќРµС‚ console errors
+
+---
+
+Р—Р°РґР°С‡Р°: REF-MAIN-GLM-07 вЂ” docs checkpoint РїРѕСЃР»Рµ main.js micro-refactor sprint
+Р”Р°С‚Р°: 2026-05-10
+Lane: Fast
+Р’РµС‚РєР°: sandbox/main (direct push)
+
+Р¦РµР»СЊ:
+Р—Р°С„РёРєСЃРёСЂРѕРІР°С‚СЊ РёС‚РѕРі СѓСЃРїРµС€РЅРѕРіРѕ main.js micro-refactor sprint Рё РЅРѕРІС‹Рµ РїСЂР°РІРёР»Р°
+РґР°Р»СЊРЅРµР№С€РµР№ СЂР°Р·СЂР°Р±РѕС‚РєРё. Docs-only checkpoint вЂ” РєРѕРґ РЅРµ РјРµРЅСЏР»СЃСЏ.
+
+РЎРѕР·РґР°РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- docs/project/REF_MAIN_GLM_07_REFACTOR_SPRINT_CHECKPOINT.md (РЅРѕРІС‹Р№)
+
+РЎРѕРґРµСЂР¶Р°РЅРёРµ checkpoint:
+1. РљСЂР°С‚РєРёР№ РёС‚РѕРі sprint (Р·Р°С‡РµРј, РїРѕС‡РµРјСѓ GLM-first, РїРѕС‡РµРјСѓ РЅРµ Codex)
+2. РўР°Р±Р»РёС†Р° 5 РїСЂРёРЅСЏС‚С‹С… РїР°С‚С‡РµР№ (REF-MAIN-GLM-02..06)
+3. РС‚РѕРі РїРѕ main.js: 12 128 в†’ 11 358 (-770 СЃС‚СЂРѕРє, -6.4%)
+4. РЎРѕР·РґР°РЅРЅС‹Рµ РјРѕРґСѓР»Рё (4 С„Р°Р№Р»Р°: 3 dev + 1 core)
+5. РџР°С‚С‚РµСЂРЅ extraction (8 С€Р°РіРѕРІ)
+6. Р—РѕРЅС‹, РєРѕС‚РѕСЂС‹Рµ РќР• С‚СЂРѕРіР°Р»РёСЃСЊ
+7. Р”Р°Р»СЊРЅРµР№С€РёРµ refactor-РєР°РЅРґРёРґР°С‚С‹
+8. РџСЂРѕРІРµСЂРєРё Рё РІРµСЂРёС„РёРєР°С†РёСЏ
+9. РСЃС…РѕРґРЅС‹Рµ РґРѕРєСѓРјРµРЅС‚С‹
+
+Р§С‚Рѕ РќР• С‚СЂРѕРЅСѓС‚Рѕ:
+- src/* вЂ” РЅРµ РёР·РјРµРЅС‘РЅ
+- index.html вЂ” РЅРµ РёР·РјРµРЅС‘РЅ
+- assets вЂ” РЅРµ РёР·РјРµРЅРµРЅС‹
+- configs вЂ” РЅРµ РёР·РјРµРЅРµРЅС‹
+- gameplay / balance / economy вЂ” РЅРµ РёР·РјРµРЅРµРЅС‹
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS (smoke only, Р±РµР· РёР·РјРµРЅРµРЅРёР№)
+- Р’РёР·СѓР°Р»СЊРЅР°СЏ РїСЂРѕРІРµСЂРєР°: С‚РѕР»СЊРєРѕ РЅРѕРІС‹Р№ .md РґРѕРєСѓРјРµРЅС‚ + PATCH_REPORT.txt
+
+---
+
+Р—Р°РґР°С‡Р°: DOCS-AUDIT-01 вЂ” Р°СѓРґРёС‚ source-of-truth Рё СѓСЃС‚Р°СЂРµРІС€РёС… РґРѕРєСѓРјРµРЅС‚РѕРІ
+Р”Р°С‚Р°: 2026-05-10
+Lane: Fast
+Р’РµС‚РєР°: sandbox/main (direct push)
+
+Р¦РµР»СЊ:
+РђСѓРґРёС‚ РІСЃРµС… РїСЂРѕРµРєС‚РЅС‹С… РґРѕРєСѓРјРµРЅС‚РѕРІ РґР»СЏ РєР»Р°СЃСЃРёС„РёРєР°С†РёРё РїРѕ РєР°С‚РµРіРѕСЂРёСЏРј
+CANONICAL / ACTIVE / REFERENCE / STALE / ARCHIVE_CANDIDATE / DANGEROUS_OLD / DUPLICATE_OR_OVERLAP.
+Docs-only Р·Р°РґР°С‡Р° вЂ” РєРѕРґ, Р°СЃСЃРµС‚С‹, gameplay РќР• РјРµРЅСЏР»РёСЃСЊ.
+
+Р§С‚Рѕ СЃРґРµР»Р°РЅРѕ:
+1. РџСЂРѕС‡РёС‚Р°РЅС‹ РІСЃРµ 37 РґРѕРєСѓРјРµРЅС‚РѕРІ РїСЂРѕРµРєС‚Р° (README, AGENTS, РїСЂРѕРјРїС‚С‹, СЂРѕР°РґРјР°РїС‹, С‡РµРєРїРѕРёРЅС‚С‹, Р°СѓРґРёС‚-РѕС‚С‡С‘С‚С‹, Р°СЂС…РёРІ)
+2. РљР°Р¶РґС‹Р№ РґРѕРєСѓРјРµРЅС‚ РєР»Р°СЃСЃРёС„РёС†РёСЂРѕРІР°РЅ РїРѕ 7 РєР°С‚РµРіРѕСЂРёСЏРј
+3. РЎРѕР·РґР°РЅ Р°СѓРґРёС‚-РґРѕРєСѓРјРµРЅС‚: docs/project/DOCS_SOURCE_OF_TRUTH_AUDIT_20260510.md
+
+РљР»СЋС‡РµРІС‹Рµ РЅР°С…РѕРґРєРё:
+- 6 CANONICAL РґРѕРєСѓРјРµРЅС‚РѕРІ (AGENTS.md, README.md, README_GLM_SANDBOX.md, PATCH_REPORT.txt, REF_MAIN_GLM_07, scout_unit_roadmap)
+- 8 ACTIVE РґРѕРєСѓРјРµРЅС‚РѕРІ (GLM_ROADMAP, GLM_STRATEGY_REVIEW, GLM_FUTURE_VISION, bot_roadmap_merged_glm, Рё РґСЂ.)
+- 7 REFERENCE РґРѕРєСѓРјРµРЅС‚РѕРІ (РёСЃС‚РѕСЂРёС‡РµСЃРєРёРµ, РЅРѕ РїРѕР»РµР·РЅС‹Рµ)
+- 4 STALE/DANGEROUS_OLD РґРѕРєСѓРјРµРЅС‚Р° (NEW_CHAT_START_PROMPT.md вЂ” production-РїСѓС‚Рё; РїР°РјСЏС‚РєР°.txt вЂ” СѓСЃС‚Р°СЂРµРІС€Р°СЏ С„РѕСЂРјСѓР»Р° СЃРµРїР°СЂР°С‚РѕСЂР°; THIS_IS_WORK_PROJECT.txt; checkpoint_10E2)
+- 8 ARCHIVE_CANDIDATE РґРѕРєСѓРјРµРЅС‚РѕРІ (codex_limit_sprint, checkpoint_10H2, .docx roadmap, Рё РґСЂ.)
+- 5 DUPLICATE_OR_OVERLAP РіСЂСѓРїРї (СЂРµРіР»Р°РјРµРЅС‚+СЂРѕР°РґРјР°Рї, Р±РѕС‚-С‡РµРєРїРѕРёРЅС‚С‹, СЂРµС„Р°РєС‚РѕСЂРёРЅРі main.js, GLM-РїР»Р°РЅРёСЂРѕРІР°РЅРёРµ, РїСЂРѕРјРїС‚С‹)
+
+Р“Р»Р°РІРЅС‹Р№ СЂРёСЃРє:
+NEW_CHAT_START_PROMPT.md Рё РїР°РјСЏС‚РєР°.txt СЃРѕРґРµСЂР¶Р°С‚ СѓСЃС‚Р°СЂРµРІС€СѓСЋ РёРЅС„РѕСЂРјР°С†РёСЋ, СЃРїРѕСЃРѕР±РЅСѓСЋ РІРІРµСЃС‚Рё Р±СѓРґСѓС‰СѓСЋ AI-СЃРµСЃСЃРёСЋ РІ Р·Р°Р±Р»СѓР¶РґРµРЅРёРµ (СѓСЃС‚Р°СЂРµРІС€Р°СЏ С„РѕСЂРјСѓР»Р° СЃРµРїР°СЂР°С‚РѕСЂР° 20->10+1 РІРјРµСЃС‚Рѕ Р°РєС‚СѓР°Р»СЊРЅРѕР№ 15->10+1, production-РїСѓС‚Рё РІРјРµСЃС‚Рѕ sandbox-РїСѓС‚РµР№).
+
+Р РµРєРѕРјРµРЅРґРѕРІР°РЅРЅР°СЏ СЃР»РµРґСѓСЋС‰Р°СЏ Р·Р°РґР°С‡Р°:
+DOCS-CLEANUP-01 вЂ” С„РёР·РёС‡РµСЃРєР°СЏ СЂРµРѕСЂРіР°РЅРёР·Р°С†РёСЏ РґРѕРєСѓРјРµРЅС‚РѕРІ (РїРµСЂРµРјРµС‰РµРЅРёРµ DANGEROUS_OLD Рё STALE РІ archive/, РґРѕР±Р°РІР»РµРЅРёРµ WARNING-Р·Р°РіРѕР»РѕРІРєРѕРІ, РїСЂРѕРІРµСЂРєР° РїРµСЂРµРєСЂС‘СЃС‚РЅС‹С… СЃСЃС‹Р»РѕРє).
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- docs/project/DOCS_SOURCE_OF_TRUTH_AUDIT_20260510.md (new)
+- PATCH_REPORT.txt (РґРѕР±Р°РІР»РµРЅР° СЌС‚Р° Р·Р°РїРёСЃСЊ)
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS (smoke only, Р±РµР· РёР·РјРµРЅРµРЅРёР№)
+- Р’РёР·СѓР°Р»СЊРЅР°СЏ РїСЂРѕРІРµСЂРєР°: С‚РѕР»СЊРєРѕ РЅРѕРІС‹Р№ .md РґРѕРєСѓРјРµРЅС‚ + PATCH_REPORT.txt
+
+Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ:
+- src/* РЅРµ РёР·РјРµРЅС‘РЅ
+- assets/* РЅРµ РёР·РјРµРЅС‘РЅ
+- index.html РЅРµ РёР·РјРµРЅС‘РЅ
+- gameplay РЅРµ РёР·РјРµРЅС‘РЅ
+- Google Drive sync РЅРµ С‚СЂРѕРЅСѓС‚
+- Production paths РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚С‹
+- Р¤Р°Р№Р»С‹ РЅРµ РїРµСЂРµРјРµС‰Р°Р»РёСЃСЊ Рё РЅРµ СѓРґР°Р»СЏР»РёСЃСЊ вЂ” С‚РѕР»СЊРєРѕ Р°СѓРґРёС‚
+
+---
+
+Р—Р°РґР°С‡Р°: DOCS-CLEANUP-01 вЂ” СЂРµРѕСЂРіР°РЅРёР·Р°С†РёСЏ РґРѕРєСѓРјРµРЅС‚РѕРІ: AI_READ_FIRST + Р°СЂС…РёРІР°С†РёСЏ dangerous/stale
+Р”Р°С‚Р°: 2026-05-10
+Lane: Review
+Р’РµС‚РєР°: glm/docs-cleanup-01-source-of-truth-archive (РѕС‚ sandbox/main)
+
+Р¦РµР»СЊ:
+РќР° РѕСЃРЅРѕРІРµ Р°СѓРґРёС‚Р° DOCS-AUDIT-01 С„РёР·РёС‡РµСЃРєРё РїСЂРёРІРµСЃС‚Рё docs РІ РїРѕСЂСЏРґРѕРє:
+1. РЎРѕР·РґР°С‚СЊ AI_READ_FIRST.md вЂ” С‚РѕС‡РєР° РІС…РѕРґР° РґР»СЏ РЅРѕРІРѕР№ AI-СЃРµСЃСЃРёРё.
+2. РџРµСЂРµРјРµСЃС‚РёС‚СЊ DANGEROUS_OLD Рё ARCHIVE_CANDIDATE РґРѕРєСѓРјРµРЅС‚С‹ РІ docs/archive/.
+3. Р”РѕР±Р°РІРёС‚СЊ WARNING-Р·Р°РіРѕР»РѕРІРєРё РІ Р°СЂС…РёРІРЅС‹Рµ РґРѕРєСѓРјРµРЅС‚С‹.
+4. РћР±РЅРѕРІРёС‚СЊ СЃСЃС‹Р»РєРё РІ ACTIVE РґРѕРєСѓРјРµРЅС‚Р°С… РЅР° РЅРѕРІС‹Рµ РїСѓС‚Рё Р°СЂС…РёРІР°.
+5. РќРµ СѓРґР°Р»СЏС‚СЊ С„Р°Р№Р»С‹.
+6. РќРµ РјРµРЅСЏС‚СЊ РєРѕРґ.
+
+Р­С‚Рѕ docs-only Р·Р°РґР°С‡Р°. РќРµ gameplay patch. РќРµ code refactor.
+
+РЎРѕР·РґР°РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- docs/project/AI_READ_FIRST.md (new) вЂ” С‚РѕС‡РєР° РІС…РѕРґР° РґР»СЏ AI-СЃРµСЃСЃРёРё
+- docs/archive/dangerous_old/ (new directory)
+- docs/archive/old_checkpoints/ (new directory)
+- docs/archive/old_codex_refactor/ (new directory)
+- docs/archive/old_roadmaps/ (new directory)
+- docs/archive/old_audits/ (new directory)
+- docs/archive/old_prompts/ (new directory вЂ” РїСѓСЃС‚Р°СЏ)
+
+РџРµСЂРµРјРµС‰С‘РЅРЅС‹Рµ DANGEROUS_OLD С„Р°Р№Р»С‹ (3):
+- docs/project/NEW_CHAT_START_PROMPT.md в†’ docs/archive/dangerous_old/NEW_CHAT_START_PROMPT.md
+  РџСЂРёС‡РёРЅР°: production-РїСѓС‚Рё, Google Drive mirror, СѓСЃС‚Р°СЂРµРІС€РёРµ С‡РµРєРїРѕРёРЅС‚С‹
+- docs/project/РїР°РјСЏС‚РєР°.txt в†’ docs/archive/dangerous_old/РїР°РјСЏС‚РєР°.txt
+  РџСЂРёС‡РёРЅР°: СѓСЃС‚Р°СЂРµРІС€Р°СЏ С„РѕСЂРјСѓР»Р° СЃРµРїР°СЂР°С‚РѕСЂР° 20в†’10+1 (Р°РєС‚СѓР°Р»СЊРЅР°СЏ 15в†’10+1), СЃС‚Р°СЂС‹Р№ РїРѕСЂС‚ 8000
+- THIS_IS_WORK_PROJECT.txt в†’ docs/archive/dangerous_old/THIS_IS_WORK_PROJECT.txt
+  РџСЂРёС‡РёРЅР°: РјР°СЂРєРµСЂ production-РїСЂРѕРµРєС‚Р°, РЅРµ sandbox
+
+РџРµСЂРµРјРµС‰С‘РЅРЅС‹Рµ ARCHIVE_CANDIDATE С„Р°Р№Р»С‹ (3):
+- docs/project/codex_limit_sprint_20260509_20260510.md в†’ docs/archive/old_codex_refactor/
+  РџСЂРёС‡РёРЅР°: sprint window РёСЃС‚С‘Рє
+- docs/project/four_elements_patch_roadmap_actual.docx в†’ docs/archive/old_roadmaps/
+  РџСЂРёС‡РёРЅР°: Р±РёРЅР°СЂРЅС‹Р№ С„РѕСЂРјР°С‚, СѓСЃС‚Р°СЂРµР» РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ .md-РІРµСЂСЃРёРё
+- docs/project/patch_08a_bot_behavior_mvp_audit.md в†’ docs/archive/old_audits/
+  РџСЂРёС‡РёРЅР°: Р°СѓРґРёС‚ PATCH-08A СѓР¶Рµ РІС‹РїРѕР»РЅРµРЅ Рё РїСЂРёРЅСЏС‚
+
+РџРµСЂРµРјРµС‰С‘РЅРЅС‹Рµ STALE С„Р°Р№Р»С‹ (2):
+- docs/project/four_elements_bot_checkpoint_10E2.md в†’ docs/archive/old_checkpoints/
+  РџСЂРёС‡РёРЅР°: РїРµСЂРµРєСЂС‹С‚ С‡РµРєРїРѕРёРЅС‚РѕРј 10I2
+- docs/project/four_elements_bot_checkpoint_10H2.md в†’ docs/archive/old_checkpoints/
+  РџСЂРёС‡РёРЅР°: РїРµСЂРµРєСЂС‹С‚ С‡РµРєРїРѕРёРЅС‚РѕРј 10I2
+
+РћР±РЅРѕРІР»С‘РЅ WARNING-Р·Р°РіРѕР»РѕРІРѕРє:
+- docs/project/archive/four_elements_workflow_reglament_v5_20260506.md вЂ” РґРѕР±Р°РІР»РµРЅ WARNING
+
+РћР±РЅРѕРІР»С‘РЅРЅС‹Рµ СЃСЃС‹Р»РєРё РІ ACTIVE РґРѕРєСѓРјРµРЅС‚Р°С…:
+- docs/prompts/PROMPT_NEW_CHAT_GPT_FOUR_ELEMENTS_GLM_FIRST.txt вЂ” NEW_CHAT_START_PROMPT в†’ AI_READ_FIRST.md
+- docs/project/four_elements_workflow_reglament.md вЂ” 5 СЃСЃС‹Р»РѕРє РѕР±РЅРѕРІР»РµРЅС‹
+- docs/project/four_elements_patch_roadmap_actual.md вЂ” 5 СЃСЃС‹Р»РѕРє РѕР±РЅРѕРІР»РµРЅС‹
+- docs/project/four_elements_bot_roadmap_merged_glm.md вЂ” 3 СЃСЃС‹Р»РєРё РѕР±РЅРѕРІР»РµРЅС‹
+- docs/project/four_elements_glm_parallel_branch_plan.md вЂ” 2 СЃСЃС‹Р»РєРё РѕР±РЅРѕРІР»РµРЅС‹
+
+Р§С‚Рѕ РќР• СЃРґРµР»Р°РЅРѕ (РїРѕ РїСЂР°РІРёР»Р°Рј Р·Р°РґР°С‡Рё):
+- Р¤Р°Р№Р»С‹ РќР• СѓРґР°Р»СЏР»РёСЃСЊ вЂ” С‚РѕР»СЊРєРѕ РїРµСЂРµРјРµС‰Р°Р»РёСЃСЊ РІ archive
+- src/* РќР• Р·Р°С‚СЂРѕРЅСѓС‚С‹
+- index.html РќР• Р·Р°С‚СЂРѕРЅСѓС‚
+- assets/* РќР• Р·Р°С‚СЂРѕРЅСѓС‚С‹
+- CANONICAL РґРѕРєСѓРјРµРЅС‚С‹ РќР• РїРµСЂРµРјРµС‰Р°Р»РёСЃСЊ
+- ACTIVE РґРѕРєСѓРјРµРЅС‚С‹ РќР• РїРµСЂРµРјРµС‰Р°Р»РёСЃСЊ
+- REFERENCE РґРѕРєСѓРјРµРЅС‚С‹ РќР• РїРµСЂРµРјРµС‰Р°Р»РёСЃСЊ
+- PLAYWRIGHT_VISUAL_SCENARIOS.md, playwright_codegen_routes.md вЂ” РЅРёР·РєРёР№ РїСЂРёРѕСЂРёС‚РµС‚, РЅРµ РїРµСЂРµРјРµС‰РµРЅС‹
+- project_structure.md, reglament_local_tools_addendum.md вЂ” STALE, РЅРѕ РЅРµ СЂРµРєРѕРјРµРЅРґРѕРІР°РЅС‹ Р°СѓРґРёС‚РѕРј РґР»СЏ Р°СЂС…РёРІР°
+- 01_BUILD_GPT_CONTEXT_WORK.bat вЂ” РЅРµ РѕР±РЅРѕРІР»С‘РЅ (production-era СЃРєСЂРёРїС‚, РЅРµ sandbox)
+- docs/codex/Open_Codex_Chat.lnk вЂ” РЅРµ РїРµСЂРµРјРµС‰С‘РЅ (Windows СЏСЂР»С‹Рє)
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS (smoke only, РєРѕРґ РЅРµ РјРµРЅСЏР»СЃСЏ)
+- git diff --name-only: С‚РѕР»СЊРєРѕ docs/ С„Р°Р№Р»С‹, PATCH_REPORT.txt
+- Р СѓС‡РЅР°СЏ РїСЂРѕРІРµСЂРєР°: РЅРё РѕРґРёРЅ CANONICAL/ACTIVE/REFERENCE РґРѕРєСѓРјРµРЅС‚ РЅРµ РїРµСЂРµРјРµС‰С‘РЅ
+- Р СѓС‡РЅР°СЏ РїСЂРѕРІРµСЂРєР°: РІСЃРµ Р°СЂС…РёРІРЅС‹Рµ С„Р°Р№Р»С‹ СЃРѕРґРµСЂР¶Р°С‚ WARNING-Р·Р°РіРѕР»РѕРІРѕРє
+- Р СѓС‡РЅР°СЏ РїСЂРѕРІРµСЂРєР°: РІСЃРµ СЃСЃС‹Р»РєРё РІ ACTIVE РґРѕРєСѓРјРµРЅС‚Р°С… РѕР±РЅРѕРІР»РµРЅС‹
+
+Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ:
+- РРіСЂРѕРІРѕР№ РєРѕРґ РЅРµ РёР·РјРµРЅС‘РЅ
+- РђСЃСЃРµС‚С‹ РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚С‹
+- src/main.js РЅРµ С‚СЂРѕРЅСѓС‚
+- Google Drive sync РЅРµ РІРєР»СЋС‡С‘РЅ
+- Production paths РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚С‹
+- РћС‚РєР°С‚ С‚СЂРёРІРёР°Р»РµРЅ: git revert РІРѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ РІСЃРµ РїРµСЂРµРјРµС‰РµРЅРёСЏ
+
+---
+
+Р—Р°РґР°С‡Р°: BOT-MVP-01 вЂ” Р°СѓРґРёС‚ С‚РµРєСѓС‰РµРіРѕ enemy bot / skirmish РґР»СЏ playable 1v1
+Р”Р°С‚Р°: 2026-05-10
+Lane: Fast
+Р’РµС‚РєР°: sandbox/main (direct push)
+
+Р¦РµР»СЊ:
+РџСЂРѕРІРµСЃС‚Рё Р°СѓРґРёС‚ С‚РµРєСѓС‰РµРіРѕ enemy bot / skirmish logic Рё РїРѕРЅСЏС‚СЊ, С‡С‚Рѕ РЅСѓР¶РЅРѕ
+РґР»СЏ РјРёРЅРёРјР°Р»СЊРЅРѕ РёРіСЂР°Р±РµР»СЊРЅРѕРіРѕ 1v1. Audit-only Р·Р°РґР°С‡Р° вЂ” РєРѕРґ РќР• РјРµРЅСЏР»СЃСЏ.
+
+Р§С‚Рѕ СЃРґРµР»Р°РЅРѕ:
+1. РџСЂРѕС‡РёС‚Р°РЅС‹ РІСЃРµ РїСЂРѕРµРєС‚РЅС‹Рµ РґРѕРєСѓРјРµРЅС‚С‹: AI_READ_FIRST.md, AGENTS.md, README_GLM_SANDBOX.md,
+   bot roadmap, checkpoint 10I2, scout roadmap, refactor checkpoint, PATCH_REPORT.
+2. РџСЂРѕР°РЅР°Р»РёР·РёСЂРѕРІР°РЅ src/main.js (~11 358 СЃС‚СЂРѕРє) РЅР° РїСЂРµРґРјРµС‚ bot/skirmish Р»РѕРіРёРєРё.
+3. РџСЂРѕР°РЅР°Р»РёР·РёСЂРѕРІР°РЅС‹ src/config/units.js, src/config/buildings.js, src/config/runtime_flags.js.
+4. РџСЂРѕР°РЅР°Р»РёР·РёСЂРѕРІР°РЅС‹ src/dev/enemy_economy_debug_panel.js, src/dev/combat_debug_overlay.js.
+5. РЎРѕСЃС‚Р°РІР»РµРЅР° РїРѕР»РЅР°СЏ РєР°СЂС‚Р° bot-СЃРёСЃС‚РµРј: enemy start, resources, separator, factory, production,
+   attack waves, phase bot, 7 AI-СЃР»РѕС‘РІ (10BвЂ“10I1), debug tools, victory/defeat.
+
+РљР»СЋС‡РµРІС‹Рµ РІС‹РІРѕРґС‹:
+- Р‘РѕС‚ СѓР¶Рµ С„СѓРЅРєС†РёРѕРЅР°Р»СЊРЅРѕ СЂР°Р±РѕС‚РѕСЃРїРѕСЃРѕР±РµРЅ РґР»СЏ Р±Р°Р·РѕРІРѕРіРѕ 1v1.
+- Р­РєРѕРЅРѕРјРёС‡РµСЃРєР°СЏ С†РµРїРѕС‡РєР° РїРѕР»РЅР°СЏ: harvesters в†’ separator в†’ factory в†’ light_tank.
+- 7 AI-СЃР»РѕС‘РІ СЂР°Р±РѕС‚Р°СЋС‚: vision memory, scouting, autopilot guard, strength estimate,
+  vision-driven targeting, retreat/HQ defense, difficulty profiles.
+- РљСЂРёС‚РёС‡РµСЃРєРёР№ РїСЂРѕР±РµР»: РЅРµС‚ РІРѕСЃРїРѕР»РЅРµРЅРёСЏ СЂР°Р±РѕС‡РёС… (harvester/builder) РїСЂРё РіРёР±РµР»Рё.
+- РћРіСЂР°РЅРёС‡РµРЅРёСЏ: С‚РѕР»СЊРєРѕ light_tank, РѕС‡РµСЂРµРґСЊ max=1, РѕРґРЅР° factory, scout РЅРµ РёРЅС‚РµРіСЂРёСЂРѕРІР°РЅ.
+
+Р РµРєРѕРјРµРЅРґРѕРІР°РЅРЅС‹Рµ СЃР»РµРґСѓСЋС‰РёРµ PR:
+- BOT-MVP-02 вЂ” worker replenishment (СЃР°РјС‹Р№ Р±РµР·РѕРїР°СЃРЅС‹Р№ РїРµСЂРІС‹Р№ РєРѕРґРѕРІС‹Р№ PR)
+- BOT-MVP-03 вЂ” production queue increase (max 1в†’2)
+- BOT-MVP-04 вЂ” second factory
+- BOT-MVP-05 вЂ” difficulty production knobs
+- BOT-MVP-06 вЂ” bot builds storages
+- BOT-MVP-07 вЂ” victory/defeat screen polish
+
+РЎРѕР·РґР°РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- docs/project/BOT_MVP_01_CURRENT_ENEMY_BOT_AUDIT.md (new) вЂ” РїРѕР»РЅС‹Р№ Р°СѓРґРёС‚
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- PATCH_REPORT.txt (РґРѕР±Р°РІР»РµРЅР° СЌС‚Р° Р·Р°РїРёСЃСЊ)
+
+РџСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS (smoke only, РєРѕРґ РЅРµ РјРµРЅСЏР»СЃСЏ)
+- git diff --name-only: С‚РѕР»СЊРєРѕ docs/ С„Р°Р№Р», PATCH_REPORT.txt
+
+Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ:
+- РРіСЂРѕРІРѕР№ РєРѕРґ РЅРµ РёР·РјРµРЅС‘РЅ
+- РђСЃСЃРµС‚С‹ РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚С‹
+- src/main.js РЅРµ С‚СЂРѕРЅСѓС‚
+- Google Drive sync РЅРµ РІРєР»СЋС‡С‘РЅ
+- Production paths РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚С‹
+
+---
+
+Р—Р°РґР°С‡Р°: BOT-BASELINE-01 вЂ” enemy bot СЃС‚Р°СЂС‚СѓРµС‚ Рё РІС‹Р¶РёРІР°РµС‚
+Р”Р°С‚Р°: 2026-05-10
+Lane: Review
+Р’РµС‚РєР°: glm/bot-baseline-01-start-and-survive (РѕС‚ sandbox/main)
+
+Р¦РµР»СЊ:
+- Р’С‹СЂРѕРІРЅСЏС‚СЊ СЃС‚Р°СЂС‚РѕРІС‹Рµ СЂРµСЃСѓСЂСЃС‹ enemy bot СЃ РёРіСЂРѕРєРѕРј (Р±С‹Р»Рѕ 30 СЌРЅРµСЂРіРёРё в†’ СЃС‚Р°Р»Рѕ 160).
+- Р”РѕР±Р°РІРёС‚СЊ РјРёРЅРёРјР°Р»СЊРЅРѕРµ РІРѕСЃРїРѕР»РЅРµРЅРёРµ enemy harvester Рё builder С‡РµСЂРµР· factory.
+
+Р§Р°СЃС‚СЊ 1 вЂ” СЃС‚Р°СЂС‚РѕРІР°СЏ СЌРєРѕРЅРѕРјРёРєР°:
+
+РЎС‚Р°СЂС‚РѕРІР°СЏ СЌРЅРµСЂРіРёСЏ РёРіСЂРѕРєР°: 160 (resources.energy РІ createGameObject, СЃС‚СЂРѕРєР° 174).
+РЎС‚Р°СЂС‚РѕРІР°СЏ СЌРЅРµСЂРіРёСЏ enemy РґРѕ РїР°С‚С‡Р°: 0 (enemyResources.energy), Р·Р°С‚РµРј FE_PATCH_09C2EnsureEnemyScenarioEnergyReserve РґР°РІР°Р»Р° С‚РѕР»СЊРєРѕ 30.
+РЎС‚Р°СЂС‚РѕРІР°СЏ СЌРЅРµСЂРіРёСЏ enemy РїРѕСЃР»Рµ РїР°С‚С‡Р°: 160 (enemyResources.energy РІ createGameObject + FE_PATCH_BASELINE_01_START_ENERGY = 160).
+РџСЂРёС‡РёРЅР°: РёРіСЂРѕРє СЃС‚Р°СЂС‚СѓРµС‚ СЃ 160 СЌРЅРµСЂРіРёРё вЂ” СЌС‚РѕРіРѕ С…РІР°С‚Р°РµС‚ РЅР° separator (30) + factory (55) = 85, СЃ Р·Р°РїР°СЃРѕРј. Enemy СЃ 30 СЌРЅРµСЂРіРёРё РјРѕРі СЃС‚СЂРѕРёС‚СЊ С‚РѕР»СЊРєРѕ separator, Р° РЅР° factory РЅРµ С…РІР°С‚Р°Р»Рѕ. 160 РІС‹СЂР°РІРЅРёРІР°РµС‚ РІРѕР·РјРѕР¶РЅРѕСЃС‚Рё.
+
+РР·РјРµРЅРµРЅРёСЏ:
+- enemyResources РІ createGameObject: energy:0 в†’ energy:160 (СЃС‚СЂРѕРєР° 176)
+- FE_PATCH_BASELINE_01_START_ENERGY = 160 вЂ” РЅРѕРІР°СЏ РєРѕРЅСЃС‚Р°РЅС‚Р° (СЃС‚СЂРѕРєР° 6051)
+- FE_PATCH_09C2EnsureEnemyScenarioEnergyReserve: РёСЃРїРѕР»СЊР·СѓРµС‚ FE_PATCH_BASELINE_01_START_ENERGY РІРјРµСЃС‚Рѕ FE_PATCH_09C2_SEPARATOR_COST_ENERGY
+
+Р§Р°СЃС‚СЊ 2 вЂ” worker replenishment MVP:
+
+РњРµС…Р°РЅРёРєР°:
+- Р•СЃР»Рё enemy harvesters < 2 в†’ factory РїСЂРѕРёР·РІРѕРґРёС‚ harvester (РїСЂРёРѕСЂРёС‚РµС‚ РЅР°Рґ light_tank).
+- Р•СЃР»Рё enemy builder < 1 в†’ factory РїСЂРѕРёР·РІРѕРґРёС‚ builder (РїСЂРёРѕСЂРёС‚РµС‚ РЅР°Рґ harvester).
+- Р•СЃР»Рё workers РЅР° РјРµСЃС‚Рµ в†’ factory РїСЂРѕРёР·РІРѕРґРёС‚ light_tank РєР°Рє РѕР±С‹С‡РЅРѕ.
+- РџСЂРёРѕСЂРёС‚РµС‚: builder > harvester > light_tank.
+
+Р—Р°С‰РёС‚Р° РѕС‚ СЃРїР°РјР°:
+- Cooldown: 5 СЃРµРєСѓРЅРґ РјРµР¶РґСѓ РїСЂРѕРІРµСЂРєР°РјРё worker count (FE_PATCH_BASELINE_01_WORKER_CHECK_COOLDOWN_MS).
+- РџСЂРѕРІРµСЂРєР° РѕС‡РµСЂРµРґРё: РµСЃР»Рё worker РґР°РЅРЅРѕРіРѕ С‚РёРїР° СѓР¶Рµ РІ РѕС‡РµСЂРµРґРё Р»СЋР±РѕР№ factory вЂ” РЅРµ РґРѕР±Р°РІР»СЏС‚СЊ РґСѓР±Р»РёРєР°С‚.
+- Cap: harvester max 4, builder max 2 вЂ” РЅРµ РїСЂРѕРёР·РІРѕРґРёС‚СЊ Р±РѕР»СЊС€Рµ cap РґР°Р¶Рµ РµСЃР»Рё РЅРёР¶Рµ min (Р·Р°С‰РёС‚Р° РѕС‚ edge case).
+- Factory queue max = 1 (РЅРµ РёР·РјРµРЅС‘РЅ) вЂ” РµСЃС‚РµСЃС‚РІРµРЅРЅС‹Р№ throttle.
+
+Worker thresholds/caps:
+- FE_PATCH_BASELINE_01_HARVESTER_MIN = 2
+- FE_PATCH_BASELINE_01_BUILDER_MIN = 1
+- FE_PATCH_BASELINE_01_HARVESTER_CAP = 4
+- FE_PATCH_BASELINE_01_BUILDER_CAP = 2
+- FE_PATCH_BASELINE_01_WORKER_CHECK_COOLDOWN_MS = 5000
+
+РђРІС‚РѕР·Р°РїСѓСЃРє harvester:
+- РџРѕСЃР»Рµ СЃРїР°РІРЅР° enemy harvester РёР· factory, РІС‹Р·С‹РІР°РµС‚СЃСЏ startHarvester() РґР»СЏ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРѕР№ РґРѕР±С‹С‡Рё.
+
+РЎС‚РѕРёРјРѕСЃС‚СЊ РїСЂРѕРёР·РІРѕРґСЃС‚РІР° workers (РёР· FE_UNITS):
+- harvester: 1 СЌР»РµРјРµРЅС‚, 25 СЃРµРє
+- builder: 1 СЌР»РµРјРµРЅС‚, 20 СЃРµРє
+
+РќРѕРІС‹Рµ С„СѓРЅРєС†РёРё:
+- FE_PATCH_BASELINE_01_CountEnemyWorkers(type) вЂ” СЃС‡РёС‚Р°РµС‚ Р¶РёРІС‹С… enemy workers РїРѕ С‚РёРїСѓ
+- FE_PATCH_BASELINE_01_ChooseFactoryUnitType() вЂ” РІС‹Р±РёСЂР°РµС‚ С‚РёРї СЋРЅРёС‚Р° РґР»СЏ РїСЂРѕРёР·РІРѕРґСЃС‚РІР° (builder > harvester > light_tank)
+- FE_PATCH_BASELINE_01_CanStartFactoryProduction(factory, unitType) вЂ” РѕР±РѕР±С‰С‘РЅРЅР°СЏ РїСЂРѕРІРµСЂРєР° РґР»СЏ Р»СЋР±РѕРіРѕ С‚РёРїР°
+- FE_PATCH_BASELINE_01_StartFactoryProduction(factory, unitType) вЂ” РѕР±РѕР±С‰С‘РЅРЅС‹Р№ Р·Р°РїСѓСЃРє РїСЂРѕРёР·РІРѕРґСЃС‚РІР°
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„СѓРЅРєС†РёРё:
+- FE_PATCH_09C2EnsureEnemyScenarioEnergyReserve() вЂ” РёСЃРїРѕР»СЊР·СѓРµС‚ FE_PATCH_BASELINE_01_START_ENERGY
+- FE_PATCH_09EUpdateEnemyFactoryProduction(dt) вЂ” РёСЃРїРѕР»СЊР·СѓРµС‚ ChooseFactoryUnitType + auto-start harvesters
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/main.js (99 РІСЃС‚Р°РІРѕРє, 4 СѓРґР°Р»РµРЅРёСЏ; net +95 СЃС‚СЂРѕРє РЅРѕРІРѕР№ Р»РѕРіРёРєРё)
+- PATCH_REPORT.txt (РґРѕР±Р°РІР»РµРЅР° СЌС‚Р° Р·Р°РїРёСЃСЊ)
+
+Р§С‚Рѕ РќР• С‚СЂРѕРіР°Р»РѕСЃСЊ:
+- scout speed/cap/usage
+- decision loop / updateEnemyBot main tick
+- storage logic
+- factory queue size (РѕСЃС‚Р°Р»СЃСЏ max=1)
+- second factory
+- reactor scaling
+- difficulty knobs
+- combat damage/range/cooldown
+- pathfinding
+- save/load schema
+- map generation
+- render/input
+- player factory/production
+- player starting resources
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+- main.js: 11 358 СЃС‚СЂРѕРє РґРѕ в†’ 11 453 СЃС‚СЂРѕРєРё РїРѕСЃР»Рµ (СЂР°Р·РЅРёС†Р° +95, РІ РїСЂРµРґРµР»Р°С… Р»РёРјРёС‚Р° 80-120)
+- git diff --name-only: С‚РѕР»СЊРєРѕ src/main.js + PATCH_REPORT.txt
+- РќРµС‚ РёР·РјРµРЅРµРЅРёР№ scout/pathfinding/combat/render/save-load/mapgen
+
+Manual smoke checklist:
+- [ ] РЅРѕРІР°СЏ РёРіСЂР° СЃС‚Р°СЂС‚СѓРµС‚
+- [ ] РІС‹Р±РѕСЂ С„СЂР°РєС†РёРё РїСЂРѕС…РѕРґРёС‚ РґР°Р»СЊС€Рµ
+- [ ] enemy base РїРѕСЏРІР»СЏРµС‚СЃСЏ
+- [ ] enemy bot РїРѕР»СѓС‡Р°РµС‚ 160 СЃС‚Р°СЂС‚РѕРІРѕР№ СЌРЅРµСЂРіРёРё
+- [ ] enemy bot СЃС‚СЂРѕРёС‚ separator/factory РїРѕ С‚РµРєСѓС‰РµР№ Р»РѕРіРёРєРµ
+- [ ] РµСЃР»Рё enemy harvester РїРѕРіРёР± вЂ” factory РїСЂРѕРёР·РІРѕРґРёС‚ Р·Р°РјРµРЅСѓ
+- [ ] РµСЃР»Рё enemy builder РїРѕРіРёР± вЂ” factory РїСЂРѕРёР·РІРѕРґРёС‚ Р·Р°РјРµРЅСѓ
+- [ ] Р±РѕС‚ РЅРµ СЃРїР°РјРёС‚ Р±РµСЃРєРѕРЅРµС‡РЅС‹С… СЂР°Р±РѕС‡РёС…
+- [ ] enemy light_tank production РЅРµ СЃР»РѕРјР°РЅР°
+- [ ] enemy attack/wave logic РЅРµ СЃР»РѕРјР°РЅР°
+- [ ] victory/defeat РЅРµ СЃР»РѕРјР°РЅС‹
+- [ ] console Р±РµР· РєСЂР°СЃРЅС‹С… РѕС€РёР±РѕРє
+
+Р РёСЃРєРё:
+- Worker production РёСЃРїРѕР»СЊР·СѓРµС‚ С‚Сѓ Р¶Рµ factory queue (max=1), С‡С‚Рѕ Рё tank. РџРѕРєР° factory РґРµР»Р°РµС‚ worker, РѕРЅР° РЅРµ РґРµР»Р°РµС‚ tank. Р­С‚Рѕ РѕСЃРѕР·РЅР°РЅРЅС‹Р№ trade-off вЂ” Р±РѕС‚ Р¶РµСЂС‚РІСѓРµС‚ С‚Р°РЅРєРѕРј СЂР°РґРё РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ СЌРєРѕРЅРѕРјРёРєРё.
+- Р•СЃР»Рё enemy builder РїРѕРіРёР±Р°РµС‚ РІРѕ РІСЂРµРјСЏ РїРѕСЃС‚СЂРѕР№РєРё separator/factory, Р±РѕС‚ РЅРµ СЃРјРѕР¶РµС‚ РїРѕСЃС‚СЂРѕРёС‚СЊ replacement factory (РЅРµС‚ builder в†’ РЅРµС‚ Р·РґР°РЅРёР№). РќРѕ С‚РµРїРµСЂСЊ factory РїСЂРѕРёР·РІРµРґРµС‚ builder, Рё СЌРєРѕРЅРѕРјРёРєР° РІРѕСЃСЃС‚Р°РЅРѕРІРёС‚СЃСЏ.
+- Cap Р·РЅР°С‡РµРЅРёСЏ (harvester=4, builder=2) вЂ” РєРѕРЅСЃРµСЂРІР°С‚РёРІРЅС‹Рµ, РјРѕРіСѓС‚ РїРѕС‚СЂРµР±РѕРІР°С‚СЊ tuning.
+
+РџСЂРѕРїСѓС‰РµРЅРЅРѕРµ:
+- РќРµ СЂРµР°Р»РёР·РѕРІР°РЅРѕ: bot СЃС‚СЂРѕРёС‚ storages (BOT-ECO-01)
+- РќРµ СЂРµР°Р»РёР·РѕРІР°РЅРѕ: bot РёСЃРїРѕР»СЊР·СѓРµС‚ scout (BOT-SCOUT-01)
+- РќРµ СЂРµР°Р»РёР·РѕРІР°РЅРѕ: difficulty РІР»РёСЏРµС‚ РЅР° production (BOT-MVP-05)
+- РќРµ СЂРµР°Р»РёР·РѕРІР°РЅРѕ: РІС‚РѕСЂР°СЏ factory (BOT-MVP-04)
+
+==========================================================================
+BOT-BRAIN-01 | Lane: Bot | Branch: glm/bot-brain-01-priority-decision-loop
+==========================================================================
+Р”Р°С‚Р°: 2026-05-10
+Р—Р°РґР°С‡Р°: Р”РѕР±Р°РІРёС‚СЊ priority decision loop вЂ” РїРµСЂРІС‹Р№ СЃР»РѕР№ В«РјС‹С€Р»РµРЅРёСЏВ» enemy bot.
+Р‘РѕС‚ РІС‹Р±РёСЂР°РµС‚ СЃР»РµРґСѓСЋС‰РµРµ РґРµР№СЃС‚РІРёРµ РїРѕ С‚РµРєСѓС‰РµРјСѓ СЃРѕСЃС‚РѕСЏРЅРёСЋ, Р° РЅРµ СЃР»РµРґСѓРµС‚ Р»РёРЅРµР№РЅРѕРјСѓ С‡РµРєР»РёСЃС‚Сѓ.
+
+Р”РµСЂРµРІРѕ СЂРµС€РµРЅРёР№:
+  РќРµС‚ separator?      в†’ build_separator
+  РќРµС‚ factory?        в†’ build_factory
+  РќРµС‚ builder?        в†’ produce_builder
+  РҐР°СЂРІРµСЃС‚РµСЂРѕРІ < min?  в†’ produce_harvester
+  Р­РєРѕРЅРѕРјРёРєР° СЃС‚Р°Р±РёР»СЊРЅР°? в†’ produce_combat (СЃРёРіРЅР°Р» РґР»СЏ tank pipeline)
+  РќРёС‡РµРіРѕ РєСЂРёС‚РёС‡РЅРѕРіРѕ?  в†’ wait (phase-bot СѓРїСЂР°РІР»СЏРµС‚)
+
+РР·РјРµРЅРµРЅРёСЏ РІ src/main.js:
+
+РРЅС‚РµРіСЂР°С†РёСЏ (updateEnemyBot):
+- Р—Р°РјРµРЅС‘РЅ Р»РёРЅРµР№РЅС‹Р№ РІС‹Р·РѕРІ (09C2Order + 09DOrder) РЅР°:
+  FE_PATCH_BRAIN_01_ChoosePriorityAction(state) в†’ FE_PATCH_BRAIN_01_ExecuteAction(decision, state)
+- Р”РІРµ СѓРґР°Р»С‘РЅРЅС‹Рµ СЃС‚СЂРѕРєРё в†’ С‚СЂРё РЅРѕРІС‹Рµ (net +1 РІ updateEnemyBot)
+
+РќРѕРІС‹Рµ РєРѕРЅСЃС‚Р°РЅС‚С‹:
+- FE_PATCH_BRAIN_01_ACTIONS вЂ” РјР°СЃСЃРёРІ РґРѕРїСѓСЃС‚РёРјС‹С… РґРµР№СЃС‚РІРёР№ (РґР»СЏ РґРѕРєСѓРјРµРЅС‚Р°С†РёРё/telemetry)
+
+РќРѕРІС‹Рµ С„СѓРЅРєС†РёРё:
+- FE_PATCH_BRAIN_01_ChoosePriorityAction(state) вЂ” evaluates state, returns {action, reason}
+  Priority chain: separator в†’ factory в†’ builder в†’ harvester в†’ combat в†’ wait
+- FE_PATCH_BRAIN_01_IsUnitTypeQueued(unitType) вЂ” checks if worker type already in factory queue
+- FE_PATCH_BRAIN_01_ExecuteAction(decision, state) вЂ” dispatches action, records telemetry
+- FE_PATCH_BRAIN_01_TryProduceWorker(unitType) вЂ” finds idle factory and starts worker production
+
+Р”РµР»РµРіРёСЂРѕРІР°РЅРёРµ:
+- build_separator в†’ FE_PATCH_09C2OrderEnemyBuilderBuildSeparator()
+- build_factory   в†’ FE_PATCH_09DOrderEnemyBuilderBuildFactory()
+- produce_builder/harvester в†’ FE_PATCH_BASELINE_01_StartFactoryProduction()
+- produce_combat  в†’ СЃРёРіРЅР°Р» (09E pipeline + BASELINE-01 chooser СѓРїСЂР°РІР»СЏСЋС‚)
+- wait            в†’ phase-bot (08B defend/attack/regroup) СѓРїСЂР°РІР»СЏРµС‚
+
+РўРµР»РµРјРµС‚СЂРёСЏ:
+- game._brain01LastDecision вЂ” РїРѕСЃР»РµРґРЅРµРµ СЂРµС€РµРЅРёРµ Р±РѕС‚Р° (action, reason, at)
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/main.js (96 РІСЃС‚Р°РІРѕРє, 2 СѓРґР°Р»РµРЅРёСЏ; net +94 СЃС‚СЂРѕРє РЅРѕРІРѕР№ Р»РѕРіРёРєРё)
+- PATCH_REPORT.txt (РґРѕР±Р°РІР»РµРЅР° СЌС‚Р° Р·Р°РїРёСЃСЊ)
+
+Р§С‚Рѕ РќР• С‚СЂРѕРіР°Р»РѕСЃСЊ:
+- worker thresholds/caps (BASELINE-01)
+- factory queue size (РѕСЃС‚Р°Р»СЃСЏ max=1)
+- scout speed/cap/usage
+- storage logic
+- second factory
+- reactor scaling
+- difficulty knobs
+- combat damage/range/cooldown
+- pathfinding
+- save/load schema
+- map generation
+- render/input
+- player factory/production
+- phase-bot logic (08B defend/attack/regroup)
+- AI layers (10B-10I1)
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+- main.js: 11 453 СЃС‚СЂРѕРє РґРѕ в†’ 11 549 СЃС‚СЂРѕРє РїРѕСЃР»Рµ (СЂР°Р·РЅРёС†Р° +96, net new logic +94, РІ РїСЂРµРґРµР»Р°С… Р»РёРјРёС‚Р° 80-120)
+- git diff --name-only: С‚РѕР»СЊРєРѕ src/main.js + PATCH_REPORT.txt
+- РќРµС‚ РёР·РјРµРЅРµРЅРёР№ scout/pathfinding/combat/render/save-load/mapgen/phase-bot
+
+Manual smoke checklist:
+- [ ] РЅРѕРІР°СЏ РёРіСЂР° СЃС‚Р°СЂС‚СѓРµС‚
+- [ ] РІС‹Р±РѕСЂ С„СЂР°РєС†РёРё РїСЂРѕС…РѕРґРёС‚ РґР°Р»СЊС€Рµ
+- [ ] enemy base РїРѕСЏРІР»СЏРµС‚СЃСЏ
+- [ ] enemy bot СЃС‚СЂРѕРёС‚ separator РїРµСЂРІС‹Рј РґРµР»РѕРј (Priority 1)
+- [ ] РїРѕСЃР»Рµ separator в†’ bot СЃС‚СЂРѕРёС‚ factory (Priority 2)
+- [ ] РµСЃР»Рё builder РїРѕРіРёР± в†’ bot РїСЂРѕРёР·РІРѕРґРёС‚ replacement (Priority 3)
+- [ ] РµСЃР»Рё harvester РїРѕРіРёР± в†’ bot РїСЂРѕРёР·РІРѕРґРёС‚ replacement (Priority 4)
+- [ ] РїСЂРё СЃС‚Р°Р±РёР»СЊРЅРѕР№ СЌРєРѕРЅРѕРјРёРєРµ в†’ bot РїСЂРѕРёР·РІРѕРґРёС‚ light_tank (Priority 5)
+- [ ] enemy attack/wave logic РЅРµ СЃР»РѕРјР°РЅР°
+- [ ] game._brain01LastDecision РѕР±РЅРѕРІР»СЏРµС‚СЃСЏ РєР°Р¶РґС‹Р№ tick
+- [ ] victory/defeat РЅРµ СЃР»РѕРјР°РЅС‹
+- [ ] console Р±РµР· РєСЂР°СЃРЅС‹С… РѕС€РёР±РѕРє
+
+Р РёСЃРєРё:
+- Edge case: РµСЃР»Рё builder РїРѕРіРёР±Р°РµС‚ Р”Рћ РїРѕСЃС‚СЂРѕР№РєРё factory, Р±РѕС‚ Р·Р°СЃС‚СЂСЏРЅРµС‚ РЅР° Priority 2 (build_factory) вЂ” РЅРµС‚ builder'Р° РґР»СЏ СЃС‚СЂРѕР№РєРё, РЅРµС‚ factory РґР»СЏ РїСЂРѕРёР·РІРѕРґСЃС‚РІР° builder'Р°. РљСЂР°Р№РЅРµ СЂРµРґРєРёР№ СЃС†РµРЅР°СЂРёР№ (player rush <30 СЃРµРє). Р¤РёРєСЃ вЂ” РІ Р±СѓРґСѓС‰РёС… РїР°С‚С‡Р°С….
+- produce_combat вЂ” СЌС‚Рѕ С‚РѕР»СЊРєРѕ В«СЃРёРіРЅР°Р»В», РЅРµ РіР°СЂР°РЅС‚РёСЂСѓРµС‚ РЅРµРјРµРґР»РµРЅРЅРѕРіРѕ РїСЂРѕРёР·РІРѕРґСЃС‚РІР° (Р·Р°РІРёСЃРёС‚ РѕС‚ СЂРµСЃСѓСЂСЃРѕРІ Рё queue).
+- Decision loop СЂР°Р±РѕС‚Р°РµС‚ СЂР°Р· РІ ~1.2 СЃРµРє (throttle РѕС‚ updateEnemyBot). Р”Р»СЏ Р±С‹СЃС‚СЂС‹С… СЂРµС€РµРЅРёР№ РјРѕР¶РµС‚ Р±С‹С‚СЊ РјРµРґР»РµРЅРЅРѕ.
+
+РџСЂРѕРїСѓС‰РµРЅРЅРѕРµ:
+- РќРµ СЂРµР°Р»РёР·РѕРІР°РЅРѕ: bot СЃС‚СЂРѕРёС‚ storages (BOT-ECO-01)
+- РќРµ СЂРµР°Р»РёР·РѕРІР°РЅРѕ: bot РёСЃРїРѕР»СЊР·СѓРµС‚ scout (BOT-SCOUT-01)
+- РќРµ СЂРµР°Р»РёР·РѕРІР°РЅРѕ: difficulty РІР»РёСЏРµС‚ РЅР° decision quality (BOT-MVP-05)
+- РќРµ СЂРµР°Р»РёР·РѕРІР°РЅРѕ: РІС‚РѕСЂР°СЏ factory (BOT-MVP-04)
+
+==========================================================================
+BOT-ATTACK-01 | Lane: Review | Branch: glm/bot-attack-01-wave-dispatch-fix
+==========================================================================
+Р”Р°С‚Р°: 2026-05-10
+Р—Р°РґР°С‡Р°: РџРѕС‡РёРЅРёС‚СЊ СЃРёС‚СѓР°С†РёСЋ, РєРѕРіРґР° enemy bot РїСЂРѕРёР·РІРѕРґРёС‚ light_tank, РЅРѕ С‚Р°РЅРєРё РєРѕРїСЏС‚СЃСЏ
+Сѓ Р±Р°Р·С‹ Рё РЅРµ РІС‹С…РѕРґСЏС‚ РІ Р°С‚Р°РєСѓ.
+
+РџСЂРёС‡РёРЅР°: РЎРўРђР Р«Р™ Р‘РђР“ (РЅРµ СЂРµРіСЂРµСЃСЃРёСЏ РїРѕСЃР»Рµ BOT-BRAIN-01).
+
+Root cause:
+10F1 vision-driven target selection (FE_PATCH_10F1SelectAttackDecision) С‚СЂРµР±СѓРµС‚
+visible/high-confidence С†РµР»Рё РґР»СЏ Р°С‚Р°РєРё. Р•СЃР»Рё Р±РѕС‚ РЅРµ В«РІРёРґРёС‚В» player РѕР±СЉРµРєС‚С‹
+(РЅРµС‚ scout, РЅРµС‚ РєРѕРЅС‚Р°РєС‚Р°), 10F1 РІРѕР·РІСЂР°С‰Р°РµС‚ target=null.
+FE_PATCH_08BPrepareAttack РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё С†РµР»Рё СЃС‚Р°РІРёС‚ phase='defend'.
+Р¦РёРєР»: defend в†’ prepare_attack в†’ РЅРµС‚ С†РµР»Рё в†’ defend в†’ РїРѕРІС‚РѕСЂ Р±РµСЃРєРѕРЅРµС‡РЅРѕ.
+Р‘РѕС‚ РєРѕРїРёС‚ С‚Р°РЅРєРё, РЅРѕ РЅРёРєРѕРіРґР° РЅРµ Р°С‚Р°РєСѓРµС‚.
+
+BOT-BRAIN-01 РќР• СЏРІР»СЏРµС‚СЃСЏ РїСЂРёС‡РёРЅРѕР№: BRAIN-01 Р·Р°РјРµРЅСЏРµС‚ С‚РѕР»СЊРєРѕ СЌРєРѕРЅРѕРјРёС‡РµСЃРєРёР№
+С‡РµРєР»РёСЃС‚ (separator/factory/workers), attack dispatch flow РЅРµ С‚СЂРѕРЅСѓС‚.
+
+РСЃРїСЂР°РІР»РµРЅРёРµ (РјРёРЅРёРјР°Р»СЊРЅРѕРµ, 30 net new lines):
+
+1. FE_PATCH_08BPrepareAttack вЂ” РґРѕР±Р°РІР»РµРЅ HQ fallback:
+   Р•СЃР»Рё 10F1 РЅРµ РЅР°С€Р»Р° С†РµР»СЊ, РЅРѕ Р°СЂРјРёСЏ РґРѕСЃС‚Р°С‚РѕС‡РЅР°СЏ в†’ Р°С‚Р°РєРѕРІР°С‚СЊ player HQ РЅР°РїСЂСЏРјСѓСЋ.
+   РСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РЅРѕРІС‹Р№ orderType 'hq_push' (РІРјРµСЃС‚Рѕ 'attack'), С‡С‚РѕР±С‹ РѕР±РѕР№С‚Рё
+   10F1 vision gate РІ FE_PATCH_08BCommandEnemyTankAttack.
+
+2. FE_PATCH_10F1CanDirectAttackTarget вЂ” РґРѕР±Р°РІР»РµРЅРѕ РёСЃРєР»СЋС‡РµРЅРёРµ РґР»СЏ 'hq_push':
+   orderType === 'hq_push' РѕР±С…РѕРґРёС‚ vision gate, РєР°Рє Рё 'defend'.
+   Р­С‚Рѕ Р»РѕРіРёС‡РЅРѕ: Р±РѕС‚ В«Р·РЅР°РµС‚В» С‡С‚Рѕ Сѓ РёРіСЂРѕРєР° РµСЃС‚СЊ HQ вЂ” СЌС‚Рѕ СЃС‚Р°СЂС‚РѕРІР°СЏ РїРѕР·РёС†РёСЏ.
+
+3. РўРµР»РµРјРµС‚СЂРёСЏ: game._attack01LastDispatch вЂ” РїРѕРєР°Р·С‹РІР°РµС‚ source ('vision' РёР»Рё 'hq_fallback'),
+   targetId, targetType, armyScore, waveSize.
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„СѓРЅРєС†РёРё:
+- FE_PATCH_08BPrepareAttack вЂ” HQ fallback + attackOrderType + С‚РµР»РµРјРµС‚СЂРёСЏ
+- FE_PATCH_10F1CanDirectAttackTarget вЂ” 'hq_push' orderType bypass
+
+РќРѕРІС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ:
+- attackOrderType РІ FE_PATCH_08BPrepareAttack ('attack' | 'hq_push')
+- game._attack01LastDispatch вЂ” С‚РµР»РµРјРµС‚СЂРёСЏ
+
+Р§С‚Рѕ РќР• С‚СЂРѕРіР°Р»РѕСЃСЊ:
+- combat damage/range/cooldown
+- pathfinding
+- render/input
+- save/load
+- map generation
+- scout speed/cap/usage
+- storage logic
+- factory queue size
+- worker replenishment (BASELINE-01)
+- priority decision loop (BRAIN-01)
+- retreat logic (10H1)
+- strength estimate (10E1)
+- autopilot guard (10D1)
+- difficulty knobs (10I1)
+- player factory/production
+- 10F1 РґР»СЏ РІРёРґРёРјС‹С…/known С†РµР»РµР№ (РїСЂРёРѕСЂРёС‚РµС‚ РѕСЃС‚Р°С‘С‚СЃСЏ Р·Р° vision)
+
+РџРѕРІРµРґРµРЅРёРµ РџРћРЎР›Р• С„РёРєСЃР°:
+- Р•СЃР»Рё 10F1 РІРёРґРёС‚ С†РµР»СЊ в†’ Р°С‚Р°РєР° РїРѕ vision (РєР°Рє СЂР°РЅСЊС€Рµ)
+- Р•СЃР»Рё 10F1 РќР• РІРёРґРёС‚ С†РµР»СЊ, РЅРѕ Р°СЂРјРёСЏ >= threshold в†’ Р°С‚Р°РєР° РЅР° player HQ (fallback)
+- Р•СЃР»Рё РЅРµС‚ С†РµР»Рё Рё РЅРµС‚ player HQ в†’ defend (РєР°Рє СЂР°РЅСЊС€Рµ)
+- Retreat/strength gate РїСЂРѕРґРѕР»Р¶Р°СЋС‚ СЂР°Р±РѕС‚Р°С‚СЊ: РµСЃР»Рё Р±РѕС‚ СЃР»Р°Р±РµРµ в†’ РѕС‚СЃС‚СѓРїР°РµС‚
+- Wave size РїСЂРёРјРµРЅСЏРµС‚СЃСЏ Рє fallback РєР°Рє РѕР±С‹С‡РЅРѕ (РЅРµС‚ В«РѕРґРёРЅ С‚Р°РЅРє Р°С‚Р°РєСѓРµС‚ РѕРґРёРЅВ»)
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/main.js (32 РІСЃС‚Р°РІРєРё, 2 СѓРґР°Р»РµРЅРёСЏ; net +30 СЃС‚СЂРѕРє РЅРѕРІРѕР№ Р»РѕРіРёРєРё)
+- PATCH_REPORT.txt (РґРѕР±Р°РІР»РµРЅР° СЌС‚Р° Р·Р°РїРёСЃСЊ)
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+- main.js: 11 547 СЃС‚СЂРѕРє РґРѕ в†’ 11 577 СЃС‚СЂРѕРє РїРѕСЃР»Рµ (СЂР°Р·РЅРёС†Р° +30)
+- git diff --name-only: С‚РѕР»СЊРєРѕ src/main.js + PATCH_REPORT.txt
+- РќРµС‚ РёР·РјРµРЅРµРЅРёР№ scout/pathfinding/combat/render/save-load/mapgen
+
+Manual smoke checklist:
+- [ ] РЅРѕРІР°СЏ РёРіСЂР° СЃС‚Р°СЂС‚СѓРµС‚
+- [ ] РІС‹Р±РѕСЂ С„СЂР°РєС†РёРё РїСЂРѕС…РѕРґРёС‚ РґР°Р»СЊС€Рµ
+- [ ] enemy base РїРѕСЏРІР»СЏРµС‚СЃСЏ
+- [ ] Р±РѕС‚ СЃС‚СЂРѕРёС‚ separator/factory
+- [ ] Р±РѕС‚ РїСЂРѕРёР·РІРѕРґРёС‚ light_tank
+- [ ] РїСЂРё tanks >= threshold С‚Р°РЅРєРё РІС‹С…РѕРґСЏС‚ СЃ Р±Р°Р·С‹ (РґР°Р¶Рµ Р±РµР· РІРёРґРёРјС‹С… С†РµР»РµР№)
+- [ ] С‚Р°РЅРєРё РёРґСѓС‚ Рє player HQ
+- [ ] С‚Р°РЅРєРё Р°С‚Р°РєСѓСЋС‚ HQ РёР»Рё РІСЃС‚СЂРµС‡РЅС‹С… СЋРЅРёС‚РѕРІ
+- [ ] РµСЃР»Рё 10F1 РІРёРґРёС‚ С†РµР»СЊ вЂ” Р°С‚Р°РєР° РїРѕ vision (РЅРµ С‡РµСЂРµР· fallback)
+- [ ] retreat РїСЂРё РїСЂРµРІРѕСЃС…РѕРґСЃС‚РІРµ РёРіСЂРѕРєР° СЂР°Р±РѕС‚Р°РµС‚
+- [ ] worker replenishment РЅРµ СЃР»РѕРјР°РЅ
+- [ ] factory РїСЂРѕРґРѕР»Р¶Р°РµС‚ РїСЂРѕРёР·РІРѕРґСЃС‚РІРѕ
+- [ ] game._attack01LastDispatch РґРѕСЃС‚СѓРїРЅР° РІ РєРѕРЅСЃРѕР»Рё
+- [ ] console Р±РµР· РєСЂР°СЃРЅС‹С… РѕС€РёР±РѕРє
+
+Р РёСЃРєРё:
+- HQ fallback РґРµР»Р°РµС‚ Р±РѕС‚Р° Р±РѕР»РµРµ Р°РіСЂРµСЃСЃРёРІРЅС‹Рј: РѕРЅ РІСЃРµРіРґР° Р±СѓРґРµС‚ РёРґС‚Рё Рє player HQ РµСЃР»Рё РЅРµС‚ РґСЂСѓРіРѕР№ С†РµР»Рё. Р­С‚Рѕ РјРѕР¶РµС‚ СЃРґРµР»Р°С‚СЊ Р±РѕС‚Р° СЃР»РёС€РєРѕРј РїСЂРµРґСЃРєР°Р·СѓРµРјС‹Рј (РІСЃРµРіРґР° РёРґС‘С‚ Рє HQ). РќРѕ СЌС‚Рѕ Р»СѓС‡С€Рµ С‡РµРј РІРµС‡РЅРѕРµ СЃС‚РѕСЏРЅРёРµ Сѓ Р±Р°Р·С‹.
+- 'hq_push' РѕР±С…РѕРґРёС‚ 10F1 vision gate. Р•СЃР»Рё РІ Р±СѓРґСѓС‰РµРј РїРѕСЏРІСЏС‚СЃСЏ РЅРµРІРёРґРёРјС‹Рµ/Р·Р°РјР°СЃРєРёСЂРѕРІР°РЅРЅС‹Рµ Р·РґР°РЅРёСЏ, РЅСѓР¶РЅРѕ Р±СѓРґРµС‚ СѓС‚РѕС‡РЅРёС‚СЊ Р»РѕРіРёРєСѓ.
+- Retreat logic РјРѕР¶РµС‚ РѕС‚РјРµРЅРёС‚СЊ HQ push РµСЃР»Рё Р±РѕС‚ СЃР»Р°Р±РµРµ. Р­С‚Рѕ РїСЂР°РІРёР»СЊРЅРѕРµ РїРѕРІРµРґРµРЅРёРµ.
+
+РџСЂРѕРїСѓС‰РµРЅРЅРѕРµ:
+- РќРµ СЂРµР°Р»РёР·РѕРІР°РЅРѕ: bot СЃС‚СЂРѕРёС‚ storages (BOT-ECO-01)
+- РќРµ СЂРµР°Р»РёР·РѕРІР°РЅРѕ: bot РёСЃРїРѕР»СЊР·СѓРµС‚ scout (BOT-SCOUT-01)
+- РќРµ СЂРµР°Р»РёР·РѕРІР°РЅРѕ: difficulty РІР»РёСЏРµС‚ РЅР° decision quality (BOT-MVP-05)
+- РќРµ СЂРµР°Р»РёР·РѕРІР°РЅРѕ: РІС‚РѕСЂР°СЏ factory (BOT-MVP-04)
+
+==========================================================================
+BOT-ATTACK-02 | Lane: Review | Branch: glm/bot-attack-02-wave-order-execution-fix
+==========================================================================
+Р”Р°С‚Р°: 2026-05-11
+Р—Р°РґР°С‡Р°: РџРѕС‡РёРЅРёС‚СЊ СЃРёС‚СѓР°С†РёСЋ, РєРѕРіРґР° enemy bot РїСЂРёРЅРёРјР°РµС‚ СЂРµС€РµРЅРёРµ Р°С‚Р°РєРѕРІР°С‚СЊ С‡РµСЂРµР·
+hq_fallback (ATTACK-01), РЅРѕ С‚Р°РЅРєРё С„Р°РєС‚РёС‡РµСЃРєРё РЅРµ РІС‹С…РѕРґСЏС‚ РІ Р°С‚Р°РєСѓ.
+
+РџСЂРёС‡РёРЅР°: 10H1 retreat layer РѕС‚РјРµРЅСЏРµС‚ hq_push Р°С‚Р°РєСѓ РЅР° СЃР»РµРґСѓСЋС‰РµРј С‚РёРєРµ.
+
+Root cause:
+ATTACK-01 РґРѕР±Р°РІРёР» HQ fallback: PrepareAttack РЅР°С…РѕРґРёС‚ player HQ Рё РѕС‚РґР°С‘С‚
+РїСЂРёРєР°Р· (hq_push). РќРѕ РЅР° СЃР»РµРґСѓСЋС‰РµРј С‚РёРєРµ updateEnemyBot РІС‹Р·С‹РІР°РµС‚ 10H1 retreat
+Р”Рћ phase checks. 10H1_shouldRetreat РІРёРґРёС‚:
+- enemyTankCount <= playerThreatEstimate (Р±РѕС‚ В«РЅРµ СЃРёР»СЊРЅРµРµВ» РёРіСЂРѕРєР°)
+  в†’ retreat в†’ startRetreat в†’ state.phase = 'regroup' в†’ С‚Р°РЅРєРё РѕС‚Р·С‹РІР°СЋС‚СЃСЏ Рє HQ.
+- estimate.attackAllowed === false (10E1 strength gate)
+  в†’ retreat в†’ С‚Рѕ Р¶Рµ СЃР°РјРѕРµ.
+
+Р РµР·СѓР»СЊС‚Р°С‚: С†РёРєР» attack в†’ retreat в†’ regroup в†’ prepare_attack в†’ attack в†’ retreat.
+РўР°РЅРєРё РєРѕРїСЏС‚СЃСЏ Сѓ Р±Р°Р·С‹, РїРѕСЃС‚РѕСЏРЅРЅРѕ РїРѕР»СѓС‡Р°СЏ Рё С‚СѓС‚ Р¶Рµ С‚РµСЂСЏСЏ attack orders.
+
+РСЃРїСЂР°РІР»РµРЅРёРµ (23 net new lines):
+
+1. FE_PATCH_08BPrepareAttack вЂ” РїСЂРё hq_push СѓСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ state-С„Р»Р°РіРё:
+   state._attack02HqPush = true
+   state._attack02HqPushArmyScore = N
+   РџСЂРё РѕР±С‹С‡РЅРѕР№ vision-Р°С‚Р°РєРµ вЂ” С„Р»Р°РіРё СЃР±СЂР°СЃС‹РІР°СЋС‚СЃСЏ.
+
+2. FE_10H1_shouldRetreat вЂ” РїСЂРё isHqPush РѕС‚СЃС‚СѓРїР»РµРЅРёРµ Р±РѕР»РµРµ РЅРµРѕС…РѕС‚РЅРѕРµ:
+   - lost_tank_during_attack в†’ РёРіРЅРѕСЂРёСЂСѓРµС‚СЃСЏ (РѕС‚СЃС‚СѓРїР°РµРј С‚РѕР»СЊРєРѕ РїСЂРё РїРѕС‚РµСЂРµ >50% Р°СЂРјРёРё)
+   - estimate.attackAllowed === false в†’ РёРіРЅРѕСЂРёСЂСѓРµС‚СЃСЏ (strength gate РЅРµ Р±Р»РѕРєРёСЂСѓРµС‚)
+   - playerThreatEstimate в†’ РѕС‚СЃС‚СѓРїР°РµРј С‚РѕР»СЊРєРѕ РїСЂРё 2:1 РїРµСЂРµРІРµСЃРµ РёРіСЂРѕРєР°
+     (РІРјРµСЃС‚Рѕ В«РЅРµ СЃРёР»СЊРЅРµРµВ» вЂ” В«РєСЂРёС‚РёС‡РµСЃРєРё СЃР»Р°Р±РµРµВ»)
+
+3. FE_PATCH_08BStartRegroup вЂ” РѕС‡РёС‰Р°РµС‚ hq_push С„Р»Р°РіРё РїСЂРё regroup,
+   С‡С‚РѕР±С‹ СЃР»РµРґСѓСЋС‰РёР№ attack cycle СЂРµС€Р°Р» Р·Р°РЅРѕРІРѕ.
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„СѓРЅРєС†РёРё:
+- FE_PATCH_08BPrepareAttack вЂ” hq_push state flags
+- FE_10H1_shouldRetreat вЂ” hq_push-aware retreat rules
+- FE_PATCH_08BStartRegroup вЂ” cleanup hq_push flags
+
+РќРѕРІС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ:
+- state._attack02HqPush (boolean)
+- state._attack02HqPushArmyScore (number)
+
+РџРѕРІРµРґРµРЅРёРµ РџРћРЎР›Р• С„РёРєСЃР°:
+- hq_push Р°С‚Р°РєР°: С‚Р°РЅРєРё РёРґСѓС‚ Рє player HQ, РЅРµ РѕС‚СЃС‚СѓРїР°СЏ РїСЂРё РјР°Р»РѕРј РїРµСЂРµРІРµСЃРµ РёРіСЂРѕРєР°
+- hq_push РѕС‚СЃС‚СѓРїР»РµРЅРёРµ: С‚РѕР»СЊРєРѕ РїСЂРё РїРѕС‚РµСЂРµ >50% Р°СЂРјРёРё РР›Р РїСЂРё 2:1 РїРµСЂРµРІРµСЃРµ РёРіСЂРѕРєР°
+- РћР±С‹С‡РЅР°СЏ vision-Р°С‚Р°РєР°: retreat СЂР°Р±РѕС‚Р°РµС‚ РєР°Рє СЂР°РЅСЊС€Рµ (Р±РµР· РёР·РјРµРЅРµРЅРёР№)
+- Regroup РїРѕСЃР»Рµ hq_push: С„Р»Р°РіРё СЃР±СЂР°СЃС‹РІР°СЋС‚СЃСЏ, СЃР»РµРґСѓСЋС‰РёР№ cycle СЂРµС€Р°РµС‚ fresh
+
+Р§С‚Рѕ РќР• С‚СЂРѕРіР°Р»РѕСЃСЊ:
+- combat damage/range/cooldown
+- pathfinding
+- render/input
+- save/load
+- map generation
+- scout speed/cap/usage
+- storage logic
+- factory queue size
+- worker replenishment (BASELINE-01)
+- priority decision loop (BRAIN-01)
+- ATTACK-01 HQ fallback logic
+- 10F1 vision-driven targeting
+- 10E1 strength estimate calculations
+- 10D1 autopilot guard/patrol
+- difficulty knobs (10I1)
+- player factory/production
+- last_tank_in_attack_wave retreat rule (РІСЃРµРіРґР° РѕС‚СЃС‚СѓРїР°РµС‚ РїСЂРё 1 С‚Р°РЅРєРµ)
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/main.js (26 РІСЃС‚Р°РІРѕРє, 3 СѓРґР°Р»РµРЅРёСЏ; net +23 СЃС‚СЂРѕРє РЅРѕРІРѕР№ Р»РѕРіРёРєРё)
+- PATCH_REPORT.txt (РґРѕР±Р°РІР»РµРЅР° СЌС‚Р° Р·Р°РїРёСЃСЊ)
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+- main.js: 11 577 СЃС‚СЂРѕРє РґРѕ в†’ 11 600 СЃС‚СЂРѕРє РїРѕСЃР»Рµ (СЂР°Р·РЅРёС†Р° +23)
+- git diff --name-only: С‚РѕР»СЊРєРѕ src/main.js + PATCH_REPORT.txt
+
+Manual smoke checklist:
+- [ ] РЅРѕРІР°СЏ РёРіСЂР° СЃС‚Р°СЂС‚СѓРµС‚
+- [ ] Р±РѕС‚ СЃС‚СЂРѕРёС‚ separator/factory
+- [ ] Р±РѕС‚ РїСЂРѕРёР·РІРѕРґРёС‚ light_tank
+- [ ] РїСЂРё tanks >= threshold С‚Р°РЅРєРё РІС‹С…РѕРґСЏС‚ Рє player HQ (hq_push)
+- [ ] С‚Р°РЅРєРё РќР• РѕС‚СЃС‚СѓРїР°СЋС‚ РїСЂРё РјР°Р»РѕРј player threat
+- [ ] С‚Р°РЅРєРё РѕС‚СЃС‚СѓРїР°СЋС‚ РїСЂРё РїРѕС‚РµСЂРµ >50% Р°СЂРјРёРё
+- [ ] С‚Р°РЅРєРё РѕС‚СЃС‚СѓРїР°СЋС‚ РїСЂРё 2:1 РїРµСЂРµРІРµСЃРµ РёРіСЂРѕРєР°
+- [ ] РѕР±С‹С‡РЅР°СЏ vision-Р°С‚Р°РєР° СЂР°Р±РѕС‚Р°РµС‚ РєР°Рє СЂР°РЅСЊС€Рµ
+- [ ] last_tank rule СЂР°Р±РѕС‚Р°РµС‚ (1 С‚Р°РЅРє в†’ РѕС‚СЃС‚СѓРїР°РµС‚)
+- [ ] regroup РїРѕСЃР»Рµ hq_push РѕС‡РёС‰Р°РµС‚ С„Р»Р°РіРё
+- [ ] worker replenishment РЅРµ СЃР»РѕРјР°РЅ
+- [ ] factory РїСЂРѕРґРѕР»Р¶Р°РµС‚ РїСЂРѕРёР·РІРѕРґСЃС‚РІРѕ
+- [ ] console Р±РµР· РєСЂР°СЃРЅС‹С… РѕС€РёР±РѕРє
+
+Р РёСЃРєРё:
+- hq_push РґРµР»Р°РµС‚ Р±РѕС‚Р° Р±РѕР»РµРµ Р°РіСЂРµСЃСЃРёРІРЅС‹Рј вЂ” РѕРЅ Р±СѓРґРµС‚ РёРґС‚Рё Рє HQ РґР°Р¶Рµ РµСЃР»Рё С‡СѓС‚СЊ СЃР»Р°Р±РµРµ.
+  Р­С‚Рѕ РѕСЃРѕР·РЅР°РЅРЅС‹Р№ trade-off: Р»СѓС‡С€Рµ Р°РіСЂРµСЃСЃРёРІРЅС‹Р№ Р±РѕС‚ С‡РµРј СЃС‚РѕСЏС‰РёР№ РЅР° Р±Р°Р·Рµ.
+- 2:1 РїРѕСЂРѕРі РґР»СЏ retreat РјРѕР¶РµС‚ Р±С‹С‚СЊ СЃР»РёС€РєРѕРј РјСЏРіРєРёРј вЂ” Р±РѕС‚ РјРѕР¶РµС‚ РїРѕС‚РµСЂСЏС‚СЊ РјРЅРѕРіРѕ С‚Р°РЅРєРѕРІ
+  РїСЂРµР¶РґРµ С‡РµРј РѕС‚СЃС‚СѓРїРёС‚. РќРѕ СЌС‚Рѕ Р»СѓС‡С€Рµ С‡РµРј РІРµС‡РЅС‹Р№ cycle attackв†’retreatв†’attack.
+- Р¤Р»Р°Рі _attack02HqPush СЃРѕС…СЂР°РЅСЏРµС‚СЃСЏ РІ game._enemyBotState вЂ” РµСЃР»Рё save/load
+  СЃРµСЂРёР°Р»РёР·СѓРµС‚ state, РЅСѓР¶РЅРѕ РґРѕР±Р°РІРёС‚СЊ РјРёРіСЂР°С†РёСЋ. РќРѕ СЃРµР№С‡Р°СЃ save/load РЅРµ СЃРѕС…СЂР°РЅСЏРµС‚
+  bot state.
+
+---
+
+Р—Р°РґР°С‡Р°: BOT-ATTACK-03 вЂ” enemy wave group attack order assignment fix
+Р”Р°С‚Р°: 2026-05-11
+Lane: Review
+Р’РµС‚РєР°: glm/bot-attack-03-wave-group-order-fix (РѕС‚ sandbox/main)
+
+Р¦РµР»СЊ:
+РџРѕС‡РёРЅРёС‚СЊ СЃРёС‚СѓР°С†РёСЋ, РєРѕРіРґР° enemy bot СѓР¶Рµ РїСЂРёРЅРёРјР°РµС‚ СЂРµС€РµРЅРёРµ Р°С‚Р°РєРѕРІР°С‚СЊ С‡РµСЂРµР· hq_fallback,
+С„РѕСЂРјРёСЂСѓРµС‚ waveSize 8, РЅРѕ С‚Р°РЅРєРё РІСЃС‘ СЂР°РІРЅРѕ СЃС‚РѕСЏС‚ Сѓ Р±Р°Р·С‹ РёР»Рё РґРІРёРіР°СЋС‚СЃСЏ С‡Р°СЃС‚РёС‡РЅРѕ.
+Continuation РїРѕСЃР»Рµ BOT-ATTACK-01/02.
+
+РџСЂРёС‡РёРЅР° Р±Р°РіР° вЂ” С‚СЂРё РєРѕРјР±РёРЅРёСЂРѕРІР°РЅРЅС‹С… РїСЂРѕР±Р»РµРјС‹ РІ order execution pipeline:
+
+1. FE_PATCH_08BNeedsNewAttackOrder (СЃС‚СЂРѕРєР° 2737): РїСЂРѕРїСѓСЃРєР°Р» С‚Р°РЅРєРё СЃ
+   state='attack_approach' Рё РЅРµРїСѓСЃС‚С‹Рј path, РґР°Р¶Рµ РµСЃР»Рё path РІРµРґС‘С‚ Рє Р”Р РЈР“РћР™ С†РµР»Рё
+   (autopilot patrol, defend order). РўР°РЅРє СЃ РїРѕРґС…РѕРґРѕРј Рє patrol-С‚РѕС‡РєРµ РЅРµ РїРѕР»СѓС‡Р°Р»
+   РЅРѕРІС‹Р№ РїСЂРёРєР°Р· Р°С‚Р°РєРё HQ вЂ” NeedsNewAttackOrder РІРѕР·РІСЂР°С‰Р°Р» false.
+   РСЃРїСЂР°РІР»РµРЅРѕ: РґРѕР±Р°РІР»РµРЅР° РїСЂРѕРІРµСЂРєР° attackApproachTargetId === target.id вЂ” skip
+   С‚РѕР»СЊРєРѕ РµСЃР»Рё РїРѕРґС…РѕРґ СѓР¶Рµ РґР»СЏ Р­РўРћР™ С†РµР»Рё.
+
+2. updateLightTankAttackApproach (СЃС‚СЂРѕРєР° 10400): РїСЂРё РїРѕРІС‚РѕСЂРЅРѕР№ РјР°СЂС€СЂСѓС‚РёР·Р°С†РёРё
+   (path consumed, re-path) РІС‹Р·С‹РІР°Р» setLightTankAttackApproach, РєРѕС‚РѕСЂС‹Р№ СЃРѕРґРµСЂР¶РёС‚
+   isPlayerUnit guard вЂ” РІСЃРµРіРґР° РІРѕР·РІСЂР°С‰Р°РµС‚ false РґР»СЏ enemy tanks. Р РµР·СѓР»СЊС‚Р°С‚:
+   attackApproachTargetId РѕС‡РёС‰РµРЅ, state='idle', РЅРѕ phase РѕСЃС‚Р°С‘С‚СЃСЏ 'attack' вЂ”
+   updateEnemyBot РґРµР»Р°РµС‚ РЅРµРјРµРґР»РµРЅРЅС‹Р№ return, Рё С‚Р°РЅРє РЅР°РІСЃРµРіРґР° idle.
+   РСЃРїСЂР°РІР»РµРЅРѕ: РґР»СЏ enemy tanks РІС‹Р·С‹РІР°РµС‚СЃСЏ setLightTankAttackApproachGeneric,
+   РєРѕС‚РѕСЂР°СЏ РЅРµ РёРјРµРµС‚ isPlayerUnit guard.
+
+3. updateEnemyBot (СЃС‚СЂРѕРєР° 4724-4726): РїСЂРё phase='attack' РґРµР»Р°Р» РЅРµРјРµРґР»РµРЅРЅС‹Р№ return,
+   РЅРµ РїРµСЂРµРЅР°Р·РЅР°С‡Р°СЏ РїСЂРёРєР°Р·С‹ С‚Р°РЅРєР°Рј, РїРѕС‚РµСЂСЏРІС€РёРј С†РµР»СЊ. Р•СЃР»Рё С‚Р°РЅРє С‚РµСЂСЏР» РїСЂРёРєР°Р·
+   (re-path fail, override autopilot/retreat), РѕРЅ РѕСЃС‚Р°РІР°Р»СЃСЏ idle РЅР°РІСЃРµРіРґР°, РїРѕС‚РѕРјСѓ
+   С‡С‚Рѕ phase='attack' Р±Р»РѕРєРёСЂРѕРІР°Р» РїРѕРІС‚РѕСЂРЅСѓСЋ РІС‹РґР°С‡Сѓ.
+   РСЃРїСЂР°РІР»РµРЅРѕ: РґРѕР±Р°РІР»РµРЅ Р±Р»РѕРє ATTACK-03 reorder вЂ” РїСЂРё phase='attack' СЃРєР°РЅРёСЂСѓРµС‚
+   enemyTanks, РЅР°С…РѕРґРёС‚ СЋРЅРёС‚С‹ Р±РµР· attackTargetId/attackApproachTargetId/state='attacking',
+   Рё РЅР°РїСЂСЏРјСѓСЋ РІС‹Р·С‹РІР°РµС‚ setLightTankAttackApproachGeneric, РѕР±С…РѕРґСЏ NeedsNewAttackOrder throttle.
+
+Р§С‚Рѕ РёРјРµРЅРЅРѕ Р±С‹Р»Рѕ РЅРµ С‚Р°Рє СЃ group order assignment:
+- РќРµ РІСЃРµ С‚Р°РЅРєРё РїРѕР»СѓС‡Р°Р»Рё РїСЂРёРєР°Р· вЂ” NeedsNewAttackOrder skip РЅР° wrong-target approach
+- РўР°РЅРєРё С‚РµСЂСЏР»Рё РїСЂРёРєР°Р· РЅР° РїРѕР»РїСѓС‚Рё вЂ” re-path С‡РµСЂРµР· player-only С„СѓРЅРєС†РёСЋ в†’ idle
+- РџРѕС‚РµСЂСЏРЅРЅС‹Рµ РїСЂРёРєР°Р·С‹ РЅРµ РІРѕСЃСЃС‚Р°РЅР°РІР»РёРІР°Р»РёСЃСЊ вЂ” attack phase immediate return
+
+РљР°РєРёРµ РїРѕР»СЏ/С„СѓРЅРєС†РёРё РёСЃРїСЂР°РІР»РµРЅС‹:
+- FE_PATCH_08BNeedsNewAttackOrder: РґРѕР±Р°РІР»РµРЅР° РїСЂРѕРІРµСЂРєР° attackApproachTargetId === target.id
+- updateLightTankAttackApproach: Р·Р°РјРµРЅС‘РЅ setLightTankAttackApproach в†’
+  isPlayerUnit ? setLightTankAttackApproach : setLightTankAttackApproachGeneric
+- updateEnemyBot: РґРѕР±Р°РІР»РµРЅ ATTACK-03 reorder block РІ phase='attack'
+- FE_PATCH_08BPrepareAttack: РґРѕР±Р°РІР»РµРЅР° ATTACK-03 telemetry (game._attack03LastDispatch)
+- updateEnemyBot: РґРѕР±Р°РІР»РµРЅР° ATTACK-03 reorder telemetry (game._attack03LastReorder)
+
+Telementry:
+- game._attack03LastDispatch: orderType, targetId, assignedCount, assignedUnitIds,
+  withTargetCount, withPathCount, withoutPathCount, at
+- game._attack03LastReorder: orderType, targetId, lostCount, reissuedCount,
+  assignedCount, assignedUnitIds, withTargetCount, withPathCount, withoutPathCount, at
+
+Р§С‚Рѕ РќР• С‚СЂРѕРіР°Р»РѕСЃСЊ:
+- pathfinding algorithm
+- combat damage/range/cooldown
+- scout
+- economy/storage
+- save/load
+- map generation
+- render/input
+- factory production
+- updateEnemyBot (РєСЂРѕРјРµ attack phase block)
+- BRAIN-01 priority loop
+- 10H1 retreat logic
+- 10D1 autopilot guard
+- 10C1 scouting
+- ATTACK-01 hq_fallback
+- ATTACK-02 hq_push flag
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/main.js
+- PATCH_REPORT.txt
+
+Р’С‹РїРѕР»РЅСЏРµРјС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+
+Manual smoke:
+- РЅРѕРІР°СЏ РёРіСЂР° СЃС‚Р°СЂС‚СѓРµС‚;
+- enemy base РїРѕСЏРІР»СЏРµС‚СЃСЏ;
+- enemy tanks РїСЂРѕРёР·РІРѕРґСЏС‚СЃСЏ;
+- hq_fallback РЅР°С…РѕРґРёС‚ player HQ;
+- waveSize >= 3;
+- С‚Р°РЅРєРё РІС‹С…РѕРґСЏС‚ СЃ Р±Р°Р·С‹ РіСЂСѓРїРїРѕР№;
+- С‚Р°РЅРєРё РёРґСѓС‚ Рє player HQ;
+- С‚Р°РЅРєРё Р°С‚Р°РєСѓСЋС‚;
+- console Р±РµР· РєСЂР°СЃРЅС‹С… РѕС€РёР±РѕРє, РєСЂРѕРјРµ favicon.ico 404.
+
+Debug proof:
+РџРѕСЃР»Рµ dispatch РїРѕРєР°Р·Р°С‚СЊ:
+- game._attack03LastDispatch: assignedCount, withTargetCount, withPathCount, withoutPathCount
+- game._attack03LastReorder: lostCount, reissuedCount, withTargetCount, withPathCount
+
+Risks:
+- РќРёР·РєРёР№: reorder block СЂР°Р±РѕС‚Р°РµС‚ С‚РѕР»СЊРєРѕ РїСЂРё phase='attack', РЅРµ Р·Р°С‚СЂР°РіРёРІР°РµС‚ defend/regroup
+- РќРёР·РєРёР№: setLightTankAttackApproachGeneric РјРѕР¶РµС‚ РІРµСЂРЅСѓС‚СЊ false РµСЃР»Рё pathfinding РЅРµ РјРѕР¶РµС‚
+  РЅР°Р№С‚Рё РїСѓС‚СЊ вЂ” С‚Р°РЅРє РѕСЃС‚Р°С‘С‚СЃСЏ idle, РЅРѕ reorder РїРѕРїСЂРѕР±СѓРµС‚ СЃРЅРѕРІР° РЅР° СЃР»РµРґСѓСЋС‰РµРј tick
+- РЎСЂРµРґРЅРёР№: РµСЃР»Рё player HQ СѓРЅРёС‡С‚РѕР¶РµРЅ, reorder РЅР°Р№РґС‘С‚ null target Рё РїСЂРѕРїСѓСЃС‚РёС‚ вЂ” РєРѕСЂСЂРµРєС‚РЅРѕ,
+  РЅРѕ OverChasing/AttackStateInvalid РґРѕР»Р¶РЅС‹ РїРµСЂРµРІРµСЃС‚Рё РІ regroup
+
+---
+
+Р—Р°РґР°С‡Р°: BOT-ATTACK-04 вЂ” hq_push order persistence / prevent regroup overwrite
+Р”Р°С‚Р°: 2026-05-11
+Lane: Review
+Р’РµС‚РєР°: glm/bot-attack-04-wave-group-order-fix (РѕС‚ sandbox/main)
+
+РџСЂРѕР±Р»РµРјР°:
+РџРѕСЃР»Рµ BOT-ATTACK-03 С‚Р°РЅРєРё enemy bot РїРѕР»СѓС‡Р°СЋС‚ hq_push РѕСЂРґРµСЂ Рё РЅР°С‡РёРЅР°СЋС‚ РґРІРёР¶РµРЅРёРµ Рє player HQ, РЅРѕ С‡РµСЂРµР· РЅРµСЃРєРѕР»СЊРєРѕ СЃРµРєСѓРЅРґ С‡Р°СЃС‚СЊ РёР»Рё РІСЃСЏ РіСЂСѓРїРїР° СЂР°Р·РІРѕСЂР°С‡РёРІР°РµС‚СЃСЏ Рё РІРѕР·РІСЂР°С‰Р°РµС‚СЃСЏ Рє purple-Р±Р°Р·Рµ. РќР° РІРёРґРµРѕ РІРёРґРµРЅ С†РёРєР»: РІС‹РµР·Рґ в†’ РґРІРёР¶РµРЅРёРµ в†’ СЂР°Р·РІРѕСЂРѕС‚ в†’ РІРѕР·РІСЂР°С‚/РєСѓС‡РєРѕРІР°РЅРёРµ Сѓ Р±Р°Р·С‹.
+
+РљРѕСЂРЅРµРІР°СЏ РїСЂРёС‡РёРЅР°:
+BOT-ATTACK-03 РїРѕС‡РёРЅРёР» РІС‹РґР°С‡Сѓ РїСЂРёРєР°Р·Р°, РЅРѕ С‚СЂРё РґСЂСѓРіРёС… СЃР»РѕСЏ РїРµСЂРµР·Р°РїРёСЃС‹РІР°Р»Рё hq_push attack order:
+1. FE_PATCH_08BOverChasing вЂ” РµСЃР»Рё Р»СЋР±РѕР№ С‚Р°РЅРє РґР°Р»СЊС€Рµ maxChaseDistanceTiles (18) РѕС‚ home в†’ StartRegroup('over_chase'). Player HQ РіР°СЂР°РЅС‚РёСЂРѕРІР°РЅРЅРѕ РґР°Р»СЊС€Рµ 18 С‚Р°Р№Р»РѕРІ, РїРѕСЌС‚РѕРјСѓ regroup СЃСЂР°Р±Р°С‚С‹РІР°РµС‚ РЅР° РїРµСЂРІРѕРј Р¶Рµ С‚РёРєРµ РїРѕСЃР»Рµ РІС‹РµР·РґР°.
+2. FE_10H1_updateEnemyRetreatAndDefenseMvp вЂ” РїСЂРё РЅР°С…РѕР¶РґРµРЅРёРё СѓРіСЂРѕР·С‹ Сѓ Р±Р°Р·С‹ РёР»Рё СЃСЂР°Р±Р°С‚С‹РІР°РЅРёРё shouldRetreat в†’ РїРµСЂРµР·Р°РїРёСЃС‹РІР°РµС‚ РІСЃРµ РѕСЂРґРµСЂР° РЅР° defend/regroup, РѕС‚РїСЂР°РІР»СЏРµС‚ С‚Р°РЅРєРё РґРѕРјРѕР№.
+3. FE_PATCH_08BThreatNearHome в†’ FE_PATCH_08BDefend вЂ” РїСЂРё Р»СЋР±РѕРј threat СЂСЏРґРѕРј СЃ enemy base РІСЃРµ С‚Р°РЅРєРё РїРѕР»СѓС‡Р°СЋС‚ defend-РѕСЂРґРµСЂ, phase='defend', Рё updateEnemyBot РґРµР»Р°РµС‚ return.
+
+Р¦РёРєР» РЅР° РІРёРґРµРѕ: PrepareAttack в†’ hq_push в†’ С‚Р°РЅРєРё РµРґСѓС‚ в†’ С‚Р°РЅРє СѓРµС…Р°Р» >18 С‚Р°Р№Р»РѕРІ в†’ OverChasing в†’ StartRegroup в†’ _attack02HqPush=false в†’ С‚Р°РЅРєРё РґРѕРјРѕР№ в†’ regroupUntil РёСЃС‚С‘Рє в†’ PrepareAttack в†’ hq_push в†’ (РїРѕРІС‚РѕСЂ)
+
+Р§С‚Рѕ РёСЃРїСЂР°РІР»РµРЅРѕ:
+
+1. Р”РѕР±Р°РІР»РµРЅС‹ 2 helper-С„СѓРЅРєС†РёРё (РїРѕСЃР»Рµ FE_PATCH_08BStartRegroup):
+   - FE_PATCH_08BIsHqPushValid(state) вЂ” РїСЂРѕРІРµСЂСЏРµС‚, Р°РєС‚РёРІРµРЅ Р»Рё hq_push Рё СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё player HQ (hp > 0)
+   - FE_PATCH_08BAttack04Telemetry(phase, source, blocked, reason, targetId, count) вЂ” Р·Р°РїРёСЃС‹РІР°РµС‚ game._attack04LastOverrideCheck
+
+2. FE_10H1 guard (СЃС‚СЂРѕРєР° ~4719):
+   - Р’Рѕ РІСЂРµРјСЏ hq_push FE_10H1 Р·Р°Р±Р»РѕРєРёСЂРѕРІР°РЅ, РµСЃР»Рё РЅРё РѕРґРЅРѕ РєСЂРёС‚РёС‡РµСЃРєРѕРµ СѓСЃР»РѕРІРёРµ РЅРµ РІС‹РїРѕР»РЅРµРЅРѕ
+   - Р Р°Р·СЂРµС€С‘РЅРЅС‹Рµ СѓСЃР»РѕРІРёСЏ РѕС‚СЃС‚СѓРїР»РµРЅРёСЏ: target_destroyed, last_tank (1 С‚Р°РЅРє), heavy_losses (>50% wave РїРѕС‚РµСЂСЏРЅРѕ), critically_outnumbered (2:1)
+   - РўРµР»РµРјРµС‚СЂРёСЏ: game._attack04LastOverrideCheck СЃ РїРѕР»СЏРјРё phase, hqPushActive, attemptedOverrideSource, blockedOverride, reason, targetId, assignedCount
+
+3. ThreatNearHome guard (СЃС‚СЂРѕРєР° ~4751):
+   - Р’Рѕ РІСЂРµРјСЏ hq_push: С‚РѕР»СЊРєРѕ СЃРІРѕР±РѕРґРЅС‹Рµ (non-attack) С‚Р°РЅРєРё РѕС‚РїСЂР°РІР»СЏСЋС‚СЃСЏ РЅР° defend
+   - РџРѕСЃР»Рµ FE_PATCH_08BDefend РІРѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµС‚СЃСЏ state.phase = 'attack'
+   - РќРµ РґРµР»Р°РµС‚СЃСЏ return вЂ” attack phase РїСЂРѕРґРѕР»Р¶Р°РµС‚ СЂР°Р±РѕС‚Сѓ РґР»СЏ wave-С‚Р°РЅРєРѕРІ
+   - РўРµР»РµРјРµС‚СЂРёСЏ: pressureOverride = 'partial_defend' РёР»Рё 'blocked'
+
+4. OverChasing/AttackStateInvalid guard (СЃС‚СЂРѕРєР° ~4775):
+   - FE_PATCH_08BIsHqPushValid РїСЂРѕРІРµСЂСЏРµС‚СЃСЏ РїРµСЂРµРґ OverChasing Рё AttackStateInvalid
+   - Р•СЃР»Рё hq_push Р°РєС‚РёРІРµРЅ Рё player HQ РІР°Р»РёРґРµРЅ в†’ OverChasing Рё AttackStateInvalid РїСЂРѕРїСѓСЃРєР°СЋС‚СЃСЏ (РЅРµ С‚СЂРёРіРіРµСЂСЏС‚ regroup)
+   - Р•СЃР»Рё hq_push РЅРµ Р°РєС‚РёРІРµРЅ РёР»Рё HQ СѓРЅРёС‡С‚РѕР¶РµРЅ в†’ РѕР±С‹С‡РЅР°СЏ Р»РѕРіРёРєР° СЂР°Р±РѕС‚Р°РµС‚
+   - РўРµР»РµРјРµС‚СЂРёСЏ: overChaseBlocked, attackInvalidBlocked
+
+Р”РѕРїСѓСЃС‚РёРјС‹Рµ СѓСЃР»РѕРІРёСЏ РѕС‚СЃС‚СѓРїР»РµРЅРёСЏ РІРѕ РІСЂРµРјСЏ hq_push:
+1. РћСЃС‚Р°Р»СЃСЏ 1 С‚Р°РЅРє (last_tank)
+2. РџРѕС‚РµСЂСЏРЅРѕ >50% wave (heavy_losses)
+3. РРіСЂРѕРє РёРјРµРµС‚ СЏРІРЅС‹Р№ 2:1 РїРµСЂРµРІРµСЃ (critically_outnumbered)
+4. Player HQ СѓРЅРёС‡С‚РѕР¶РµРЅ / target invalid (target_destroyed)
+
+РќРѕРІР°СЏ Р»РѕРіРёРєР°: ~75 СЃС‚СЂРѕРє (РІРєР»СЋС‡Р°СЏ РєРѕРјРјРµРЅС‚Р°СЂРёРё Рё С‚РµР»РµРјРµС‚СЂРёСЋ)
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/main.js вЂ” 2 helper-С„СѓРЅРєС†РёРё + 4 guard-Р±Р»РѕРєР° РІ updateEnemyBot
+- PATCH_REPORT.txt вЂ” РґРѕР±Р°РІР»РµРЅР° СЌС‚Р° Р·Р°РїРёСЃСЊ
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+
+Р§С‚Рѕ РќР• С‚СЂРѕРЅСѓС‚Рѕ (hard rules):
+- combat damage/range/cooldown вЂ” РЅРµС‚
+- pathfinding algorithm вЂ” РЅРµС‚
+- scout вЂ” РЅРµС‚
+- economy/storage вЂ” РЅРµС‚
+- updateEnemyBot РЅРµ РїРµСЂРµРїРёСЃР°РЅ С†РµР»РёРєРѕРј вЂ” РґРѕР±Р°РІР»РµРЅС‹ С‚РѕР»СЊРєРѕ guard-Р±Р»РѕРєРё
+- РЅРѕРІС‹Р№ AI РЅРµ СЃРѕР·РґР°РЅ
+- Google Drive sync вЂ” РЅРµС‚
+- production paths вЂ” РЅРµС‚
+
+РћР¶РёРґР°РµРјРѕРµ РїРѕРІРµРґРµРЅРёРµ РїРѕСЃР»Рµ РїР°С‚С‡Р°:
+- hq_push wave РІС‹С…РѕРґРёС‚ РіСЂСѓРїРїРѕР№
+- С‚Р°РЅРєРё РЅРµ СЂР°Р·РІРѕСЂР°С‡РёРІР°СЋС‚СЃСЏ РѕР±СЂР°С‚РЅРѕ С‡РµСЂРµР· РїР°СЂСѓ СЃРµРєСѓРЅРґ
+- С‚Р°РЅРєРё РїСЂРѕРґРѕР»Р¶Р°СЋС‚ РґРІРёР¶РµРЅРёРµ Рє player HQ
+- РѕС‚СЃС‚СѓРїР°СЋС‚ С‚РѕР»СЊРєРѕ РїСЂРё: 1 С‚Р°РЅРє, >50% РїРѕС‚РµСЂСЊ, 2:1 РїРµСЂРµРІРµСЃ, HQ СѓРЅРёС‡С‚РѕР¶РµРЅ
+
+---
+
+Р—Р°РґР°С‡Р°: BOT-ATTACK-05 вЂ” sync hq_push attack target with movement command
+Р”Р°С‚Р°: 2026-05-11
+Lane: Review
+Р’РµС‚РєР°: glm/bot-attack-05-sync-hq-push-movement (РѕС‚ sandbox/main)
+
+РџСЂРѕР±Р»РµРјР°:
+РџРѕСЃР»Рµ BOT-ATTACK-04 С‚Р°РЅРєРё РїРѕР»СѓС‡Р°СЋС‚ attackApproachTargetId = player HQ, РЅРѕ movement fields РЅРµ СЃРёРЅС…СЂРѕРЅРёР·РёСЂРѕРІР°РЅС‹:
+- command С‡Р°СЃС‚Рѕ = 'move' (РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ 'attack')
+- state = manual_move / moving (РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ attack_approach)
+- targetX/targetY РїРѕРєР°Р·С‹РІР°СЋС‚ СЃС‚Р°СЂС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹ РѕС‚ patrol/regroup (40,40 / 36,2 / 33,3 / 75,75)
+- С‡Р°СЃС‚СЊ С‚Р°РЅРєРѕРІ РµРґРµС‚ РЅРµ Рє player HQ, Р° Рє СЃР»СѓС‡Р°Р№РЅС‹Рј С‚РѕС‡РєР°Рј
+- FE_10E1 strength gate РѕС‡РёС‰Р°РµС‚ attackApproachTargetId Рё РѕС‚РїСЂР°РІР»СЏРµС‚ С‚Р°РЅРєРё РґРѕРјРѕР№
+- FE_10D1 autopilot РїРµСЂРµР·Р°РїРёСЃС‹РІР°РµС‚ targetX/targetY РЅР° patrol-С‚РѕС‡РєРё
+
+РљРѕСЂРЅРµРІС‹Рµ РїСЂРёС‡РёРЅС‹:
+1. setLightTankAttackApproachGeneric РќР• СѓСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ targetX/targetY/command/moveTarget/destination
+   вЂ” СЃС‚Р°СЂС‹Рµ Р·РЅР°С‡РµРЅРёСЏ РѕС‚ patrol/regroup РѕСЃС‚Р°СЋС‚СЃСЏ, РїРѕРєР°Р·С‹РІР°СЋС‚ РЅРµРІРµСЂРЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹ РІ console table
+2. FE_10E1_clearAttackOrder РѕС‡РёС‰Р°РµС‚ attackApproachTargetId РїСЂРё strength gate
+   вЂ” РµСЃР»Рё attackAllowed=false, РІСЃРµ attack РѕСЂРґРµСЂР° СЃС‚РёСЂР°СЋС‚СЃСЏ, С‚Р°РЅРєРё РѕС‚РїСЂР°РІР»СЏСЋС‚СЃСЏ РґРѕРјРѕР№
+3. FE_10E1_returnToHq РїРµСЂРµР·Р°РїРёСЃС‹РІР°РµС‚ targetX/targetY/state РЅР° РєРѕРѕСЂРґРёРЅР°С‚С‹ enemy HQ
+   вЂ” РґР°Р¶Рµ РµСЃР»Рё Сѓ С‚Р°РЅРєР° Р°РєС‚РёРІРЅС‹Р№ hq_push attack order
+4. FE_10D1_tryMove РїРµСЂРµР·Р°РїРёСЃС‹РІР°РµС‚ targetX/targetY/command/state РЅР° patrol/return РєРѕРѕСЂРґРёРЅР°С‚С‹
+   вЂ” РґР°Р¶Рµ РµСЃР»Рё Сѓ С‚Р°РЅРєР° Р°РєС‚РёРІРЅС‹Р№ hq_push attack order
+
+Р§С‚Рѕ РёСЃРїСЂР°РІР»РµРЅРѕ:
+
+1. setLightTankAttackApproachGeneric (СЃС‚СЂРѕРєР° ~10481):
+   - Р”РѕР±Р°РІР»РµРЅР° СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёСЏ: targetX=targetY=cell.x/cell.y, command='attack'
+   - РўР°РєР¶Рµ СѓСЃС‚Р°РЅРѕРІР»РµРЅС‹ moveTarget, destination, targetTile, destX/destY, goalX/goalY
+   - РЎС‚Р°СЂС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹ РѕС‚ patrol/regroup РїРѕР»РЅРѕСЃС‚СЊСЋ Р·Р°РјРµРЅСЏСЋС‚СЃСЏ
+
+2. FE_10E1_clearAttackOrder guard (СЃС‚СЂРѕРєР° ~4250):
+   - Р•СЃР»Рё Сѓ С‚Р°РЅРєР° _attackApproachCommanded РёР»Рё attackApproachTargetId Рё hq_push Р°РєС‚РёРІРµРЅ
+   вЂ” РѕС‡РёСЃС‚РєР° РѕСЂРґРµСЂР° Р±Р»РѕРєРёСЂСѓРµС‚СЃСЏ, attack order СЃРѕС…СЂР°РЅСЏРµС‚СЃСЏ
+
+3. FE_10E1_returnToHq guard (СЃС‚СЂРѕРєР° ~4266):
+   - Р•СЃР»Рё Сѓ С‚Р°РЅРєР° _attackApproachCommanded РёР»Рё attackApproachTargetId Рё hq_push Р°РєС‚РёРІРµРЅ
+   вЂ” return-to-HQ Р±Р»РѕРєРёСЂСѓРµС‚СЃСЏ, С‚Р°РЅРє РѕСЃС‚Р°С‘С‚СЃСЏ РЅР° attack_approach
+
+4. FE_10D1_tryMove guard (СЃС‚СЂРѕРєР° ~3881):
+   - Р•СЃР»Рё Сѓ С‚Р°РЅРєР° _attackApproachCommanded РёР»Рё attackApproachTargetId Рё hq_push Р°РєС‚РёРІРµРЅ
+   вЂ” patrol/return/move РїРµСЂРµР·Р°РїРёСЃСЊ Р±Р»РѕРєРёСЂСѓРµС‚СЃСЏ, С‚Р°РЅРє РїСЂРѕРґРѕР»Р¶Р°РµС‚ attack_approach
+
+5. ATTACK-05 sync loop РІ attack phase (СЃС‚СЂРѕРєР° ~4858):
+   - РљР°Р¶РґС‹Р№ С‚РёРє attack phase: РїСЂРѕРІРµСЂСЏРµС‚ РІСЃРµ С‚Р°РЅРєРё СЃ attackApproachTargetId
+   - Р•СЃР»Рё state != attack_approach, targetX/targetY РґР°Р»РµРєРѕ РѕС‚ HQ, РёР»Рё РЅРµС‚ path
+   вЂ” РІС‹Р·С‹РІР°РµС‚ setLightTankAttackApproachGeneric РґР»СЏ РїРµСЂРµСЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё
+   - РўРµР»РµРјРµС‚СЂРёСЏ: game._attack05LastOrderSync
+
+РўРµР»РµРјРµС‚СЂРёСЏ game._attack05LastOrderSync:
+{
+  targetId, targetX, targetY, assignedCount, syncedCount,
+  manualMoveLeftCount, wrongTargetCount, withPathCount,
+  withoutPathCount, sampleUnits, at
+}
+
+РќРѕРІР°СЏ Р»РѕРіРёРєР°: ~45 СЃС‚СЂРѕРє guard + ~30 СЃС‚СЂРѕРє sync loop + 13 СЃС‚СЂРѕРє field sync = ~88 СЃС‚СЂРѕРє
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/main.js вЂ” 5 guard/sync РїСЂР°РІРѕРє + telemetry
+- PATCH_REPORT.txt вЂ” РґРѕР±Р°РІР»РµРЅР° СЌС‚Р° Р·Р°РїРёСЃСЊ
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+
+Р§С‚Рѕ РќР• С‚СЂРѕРЅСѓС‚Рѕ (hard rules):
+- combat damage/range/cooldown вЂ” РЅРµС‚
+- pathfinding algorithm вЂ” РЅРµС‚
+- scout вЂ” РЅРµС‚
+- economy/storage вЂ” РЅРµС‚
+- updateEnemyBot С†РµР»РёРєРѕРј вЂ” РЅРµС‚, С‚РѕР»СЊРєРѕ С‚РѕС‡РµС‡РЅС‹Рµ РїСЂР°РІРєРё
+
+РћР¶РёРґР°РµРјРѕРµ РїРѕРІРµРґРµРЅРёРµ РїРѕСЃР»Рµ РїР°С‚С‡Р°:
+- hq_push wave РІС‹С…РѕРґРёС‚ РіСЂСѓРїРїРѕР№ Рє player HQ
+- targetX/targetY Сѓ РєР°Р¶РґРѕРіРѕ С‚Р°РЅРєР° СѓРєР°Р·С‹РІР°СЋС‚ РЅР° player HQ РёР»Рё approach-С‚РѕС‡РєСѓ СЂСЏРґРѕРј
+- command = 'attack', state = 'attack_approach' (РЅРµ manual_move/moving)
+- strength gate РЅРµ РїРѕРґР°РІР»СЏРµС‚ hq_push attack РѕСЂРґРµСЂР°
+- autopilot РЅРµ РїРµСЂРµР·Р°РїРёСЃС‹РІР°РµС‚ РґРІРёР¶РµРЅРёРµ hq_push С‚Р°РЅРєРѕРІ
+- С‚Р°РЅРєРё РіСЂСѓРїРїРѕР№ РёРґСѓС‚ Рє player HQ Рё Р°С‚Р°РєСѓСЋС‚
+
+---
+
+Р—Р°РґР°С‡Р°: BOT-ATTACK-06 вЂ” enemy attack movement stall fix
+Р”Р°С‚Р°: 2026-05-11
+Lane: Review
+Р’РµС‚РєР°: glm/bot-attack-06-enemy-attack-movement-stall-fix (РѕС‚ sandbox/main)
+
+РџСЂРѕР±Р»РµРјР°:
+Enemy light_tank РІРѕ РІСЂРµРјСЏ hq_push/attack_approach Р·Р°РІРёСЃР°РµС‚: attackApproachTargetId РЅР°Р·РЅР°С‡РµРЅ,
+pathLen > 0, РЅРѕ x/y РїРѕС‡С‚Рё РЅРµ РјРµРЅСЏСЋС‚СЃСЏ Рё path РЅРµ СЂР°СЃС…РѕРґСѓРµС‚СЃСЏ. РўР°РЅРєРё СЃС‚РѕСЏС‚ РЅР° РјРµСЃС‚Рµ РІРјРµСЃС‚Рѕ
+РґРІРёР¶РµРЅРёСЏ Рє player HQ.
+
+РљРѕСЂРЅРµРІР°СЏ РїСЂРёС‡РёРЅР°:
+1. updateUnitMovement (СЃС‚СЂРѕРєР° 5437): РµСЃР»Рё next waypoint Р·Р°Р±Р»РѕРєРёСЂРѕРІР°РЅ (passable=false),
+   blockedTimer РєРѕРїРёС‚СЃСЏ Рё С‡РµСЂРµР· 0.35СЃ РІС‹Р·С‹РІР°РµС‚ recoverUnitPath(unit).
+2. recoverUnitPath (СЃС‚СЂРѕРєР° 5393): РґР»СЏ light_tank РЅРµС‚ СЃРїРµС†РёР°Р»СЊРЅРѕР№ РІРµС‚РєРё в†’ РїР°РґР°РµС‚ РІ default:
+   - unit.path = [] (РїСѓС‚СЊ СѓР±РёС‚)
+   - if (unit.state === 'manual_move') unit.state = 'idle' вЂ” РЅРѕ state='attack_approach',
+     РЅРµ 'manual_move' в†’ state РќР• РјРµРЅСЏРµС‚СЃСЏ
+   - РС‚РѕРі: С‚Р°РЅРє РІ state='attack_approach' СЃ РїСѓСЃС‚С‹Рј path, attackApproachTargetId Р¶РёРІ, РЅРѕ РЅРёРєСѓРґР° РЅРµ РµРґРµС‚
+3. passable() СѓС‡РёС‚С‹РІР°РµС‚ unitAt() вЂ” РґСЂСѓРіРѕР№ С‚Р°РЅРє РЅР° next waypoint = hard block.
+   Р“СЂСѓРїРїР° С‚Р°РЅРєРѕРІ РїРѕСЃС‚РѕСЏРЅРЅРѕ Р±Р»РѕРєРёСЂСѓРµС‚ РґСЂСѓРі РґСЂСѓРіР° РЅР° СѓР·РєРёС… РїСЂРѕС…РѕРґР°С….
+
+Р§С‚Рѕ РёСЃРїСЂР°РІР»РµРЅРѕ:
+
+1. recoverUnitPath вЂ” ATTACK-06 branch РґР»СЏ light_tank + attackApproachTargetId (СЃС‚СЂРѕРєР° ~5400):
+   - Р•СЃР»Рё Сѓ С‚Р°РЅРєР° Р°РєС‚РёРІРЅС‹Р№ attack approach Рё target Р¶РёРІ в†’ РїРѕРїСЂРѕР±РѕРІР°С‚СЊ re-path С‡РµСЂРµР·
+     setLightTankAttackApproachGeneric РІРјРµСЃС‚Рѕ Р±РµР·СѓСЃР»РѕРІРЅРѕР№ РѕС‡РёСЃС‚РєРё path
+   - Throttle: РЅРµ С‡Р°С‰Рµ СЂР°Р·Р° РІ 800РјСЃ (_attack06LastRepathAt)
+   - Р•СЃР»Рё re-path СѓСЃРїРµС€РµРЅ вЂ” РІРµСЂРЅСѓС‚СЊ true, attack order СЃРѕС…СЂР°РЅС‘РЅ
+   - Р•СЃР»Рё re-path РЅРµСѓСЃРїРµС€РµРЅ РёР»Рё throttled вЂ” РІРµСЂРЅСѓС‚СЊ false, РќР• РѕС‡РёС‰Р°С‚СЊ path,
+     ATTACK-05 sync loop РїРµСЂРµРїСЂРёСЃРІРѕРёС‚ РЅР° СЃР»РµРґСѓСЋС‰РµРј С‚РёРєРµ
+   - Р•СЃР»Рё target dead/invalid вЂ” fall through Рє default (РѕС‡РёСЃС‚РєР° path)
+
+2. updateUnitMovement вЂ” ATTACK-06 early recovery РІ blocked branch (СЃС‚СЂРѕРєР° ~5463):
+   - РљРѕРіРґР° isLightTank(unit) && attackApproachTargetId && blockedTimer > 0.5СЃ
+   - РћРїСЂРµРґРµР»СЏРµС‚СЃСЏ blocker type: unit / building / mineral / obstacle / unknown
+   - Р•СЃР»Рё blocker = unit: РїРѕРїСЂРѕР±РѕРІР°С‚СЊ re-path Рє attack target СЃ throttle 800РјСЃ
+   - Р•СЃР»Рё blocker = building/mineral/obstacle: РєРѕРЅСЃРµСЂРІР°С‚РёРІРЅРѕ, Р·Р°РїРёСЃР°С‚СЊ telemetry,
+     РЅРµ Р»РѕРјР°С‚СЊ РїСЂРѕС…РѕРґРёРјРѕСЃС‚СЊ
+   - Р•СЃР»Рё re-path СѓСЃРїРµС€РµРЅ: СЃР±СЂРѕСЃРёС‚СЊ blockedTimer, СЃРѕС…СЂР°РЅРёС‚СЊ command='attack'
+   - РўРµР»РµРјРµС‚СЂРёСЏ: game._attack06LastMovementStallCheck
+   - Counters: game._attack06StallCounters (checkedCount, stuckCount, recoveredCount, failedRecoveryCount)
+
+РћР±СЂР°Р±Р°С‚С‹РІР°РµРјС‹Рµ blocker types:
+- unit: re-path Рє attack target
+- building: РєРѕРЅСЃРµСЂРІР°С‚РёРІРЅРѕ, telemetry, РЅРµ Р»РѕРјР°С‚СЊ
+- mineral: РєРѕРЅСЃРµСЂРІР°С‚РёРІРЅРѕ, telemetry, РЅРµ Р»РѕРјР°С‚СЊ
+- obstacle: РєРѕРЅСЃРµСЂРІР°С‚РёРІРЅРѕ, telemetry, РЅРµ Р»РѕРјР°С‚СЊ
+- unknown: РєРѕРЅСЃРµСЂРІР°С‚РёРІРЅРѕ, telemetry
+
+РўРµР»РµРјРµС‚СЂРёСЏ game._attack06LastMovementStallCheck:
+{
+  unitId, blockerKind, blockerId, nextX, nextY,
+  pathLenBefore, pathLenAfter, recovered, recoveryReason,
+  targetId, state, command, blockedTimer
+}
+
+Counters game._attack06StallCounters:
+{ checkedCount, stuckCount, recoveredCount, failedRecoveryCount }
+
+РќРѕРІР°СЏ Р»РѕРіРёРєР°: ~60 СЃС‚СЂРѕРє (recoverUnitPath branch + updateUnitMovement early recovery + telemetry)
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/main.js вЂ” 2 РїСЂР°РІРєРё: recoverUnitPath + updateUnitMovement
+- PATCH_REPORT.txt вЂ” РґРѕР±Р°РІР»РµРЅР° СЌС‚Р° Р·Р°РїРёСЃСЊ
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+
+Р§С‚Рѕ РќР• С‚СЂРѕРЅСѓС‚Рѕ (hard rules):
+- findPath algorithm вЂ” РЅРµС‚
+- passable globally вЂ” РЅРµС‚
+- unitAt globally вЂ” РЅРµС‚
+- combat damage/range/cooldown вЂ” РЅРµС‚
+- scout вЂ” РЅРµС‚
+- economy/storage вЂ” РЅРµС‚
+- updateEnemyBot вЂ” РЅРµС‚
+- player manual movement вЂ” РЅРµС‚
+
+Manual smoke:
+- РЅРѕРІР°СЏ РёРіСЂР° СЃС‚Р°СЂС‚СѓРµС‚
+- enemy base РїРѕСЏРІР»СЏРµС‚СЃСЏ
+- enemy tanks РїСЂРѕРёР·РІРѕРґСЏС‚СЃСЏ
+- hq_push СЃСЂР°Р±Р°С‚С‹РІР°РµС‚
+- С‚Р°РЅРєРё РїРѕР»СѓС‡Р°СЋС‚ pathLen > 0
+- РµСЃР»Рё next waypoint Р·Р°РЅСЏС‚ РґСЂСѓРіРёРј С‚Р°РЅРєРѕРј, recovery/re-path СЃСЂР°Р±Р°С‚С‹РІР°РµС‚
+- С‡РµСЂРµР· 10 СЃРµРєСѓРЅРґ x/y РјРµРЅСЏСЋС‚СЃСЏ
+- pathLen СѓРјРµРЅСЊС€Р°РµС‚СЃСЏ РёР»Рё РїРµСЂРµСЃС‡РёС‚С‹РІР°РµС‚СЃСЏ
+- distToPlayerHQ СѓРјРµРЅСЊС€Р°РµС‚СЃСЏ
+- С‚Р°РЅРєРё РґРѕС…РѕРґСЏС‚ РґРѕ player HQ
+- С‚Р°РЅРєРё Р°С‚Р°РєСѓСЋС‚
+- player manual tank movement СЂР°Р±РѕС‚Р°РµС‚
+- harvesters/builders РЅРµ СЃР»РѕРјР°Р»РёСЃСЊ
+- console Р±РµР· РєСЂР°СЃРЅС‹С… РѕС€РёР±РѕРє
+
+Р РёСЃРєРё:
+- re-path РјРѕР¶РµС‚ РЅРµ РЅР°Р№С‚Рё Р°Р»СЊС‚РµСЂРЅР°С‚РёРІРЅС‹Р№ РјР°СЂС€СЂСѓС‚ РµСЃР»Рё РІСЃРµ approach-РєР»РµС‚РєРё Р·Р°Р±Р»РѕРєРёСЂРѕРІР°РЅС‹
+  в†’ РІ СЌС‚РѕРј СЃР»СѓС‡Р°Рµ ATTACK-05 sync loop РїСЂРѕРґРѕР»Р¶Р°РµС‚ РїРѕРїС‹С‚РєРё РЅР° РєР°Р¶РґРѕРј С‚РёРєРµ
+- throttle 800РјСЃ РѕР·РЅР°С‡Р°РµС‚ С‡С‚Рѕ С‚Р°РЅРє РјРѕР¶РµС‚ СЃС‚РѕСЏС‚СЊ РґРѕ 0.8СЃ РїРµСЂРµРґ re-path
+  в†’ Р»СѓС‡С€Рµ С‡РµРј РІРµС‡РЅРѕРµ Р·Р°Р»РёРїР°РЅРёРµ, РЅРѕ РІРѕР·РјРѕР¶РЅР° РєРѕСЂРѕС‚РєР°СЏ РїР°СѓР·Р°
+- blocker detection РґР»СЏ building/mineral/obstacle РЅРµ РґРµР»Р°РµС‚ recovery
+  в†’ РєРѕРЅСЃРµСЂРІР°С‚РёРІРЅС‹Р№ РїРѕРґС…РѕРґ, РЅРµ Р»РѕРјР°РµС‚ РїСЂРѕС…РѕРґРёРјРѕСЃС‚СЊ
+
+---
+
+Р—Р°РґР°С‡Р°: BOT-ATTACK-07 вЂ” fix enemy attack_approach/manual_move desync
+Р”Р°С‚Р°: 2026-05-11
+Lane: Review
+Р’РµС‚РєР°: glm/bot-attack-07-enemy-attack-approach-manual-move-desync-fix (РѕС‚ sandbox/main)
+
+РџСЂРѕР±Р»РµРјР°:
+Enemy light_tank РІРѕ РІСЂРµРјСЏ hq_push РІС…РѕРґРёС‚ РІ СЂР°СЃСЃРёРЅС…СЂРѕРЅРёР·РёСЂРѕРІР°РЅРЅРѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ:
+- state = manual_move
+- command = attack
+- attackApproachTargetId = hq_base_101
+- targetX/targetY СѓРєР°Р·С‹РІР°СЋС‚ РЅР° HQ approach-С‚РѕС‡РєСѓ
+- pathLen РЅРµ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓРµС‚ targetX/targetY
+
+РџСЂРёС‡РёРЅР°: ATTACK-05 guards Р·Р°РІРёСЃРµР»Рё РѕС‚ state._attack02HqPush вЂ” С„Р»Р°РіР° Р±РѕС‚Р°.
+Р•СЃР»Рё С„Р»Р°Рі СЃР±СЂРѕС€РµРЅ (regroup, timer), Р° Сѓ С‚Р°РЅРєР° attackApproachTargetId РµС‰С‘ Р¶РёРІ вЂ”
+guards РЅРµ СЃСЂР°Р±Р°С‚С‹РІР°СЋС‚, autopilot/strength gate РїРµСЂРµР·Р°РїРёСЃС‹РІР°РµС‚ state/path.
+
+РљРѕСЂРЅРµРІС‹Рµ РїСЂРёС‡РёРЅС‹:
+1. FE_10D1_tryMove guard Р·Р°РІРёСЃРµР» РѕС‚ game._enemyBotState._attack02HqPush
+2. FE_10E1_clearAttackOrder guard Р·Р°РІРёСЃРµР» РѕС‚ game._enemyBotState._attack02HqPush
+3. FE_10E1_returnToHq guard Р·Р°РІРёСЃРµР» РѕС‚ game._enemyBotState._attack02HqPush
+4. ATTACK-05 sync loop Р·Р°РІРёСЃРµР» РѕС‚ state._attack02HqPush
+   вЂ” РµСЃР»Рё С„Р»Р°Рі СЃР±СЂРѕС€РµРЅ, СЂР°СЃСЃРёРЅС…СЂРѕРЅ РЅРµ С‡РёРЅРёР»СЃСЏ
+
+Р§С‚Рѕ РёСЃРїСЂР°РІР»РµРЅРѕ:
+
+1. РќРѕРІС‹Р№ С…РµР»РїРµСЂ FE_ATTACK07HasActiveEnemyAttackOrder(unit) (СЃС‚СЂРѕРєР° ~3145):
+   - РџСЂРѕРІРµСЂСЏРµС‚ РёРЅРІР°СЂРёР°РЅС‚ РЅР° СЃР°РјРѕРј СЋРЅРёС‚Рµ, Р‘Р•Р— Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ _attack02HqPush
+   - true РєРѕРіРґР°: light_tank + enemy + command='attack' + attackApproachTargetId + target Р¶РёРІ
+   - РСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РєР°Рє РїРµСЂРІРёС‡РЅР°СЏ РїСЂРѕРІРµСЂРєР° РІРѕ РІСЃРµС… guards
+
+2. FE_10D1_tryMove (СЃС‚СЂРѕРєР° ~3894):
+   - ATTACK-07 guard С‡РµСЂРµР· FE_ATTACK07HasActiveEnemyAttackOrder вЂ” РїРµСЂРІС‹Р№ РїСЂРёРѕСЂРёС‚РµС‚
+   - ATTACK-05 fallback С‡РµСЂРµР· _attack02HqPush вЂ” РІС‚РѕСЂРѕР№ РїСЂРёРѕСЂРёС‚РµС‚
+
+3. FE_10E1_clearAttackOrder (СЃС‚СЂРѕРєР° ~4271):
+   - ATTACK-07 guard С‡РµСЂРµР· FE_ATTACK07HasActiveEnemyAttackOrder вЂ” РїРµСЂРІС‹Р№ РїСЂРёРѕСЂРёС‚РµС‚
+   - ATTACK-05 fallback С‡РµСЂРµР· _attack02HqPush вЂ” РІС‚РѕСЂРѕР№ РїСЂРёРѕСЂРёС‚РµС‚
+
+4. FE_10E1_returnToHq (СЃС‚СЂРѕРєР° ~4289):
+   - ATTACK-07 guard С‡РµСЂРµР· FE_ATTACK07HasActiveEnemyAttackOrder вЂ” РїРµСЂРІС‹Р№ РїСЂРёРѕСЂРёС‚РµС‚
+   - ATTACK-05 fallback С‡РµСЂРµР· _attack02HqPush вЂ” РІС‚РѕСЂРѕР№ РїСЂРёРѕСЂРёС‚РµС‚
+
+5. ATTACK-07 sync loop РІ attack phase (СЃС‚СЂРѕРєР° ~4878):
+   - Р—Р°РјРµРЅСЏРµС‚ ATTACK-05 sync loop (РєРѕС‚РѕСЂС‹Р№ Р·Р°РІРёСЃРµР» РѕС‚ _attack02HqPush)
+   - РЎРєР°РЅРёСЂСѓРµС‚ Р’РЎР• enemy light_tank СЃ attackApproachTargetId + command='attack'
+   - Р•СЃР»Рё target Р¶РёРІ Рё: state !== 'attack_approach' РР›Р path РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚
+     РР›Р path goal РЅРµ СЃРѕРІРїР°РґР°РµС‚ СЃ targetX/targetY в†’ re-sync С‡РµСЂРµР· setLightTankAttackApproachGeneric
+   - РўРµР»РµРјРµС‚СЂРёСЏ: game._attack07LastInvariantFix
+
+РўРµР»РµРјРµС‚СЂРёСЏ game._attack07LastInvariantFix:
+{
+  unitId, beforeState, afterState, command,
+  targetId, pathLenBefore, pathLenAfter, reason
+}
+
+РџСЂРёС‡РёРЅС‹ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё (reason):
+- state_manual_move / state_moving / state_idle / state_null вЂ” state РЅРµ attack_approach
+- no_path вЂ” path РїСѓСЃС‚РѕР№
+- path_goal_mismatch вЂ” РєРѕРЅРµС‡РЅР°СЏ С‚РѕС‡РєР° path РЅРµ СЃРѕРІРїР°РґР°РµС‚ СЃ targetX/targetY
+
+РќРѕРІР°СЏ Р»РѕРіРёРєР°: ~55 СЃС‚СЂРѕРє (С…РµР»РїРµСЂ + 3 guards + sync loop + telemetry)
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/main.js вЂ” 5 РїСЂР°РІРѕРє
+- PATCH_REPORT.txt вЂ” РґРѕР±Р°РІР»РµРЅР° СЌС‚Р° Р·Р°РїРёСЃСЊ
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+
+Р§С‚Рѕ РќР• С‚СЂРѕРЅСѓС‚Рѕ:
+- findPath вЂ” РЅРµС‚
+- passable вЂ” РЅРµС‚
+- combat вЂ” РЅРµС‚
+- scout вЂ” РЅРµС‚
+- economy вЂ” РЅРµС‚
+- updateEnemyBot С†РµР»РёРєРѕРј вЂ” РЅРµС‚
+
+Р РёСЃРєРё:
+- FE_ATTACK07HasActiveEnemyAttackOrder РїСЂРѕРІРµСЂСЏРµС‚ FE_PATCH_06BResolveApproachTarget вЂ”
+  РµСЃР»Рё target РІСЂРµРјРµРЅРЅРѕ РЅРµРґРѕСЃС‚СѓРїРµРЅ (Р·РґР°РЅРёРµ РІ С‚СѓРјР°РЅРµ РІРѕР№РЅС‹), С…РµР»РїРµСЂ РІРµСЂРЅС‘С‚ false,
+  Рё guard РЅРµ СЃСЂР°Р±РѕС‚Р°РµС‚. Р­С‚Рѕ РєРѕРЅСЃРµСЂРІР°С‚РёРІРЅРѕРµ РїРѕРІРµРґРµРЅРёРµ.
+- Sync loop РІС‹Р·С‹РІР°РµС‚ setLightTankAttackApproachGeneric РЅР° РєР°Р¶РґРѕРј С‚РёРєРµ attack phase
+  РґР»СЏ СЂР°СЃСЃРёРЅС…СЂРѕРЅРёР·РёСЂРѕРІР°РЅРЅС‹С… С‚Р°РЅРєРѕРІ вЂ” РјРѕР¶РµС‚ Р±С‹С‚СЊ РґРѕСЂРѕРіРѕ РµСЃР»Рё РјРЅРѕРіРѕ С‚Р°РЅРєРѕРІ,
+  РЅРѕ РЅР° РїСЂР°РєС‚РёРєРµ РєРѕР»РёС‡РµСЃС‚РІРѕ СЂР°СЃСЃРёРЅС…СЂРѕРЅРѕРІ РјР°Р»Рѕ.
+
+---
+
+Р—Р°РґР°С‡Р°: BOT-ATTACK-08 вЂ” global repair for enemy attack-order invariant
+Р”Р°С‚Р°: 2026-05-11
+Lane: Review
+Р’РµС‚РєР°: glm/bot-attack-08-global-attack-invariant-repair (РѕС‚ sandbox/main)
+
+РџСЂРѕР±Р»РµРјР°:
+ATTACK-07 sync loop СЂР°Р±РѕС‚Р°РµС‚ С‚РѕР»СЊРєРѕ РІРЅСѓС‚СЂРё updateEnemyBot attack phase.
+Р•СЃР»Рё Р±РѕС‚ РїРµСЂРµС€С‘Р» РІ regroup/prepare_attack вЂ” С„Р°Р·Р° РЅРµ attack, sync РЅРµ РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ.
+Р Р°СЃСЃРёРЅС…СЂРѕРЅ manual_move + command='attack' + attackApproachTargetId РѕСЃС‚Р°С‘С‚СЃСЏ РЅР°РІСЃРµРіРґР°.
+game._attack07LastInvariantFix РѕСЃС‚Р°С‘С‚СЃСЏ null вЂ” repair РЅРµ РІС‹Р·С‹РІР°РµС‚СЃСЏ.
+
+РљРѕСЂРЅРµРІР°СЏ РїСЂРёС‡РёРЅР°:
+ATTACK-07 sync РїСЂРёРІСЏР·Р°РЅ Рє С„Р°Р·Рµ Р±РѕС‚Р°. РРЅРІР°СЂРёР°РЅС‚ РґРѕР»Р¶РµРЅ РїСЂРѕРІРµСЂСЏС‚СЊСЃСЏ РіР»РѕР±Р°Р»СЊРЅРѕ,
+РєР°Р¶РґС‹Р№ С‚РёРє, РІРЅРµ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ С„Р°Р·С‹ Р±РѕС‚Р°.
+
+Р§С‚Рѕ РёСЃРїСЂР°РІР»РµРЅРѕ:
+
+1. РќРѕРІР°СЏ С„СѓРЅРєС†РёСЏ FE_ATTACK08RepairEnemyAttackInvariant() (СЃС‚СЂРѕРєР° ~3159):
+   - РџСЂРѕС…РѕРґРёС‚ РїРѕ РІСЃРµРј game.units РєР°Р¶РґС‹Р№ С‚РёРє
+   - Р”Р»СЏ РєР°Р¶РґРѕРіРѕ enemy light_tank СЃ command='attack' + attackApproachTargetId + Р¶РёРІРѕР№ target:
+     - Р•СЃР»Рё state !== 'attack_approach' вЂ” РЅР°СЂСѓС€РµРЅРёРµ РёРЅРІР°СЂРёР°РЅС‚Р°
+     - Path РµСЃС‚СЊ в†’ state_restore: РїСЂРѕСЃС‚Рѕ u.state = 'attack_approach' (РЅРµ РїРµСЂРµСЃС‡РёС‚С‹РІР°РµРј path)
+     - Path РїСѓСЃС‚ в†’ repath: setLightTankAttackApproachGeneric(unit, target)
+   - РўРµР»РµРјРµС‚СЂРёСЏ: game._attack08LastInvariantRepair
+   - РЎС‡С‘С‚С‡РёРє: game._attack08InvariantRepairCount
+
+2. Р’С‹Р·РѕРІ РІ game loop (СЃС‚СЂРѕРєР° ~11635):
+   - РџРѕСЃР»Рµ updateEnemyBot(dt) вЂ” РџРћРЎР›Р• РІСЃРµС… РјРµСЃС‚, РєРѕС‚РѕСЂС‹Рµ РјРѕРіСѓС‚ РјРµРЅСЏС‚СЊ state/path
+   - РџРѕСЂСЏРґРѕРє: movement loop в†’ updateEnemyBot в†’ ATTACK-08 repair в†’ РѕСЃС‚Р°Р»СЊРЅРѕРµ
+   - Р“Р°СЂР°РЅС‚РёСЂСѓРµС‚ С‡С‚Рѕ BAD state РЅРµ РѕСЃС‚Р°С‘С‚СЃСЏ РІРёРґРёРјС‹Рј РІ console watcher Р±РѕР»СЊС€Рµ 1 С‚РёРєР°
+
+РРЅРІР°СЂРёР°РЅС‚:
+Enemy light_tank СЃ command='attack' + attackApproachTargetId + Р¶РёРІРѕР№ target
+в†’ state Р”РћР›Р–Р•Рќ Р±С‹С‚СЊ 'attack_approach'
+
+РўРµР»РµРјРµС‚СЂРёСЏ game._attack08LastInvariantRepair:
+{
+  unitId, beforeState, afterState, command,
+  targetId, pathLenBefore, pathLenAfter,
+  action: 'state_restore' | 'repath'
+}
+
+РЎС‡С‘С‚С‡РёРє: game._attack08InvariantRepairCount
+
+РќРѕРІР°СЏ Р»РѕРіРёРєР°: ~45 СЃС‚СЂРѕРє (С„СѓРЅРєС†РёСЏ + РІС‹Р·РѕРІ)
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/main.js вЂ” 2 РїСЂР°РІРєРё: С„СѓРЅРєС†РёСЏ + РІС‹Р·РѕРІ РІ game loop
+- PATCH_REPORT.txt вЂ” РґРѕР±Р°РІР»РµРЅР° СЌС‚Р° Р·Р°РїРёСЃСЊ
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+
+Р§С‚Рѕ РќР• С‚СЂРѕРЅСѓС‚Рѕ:
+- findPath, passable вЂ” РЅРµС‚
+- combat вЂ” РЅРµС‚
+- scout вЂ” РЅРµС‚
+- economy вЂ” РЅРµС‚
+- updateEnemyBot вЂ” РЅРµС‚
+- player manual movement вЂ” РЅРµС‚
+
+Р РёСЃРєРё:
+- state_restore РЅРµ РїРµСЂРµСЃС‡РёС‚С‹РІР°РµС‚ path вЂ” РµСЃР»Рё path РІРµРґС‘С‚ РЅРµ Рє attack target,
+  С‚Р°РЅРє Р±СѓРґРµС‚ РµС…Р°С‚СЊ РїРѕ РЅРµРїСЂР°РІРёР»СЊРЅРѕРјСѓ path РЅРѕ РІ РїСЂР°РІРёР»СЊРЅРѕРј state.
+  РЎР»РµРґСѓСЋС‰РёР№ С‚РёРє ATTACK-07/05 sync РїРѕР№РјС‘С‚ path_goal_mismatch Рё РїРµСЂРµРїСЂРѕР»РѕР¶РёС‚.
+- repath РІС‹Р·С‹РІР°РµС‚ setLightTankAttackApproachGeneric РєР°Р¶РґС‹Р№ С‚РёРє РґР»СЏ С‚Р°РЅРєРѕРІ Р±РµР· path вЂ”
+  РµСЃР»Рё РІСЃРµ approach-РєР»РµС‚РєРё Р·Р°Р±Р»РѕРєРёСЂРѕРІР°РЅС‹, СЌС‚Рѕ Р±СѓРґРµС‚ РїРѕРІС‚РѕСЂСЏС‚СЊСЃСЏ РєР°Р¶РґС‹Р№ С‚РёРє.
+  РќРѕ findPath Р±С‹СЃС‚СЂС‹Р№ РґР»СЏ РЅРµР±РѕР»СЊС€РёС… СЂР°СЃСЃС‚РѕСЏРЅРёР№.
+
+---
+
+Р—Р°РґР°С‡Р°: BOT-ATTACK-09 вЂ” СЌРєСЃРїРµСЂРёРјРµРЅС‚Р°Р»СЊРЅС‹Р№ production cap РґР»СЏ enemy light_tank
+Р”Р°С‚Р°: 2026-05-11
+Lane: Review
+Р’РµС‚РєР°: glm/bot-attack-09-experimental-enemy-light-tank-production-cap (РѕС‚ sandbox/main)
+
+Р¦РµР»СЊ:
+Р­РєСЃРїРµСЂРёРјРµРЅС‚Р°Р»СЊРЅС‹Р№ production cap РґР»СЏ РїСЂРѕРІРµСЂРєРё РІР»РёСЏРЅРёСЏ РјР°СЃСЃРѕРІРѕРіРѕ РїСЂРѕРёР·РІРѕРґСЃС‚РІР° enemy light_tank.
+РћРіСЂР°РЅРёС‡РёС‚СЊ РєРѕР»РёС‡РµСЃС‚РІРѕ enemy light_tank, РєРѕС‚РѕСЂРѕРµ Р±РѕС‚ РјРѕР¶РµС‚ РѕРґРЅРѕРІСЂРµРјРµРЅРЅРѕ РёРјРµС‚СЊ (Р¶РёРІС‹Рµ + РІ РѕС‡РµСЂРµРґРё + РІ РїСЂРѕРёР·РІРѕРґСЃС‚РІРµ).
+
+Р§С‚Рѕ СЃРґРµР»Р°РЅРѕ:
+
+1. Р“Р»РѕР±Р°Р»СЊРЅС‹Р№ С„Р»Р°Рі cap (main.js, РїРѕСЃР»Рµ FE_PATCH_09E_FACTORY_MAX_QUEUE):
+   - window.FE_ENEMY_LIGHT_TANK_CAP = 3
+   - null / undefined / <=0 РѕС‚РєР»СЋС‡Р°РµС‚ cap
+   - РќР°СЃС‚СЂР°РёРІР°РµС‚СЃСЏ РёР· РєРѕРЅСЃРѕР»Рё: window.FE_ENEMY_LIGHT_TANK_CAP = 5 РёР»Рё window.FE_ENEMY_LIGHT_TANK_CAP = null
+
+2. РҐРµР»РїРµСЂ РїРѕРґСЃС‡С‘С‚Р° (main.js, FE_ATTACK09GetEnemyLightTankCountIncludingQueue):
+   - РЎС‡РёС‚Р°РµС‚ Р¶РёРІС‹Рµ enemy light_tank (game.units, owner=enemy, hp>0)
+   - РЎС‡РёС‚Р°РµС‚ light_tank РІ РѕС‡РµСЂРµРґСЏС… РІСЃРµС… enemy factories (_enemyFactoryQueue09E, type=light_tank)
+   - РџРµСЂРІС‹Р№ СЌР»РµРјРµРЅС‚ РѕС‡РµСЂРµРґРё вЂ” СЌС‚Рѕ С‚РµРєСѓС‰РµРµ РїСЂРѕРёР·РІРѕРґСЃС‚РІРѕ, СѓР¶Рµ СѓС‡С‚С‘РЅ РІ РѕС‡РµСЂРµРґРё
+   - Р’РѕР·РІСЂР°С‰Р°РµС‚ alive + queued
+
+3. Guard РІ FE_PATCH_09ECanStartLightTankProduction (main.js):
+   - Р•СЃР»Рё cap enabled Рё count >= cap в†’ return { ok:false, reason:'attack09_tank_cap', attack09Cap, attack09Count }
+   - РџСЂРѕРІРµСЂРєР° СЃС‚РѕРёС‚ Р”Рћ РїСЂРѕРІРµСЂРєРё queue_busy Рё not_enough_element
+   - StartLightTankProduction РїРѕР»СѓС‡Р°РµС‚ reject СЃ reason Рё РїРёС€РµС‚ РІ SetProductionStatus
+
+4. Guard РІ FE_PATCH_BASELINE_01_ChooseFactoryUnitType (main.js):
+   - Р•СЃР»Рё cap enabled Рё count >= cap в†’ return null (РІРјРµСЃС‚Рѕ 'light_tank')
+   - Р¤Р°Р±СЂРёРєР° РѕСЃС‚Р°С‘С‚СЃСЏ idle вЂ” РЅРµ РїСЂРѕРёР·РІРѕРґРёС‚СЃСЏ РЅРё light_tank, РЅРё builder (РЅРµС‚ builder spam)
+   - Guard РїСЂРёРјРµРЅСЏРµС‚СЃСЏ РЅР° РІСЃРµС… early-return РїСѓС‚СЏС…: !game, cooldown вЂ” С‚РѕР¶Рµ РїСЂРѕРІРµСЂСЏСЋС‚ cap
+
+5. РћР±СЂР°Р±РѕС‚РєР° null РІ FE_PATCH_09EUpdateEnemyFactoryProduction (main.js):
+   - var unitType = FE_PATCH_BASELINE_01_ChooseFactoryUnitType()
+   - if (!unitType) в†’ factory Р¶РґС‘С‚ (noop), builder spam РёСЃРєР»СЋС‡С‘РЅ
+   - else if (unitType === 'light_tank') в†’ StartLightTankProduction(factory)
+   - else в†’ StartFactoryProduction(factory, unitType)
+
+6. Telemetry (main.js, game._attack09EnemyTankCap):
+   - РћР±РЅРѕРІР»СЏРµС‚СЃСЏ РєР°Р¶РґС‹Р№ С‚РёРє РІ FE_PATCH_09EUpdateEnemyFactoryProduction
+   - РЎС‚СЂСѓРєС‚СѓСЂР°: { cap, count, blocked, reason, factoryId, at }
+   - cap: С‡РёСЃР»Рѕ РµСЃР»Рё enabled, null РµСЃР»Рё disabled
+   - count: С‡РёСЃР»Рѕ light_tank (alive + queued) РµСЃР»Рё enabled, null РµСЃР»Рё disabled
+   - blocked: true РµСЃР»Рё count >= cap
+   - reason: 'cap_reached' | 'cap_disabled' | null
+   - factoryId: id РїРµСЂРІРѕР№ enemy factory РёР»Рё null
+   - at: game.time
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/main.js вЂ” 5 РїСЂР°РІРѕРє (cap flag + helper, guard in CanStart, guard in ChooseFactoryUnitType, null handling in UpdateEnemyFactoryProduction, telemetry)
+- PATCH_REPORT.txt
+
+Р§С‚Рѕ РќР• С‚СЂРѕРЅСѓС‚Рѕ:
+- findPath вЂ” РЅРµС‚
+- passable вЂ” РЅРµС‚
+- combat вЂ” РЅРµС‚
+- ATTACK-08 repair вЂ” РЅРµС‚
+- scout вЂ” РЅРµС‚
+- economy formulas вЂ” РЅРµС‚
+- player production вЂ” РЅРµС‚
+- movement / pathfinding / render вЂ” РЅРµС‚
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+
+Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ:
+- assets РёР·РјРµРЅРµРЅС‹: РЅРµС‚
+- combat РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- pathfinding РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- player production Р·Р°С‚СЂРѕРЅСѓС‚Р°: РЅРµС‚
+- economy core РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- ATTACK-08 repair РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚
+- Google Drive sync С‚СЂРѕРЅСѓС‚: РЅРµС‚
+- Production paths РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚С‹
+
+РљР°Рє С‚РµСЃС‚РёСЂРѕРІР°С‚СЊ:
+1. Р—Р°РїСѓСЃС‚РёС‚СЊ РёРіСЂСѓ, РЅР°С‡Р°С‚СЊ skirmish
+2. РџРѕРґРѕР¶РґР°С‚СЊ РїРѕРєР° enemy РїРѕСЃС‚СЂРѕРёС‚ С„Р°Р±СЂРёРєСѓ Рё РїСЂРѕРёР·РІРµРґС‘С‚ 3 light_tank
+3. РџСЂРѕРІРµСЂРёС‚СЊ telemetry: console.log(game._attack09EnemyTankCap)
+   - Р”РѕР»Р¶РЅРѕ РїРѕРєР°Р·Р°С‚СЊ { cap:3, count:3, blocked:true, reason:'cap_reached', ... }
+4. РЈР±РёС‚СЊ РѕРґРёРЅ enemy light_tank
+5. РџСЂРѕРІРµСЂРёС‚СЊ С‡С‚Рѕ Р±РѕС‚ РїСЂРѕРёР·РІРѕРґРёС‚ РЅРѕРІС‹Р№ С‚Р°РЅРє (count СѓРїР°Р» РґРѕ 2, cap РЅРµ blocked)
+6. Р”Р»СЏ РѕС‚РєР»СЋС‡РµРЅРёСЏ: window.FE_ENEMY_LIGHT_TANK_CAP = null
+   - telemetry РїРѕРєР°Р¶РµС‚ { cap:null, count:null, blocked:false, reason:'cap_disabled', ... }
+7. Р”Р»СЏ СѓРІРµР»РёС‡РµРЅРёСЏ: window.FE_ENEMY_LIGHT_TANK_CAP = 5
+
+---
+
+Р—Р°РґР°С‡Р°: BOT-ATTACK-10 вЂ” lock active attack wave composition (MVP)
+Р”Р°С‚Р°: 2026-05-11
+Lane: Review
+Р’РµС‚РєР°: glm/bot-attack-10-lock-active-attack-wave (РѕС‚ sandbox/main)
+
+Р¦РµР»СЊ:
+Р—Р°С„РёРєСЃРёСЂРѕРІР°С‚СЊ СЃРѕСЃС‚Р°РІ Р°С‚Р°РєСѓСЋС‰РµР№ РІРѕР»РЅС‹ РїРѕСЃР»Рµ dispatch.
+РќРѕРІС‹Рµ РїСЂРѕРёР·РІРµРґС‘РЅРЅС‹Рµ С‚Р°РЅРєРё РЅРµ РґРѕР»Р¶РЅС‹ СЃР±СЂР°СЃС‹РІР°С‚СЊ/РїРµСЂРµСЃРѕР±РёСЂР°С‚СЊ С‚РµРєСѓС‰СѓСЋ РІРѕР»РЅСѓ.
+PrepareAttack/regroup РЅРµ РґРѕР»Р¶РЅС‹ РІРѕР·РІСЂР°С‰Р°С‚СЊ/РїРµСЂРµСЃРѕР±РёСЂР°С‚СЊ locked wave units, РїРѕРєР° target Р¶РёРІ.
+
+Р§С‚Рѕ СЃРґРµР»Р°РЅРѕ:
+
+1. РҐРµР»РїРµСЂС‹ ATTACK-10 (main.js, РїРѕСЃР»Рµ FE_PATCH_08BAttack04Telemetry):
+   - _attack10WaveCounter вЂ” СЃС‡С‘С‚С‡РёРє РІРѕР»РЅ
+   - FE_ATTACK10CreateWave(state, targetId, unitIds, orderType) вЂ” СЃРѕР·РґР°С‘С‚ РІРѕР»РЅСѓ, РјР°СЂРєРёСЂСѓРµС‚ СЋРЅРёС‚С‹
+     (unit._attack10WaveId, unit._attack10WaveLocked = true), РїРёС€РµС‚ telemetry _attack10LastWaveLock
+   - FE_ATTACK10ReleaseWave(state, reason) вЂ” СЃРЅРёРјР°РµС‚ РјР°СЂРєРёСЂРѕРІРєСѓ, РїРёС€РµС‚ telemetry
+   - FE_ATTACK10IsWaveLocked(unit) вЂ” РїСЂРѕРІРµСЂСЏРµС‚ _attack10WaveLocked && _attack10WaveId
+   - FE_ATTACK10IsWaveTargetAlive(state) вЂ” РїСЂРѕРІРµСЂСЏРµС‚ С‡С‚Рѕ target РІРѕР»РЅС‹ Р¶РёРІ
+   - FE_ATTACK10AliveWaveUnitCount(state) вЂ” СЃС‡РёС‚Р°РµС‚ Р¶РёРІС‹С… СЋРЅРёС‚РѕРІ РІРѕР»РЅС‹
+   - FE_ATTACK10GetReserveTanks(enemyTanks, state) вЂ” С„РёР»СЊС‚СЂСѓРµС‚ non-wave С‚Р°РЅРєРё
+   - FE_ATTACK10UpdateTelemetry(state) вЂ” РѕР±РЅРѕРІР»СЏРµС‚ game._attack10ActiveWave
+   - FE_ATTACK10CheckAndRelease(state) вЂ” РїСЂРѕРІРµСЂСЏРµС‚ СѓСЃР»РѕРІРёСЏ Р·Р°РІРµСЂС€РµРЅРёСЏ РІРѕР»РЅС‹
+
+2. РЎРѕР·РґР°РЅРёРµ РІРѕР»РЅС‹ РїСЂРё dispatch (FE_PATCH_08BPrepareAttack):
+   - РџРѕСЃР»Рµ СѓСЃРїРµС€РЅРѕРіРѕ issued в†’ FE_ATTACK10CreateWave(state, targetId, unitIds, attackOrderType)
+   - unitIds Р±РµСЂСѓС‚СЃСЏ РёР· _a03Ids (ATTACK-03 telemetry)
+
+3. Guard РІ FE_PATCH_08BReturnUnitHome:
+   - Wave-locked units РЅРµ РІРѕР·РІСЂР°С‰Р°СЋС‚СЃСЏ РґРѕРјРѕР№ в†’ return false
+
+4. Guard РІ FE_PATCH_08BPrepareAttack (below-threshold loop):
+   - FE_ATTACK10IsWaveLocked(unit) в†’ continue (РЅРµ ReturnUnitHome)
+
+5. Guard РІ FE_PATCH_08BStartRegroup:
+   - Release РІРѕР»РЅС‹ РїСЂРё regroup в†’ FE_ATTACK10ReleaseWave(state, 'regroup_...')
+
+6. Guard РІ FE_10D1_tryMove:
+   - Wave-locked units РЅРµ РїРµСЂРµРЅР°РїСЂР°РІР»СЏСЋС‚СЃСЏ autopilot/patrol/strength-wait в†’ return false
+
+7. Guard РІ FE_10E1_clearAttackOrder:
+   - Wave-locked units РЅРµ С‡РёСЃС‚СЏС‚ attack order в†’ return
+
+8. Guard РІ FE_10E1_returnToHq:
+   - Wave-locked units РЅРµ РІРѕР·РІСЂР°С‰Р°СЋС‚СЃСЏ РЅР° HQ в†’ return false
+
+9. Guard РІ updateEnemyBot regroup/defend loops:
+   - FE_ATTACK10IsWaveLocked(unit) в†’ continue (РЅРµ ReturnUnitHome)
+
+10. CheckAndRelease + UpdateTelemetry РІ РЅР°С‡Р°Р»Рµ updateEnemyBot:
+    - РљР°Р¶РґС‹Р№ С‚РёРє: FE_ATTACK10CheckAndRelease(state) + FE_ATTACK10UpdateTelemetry(state)
+    - РЈСЃР»РѕРІРёСЏ release: target dead, all units dead, game ended
+
+РЈСЃР»РѕРІРёСЏ Р·Р°РІРµСЂС€РµРЅРёСЏ РІРѕР»РЅС‹:
+1. Target РјС‘СЂС‚РІ в†’ release 'target_dead'
+2. Р’СЃРµ wave units РјРµСЂС‚РІС‹ в†’ release 'all_units_dead'
+3. Game result victory/defeat в†’ release 'game_ended'
+4. FE_PATCH_08BStartRegroup в†’ release 'regroup_...'
+
+Telemetry:
+- game._attack10ActiveWave = { id, targetId, unitIds, aliveCount, lockedCount, reserveTankCount, startedAt, orderType, reason }
+- game._attack10LastWaveLock = { action:'create'|'release', waveId, targetId, unitIds, reason, at }
+
+РќРµ С‚СЂРѕРЅСѓС‚Рѕ:
+- findPath вЂ” РЅРµС‚
+- passable вЂ” РЅРµС‚
+- combat damage/range/cooldown вЂ” РЅРµС‚
+- ATTACK-08 invariant repair вЂ” РЅРµС‚ (СЂР°Р±РѕС‚Р°РµС‚ РґР»СЏ wave-locked units, С‡РёРЅРёС‚ path/state)
+- ATTACK-09 cap logic вЂ” РЅРµС‚
+- ATTACK-03/ATTACK-07 sync вЂ” РЅРµС‚ (РїСЂРѕРґРѕР»Р¶Р°СЋС‚ СЂР°Р±РѕС‚Р°С‚СЊ РґР»СЏ wave-locked units)
+- scout вЂ” РЅРµС‚
+- economy formulas вЂ” РЅРµС‚
+- player production вЂ” РЅРµС‚
+- map generation вЂ” РЅРµС‚
+- render/fog вЂ” РЅРµС‚
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+
+Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ:
+- assets РёР·РјРµРЅРµРЅС‹: РЅРµС‚
+- combat РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- pathfinding РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- player production Р·Р°С‚СЂРѕРЅСѓС‚Р°: РЅРµС‚
+- economy core РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- ATTACK-08 repair РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚
+- ATTACK-09 cap РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚
+- Google Drive sync С‚СЂРѕРЅСѓС‚: РЅРµС‚
+
+РљР°Рє С‚РµСЃС‚РёСЂРѕРІР°С‚СЊ:
+1. Р—Р°РїСѓСЃС‚РёС‚СЊ РёРіСЂСѓ, РЅР°С‡Р°С‚СЊ skirmish
+2. Enemy РїСЂРѕРёР·РІРѕРґРёС‚ С‚Р°РЅРєРё, Р·Р°РїСѓСЃРєР°РµС‚ attack wave
+3. РџСЂРѕРІРµСЂРёС‚СЊ telemetry: console.log(game._attack10ActiveWave)
+   вЂ” Р”РѕР»Р¶РµРЅ РїРѕРєР°Р·Р°С‚СЊ { id:'wave_1', unitIds:[...], aliveCount:3, lockedCount:3, ... }
+4. РќРѕРІС‹Р№ С‚Р°РЅРє РїСЂРѕРёР·РІРµРґС‘РЅ вЂ” РЅРµ РґРѕР±Р°РІР»СЏРµС‚СЃСЏ РІ wave
+5. Wave-locked С‚Р°РЅРєРё РїСЂРѕРґРѕР»Р¶Р°СЋС‚ Р°С‚Р°РєСѓ
+6. game._attack10ActiveWave.reserveTankCount РїРѕРєР°Р·С‹РІР°РµС‚ РѕС‚РґРµР»СЊРЅС‹Рµ СЂРµР·РµСЂРІРЅС‹Рµ С‚Р°РЅРєРё
+7. РљРѕРіРґР° target СѓРЅРёС‡С‚РѕР¶РµРЅ / РІСЃРµ wave units РјРµСЂС‚РІС‹ в†’ wave release
+8. game._attack10LastWaveLock РїРѕРєР°Р·С‹РІР°РµС‚ action:'release', reason:'target_dead'
+
+---
+
+Р—Р°РґР°С‡Р°: BOT-SCOUT-01 вЂ” enemy produces and uses scout MVP
+Р”Р°С‚Р°: 2026-05-11
+Lane: Review
+Р’РµС‚РєР°: glm/bot-scout-01-enemy-scout-mvp (РѕС‚ sandbox/main)
+
+Р¦РµР»СЊ:
+Enemy bot РїСЂРѕРёР·РІРѕРґРёС‚ Рё РёСЃРїРѕР»СЊР·СѓРµС‚ scout РєР°Рє СЂР°Р·РІРµРґС‹РІР°С‚РµР»СЊРЅС‹Р№ СЋРЅРёС‚.
+Player С‚Р°РєР¶Рµ РјРѕР¶РµС‚ РїСЂРѕРёР·РІРѕРґРёС‚СЊ scout СЃ Р»РёРјРёС‚РѕРј 2.
+Scout Р±С‹СЃС‚СЂРµРµ РІСЃРµС… СЋРЅРёС‚РѕРІ, РёРјРµРµС‚ Р»СѓС‡С€РёР№ РѕР±Р·РѕСЂ, РЅРµ Р°С‚Р°РєСѓРµС‚.
+
+Р§С‚Рѕ СЃРґРµР»Р°РЅРѕ:
+
+1. Scout tuning (units.js):
+   - РЎРєРѕСЂРѕСЃС‚СЊ: 0.72 в†’ 1.08 (+50%)
+   - HP: 70 (Р±РµР· РёР·РјРµРЅРµРЅРёР№)
+   - view: 7 (Р±РµР· РёР·РјРµРЅРµРЅРёР№, Р»СѓС‡С€РёР№ РѕР±Р·РѕСЂ)
+   - canAttack: false (Р±РµР· РёР·РјРµРЅРµРЅРёР№)
+
+2. Scout visual (sprite_profiles.js):
+   - size: [84,84] в†’ [92,92] (Р±РѕР»СЊС€Рµ, РЅРѕ РјРµРЅСЊС€Рµ light_tank [104,104])
+   - hpOffset: 34 в†’ 38 (СЃРєРѕСЂСЂРµРєС‚РёСЂРѕРІР°РЅ РїРѕРґ РЅРѕРІС‹Р№ СЂР°Р·РјРµСЂ)
+
+3. Selection ring (main.js):
+   - scout: { x:0, y:-28, rx:0.88, ry:0.84 } в†’ { x:0, y:-32, rx:0.92, ry:0.88 }
+   - РџРѕРґСЃС‚СЂРѕРµРЅ РїРѕРґ СѓРІРµР»РёС‡РµРЅРЅС‹Р№ СЃРїСЂР°Р№С‚
+
+4. Scout cap (main.js):
+   - window.FE_SCOUT_CAP = 2 вЂ” РіР»РѕР±Р°Р»СЊРЅС‹Р№ Р»РёРјРёС‚ РґР»СЏ РѕР±РѕРёС… РІР»Р°РґРµР»СЊС†РµРІ
+   - FE_SCOUT01GetScoutCountIncludingQueue(owner) вЂ” СЃС‡РёС‚Р°РµС‚ alive + queued + producing
+   - FE_SCOUT01PlayerCanProduceScout() вЂ” РїСЂРѕРІРµСЂРєР° Р»РёРјРёС‚Р° РґР»СЏ player
+   - FE_SCOUT01EnemyCanProduceScout() вЂ” РїСЂРѕРІРµСЂРєР° Р»РёРјРёС‚Р° РґР»СЏ enemy
+   - Player cap enforcement: РІ queueUnitProduction вЂ” Р±Р»РѕРєРёСЂРѕРІРєР° + toast
+   - Player UI cap: РєРЅРѕРїРєР° scout disabled РµСЃР»Рё РєР°Рї РґРѕСЃС‚РёРіРЅСѓС‚
+   - Enemy cap enforcement: РІ ChooseFactoryUnitType вЂ” РЅРµ РІРѕР·РІСЂР°С‰Р°РµС‚ 'scout' РµСЃР»Рё РєР°Рї РґРѕСЃС‚РёРіРЅСѓС‚
+
+5. Player scout production:
+   - Scout СѓР¶Рµ РїСЂРёСЃСѓС‚СЃС‚РІРѕРІР°Р» РІ UI С„Р°Р±СЂРёРєРё (PATCH-SCOUT-02)
+   - Р”РѕР±Р°РІР»РµРЅР° РїСЂРѕРІРµСЂРєР° Р»РёРјРёС‚Р° РІ queueUnitProduction Рё openFactoryMenu
+   - РЎС‚РѕРёРјРѕСЃС‚СЊ: 1 СЌР»РµРјРµРЅС‚, 18 СЃРµРє (Р±РµР· РёР·РјРµРЅРµРЅРёР№)
+   - Player РјРѕР¶РµС‚ РїСЂРѕРёР·РІРµСЃС‚Рё РґРѕ 2 scout (alive + queued + producing)
+
+6. Enemy scout production (ChooseFactoryUnitType):
+   - РџРѕСЃР»Рµ builder/harvester РїСЂРёРѕСЂРёС‚РµС‚Р°, РїРµСЂРµРґ light_tank
+   - FE_SCOUT01_ENEMY_SCOUT_MIN = 1: РїРµСЂРІС‹Р№ scout РїСЂРѕРёР·РІРѕРґРёС‚СЃСЏ РІСЃРµРіРґР°
+   - FE_SCOUT01_ENEMY_SCOUT_CAP = 2: РІС‚РѕСЂРѕР№ scout вЂ” С‚РѕР»СЊРєРѕ РµСЃР»Рё РµСЃС‚СЊ >=2 light_tank
+   - scoutQueued РїСЂРѕРІРµСЂРєР°: РЅРµ СЃС‚Р°РІРёС‚СЊ scout РІ РѕС‡РµСЂРµРґСЊ РґРІР°Р¶РґС‹
+   - Scout production РЅРµ Р±Р»РѕРєРёСЂСѓРµС‚ light_tank РЅР°РІСЃРµРіРґР° вЂ” РїРѕСЃР»Рµ РєР°РїР° РІРѕР·РІСЂР°С‰Р°РµС‚СЃСЏ light_tank
+
+7. Scout behavior:
+   - FE_SCOUT01UpdateEnemyScoutBehavior() вЂ” РѕСЃРЅРѕРІРЅРѕР№ С†РёРєР» РїРѕРІРµРґРµРЅРёСЏ scout
+   - Scout РѕС‚РїСЂР°РІР»СЏРµС‚СЃСЏ Рє scouting points: knowledge-based в†’ map center в†’ opposite corner
+   - FE_10C1_isCombatScoutCandidate вЂ” РґРѕР±Р°РІР»РµРЅ С‚РёРї 'scout'
+   - FE_10C1_updateEnemyScoutingMvp вЂ” РїСЂРµРґРїРѕС‡РёС‚Р°РµС‚ scout unit type, fallback РЅР° light_tank
+   - Scout type РЅРµ С‚СЂРµР±СѓРµС‚ "2 tanks before scouting" gate
+   - FE_10G1_isUnitBusyForScout вЂ” scout type РІСЃРµРіРґР° free (РЅРµ busy)
+   - Scout РЅРµ Р°С‚Р°РєСѓРµС‚ (canAttack:false)
+   - Scout РЅРµ РІС…РѕРґРёС‚ РІ combat wave (FE_PATCH_08BEnemyCombatUnits С‚РѕР»СЊРєРѕ light_tank)
+   - Scout РЅРµ СЃС‡РёС‚Р°РµС‚СЃСЏ Р·Р° combat strength
+
+8. isScout helper updates:
+   - FE_10D1_isActiveScout: РґРѕР±Р°РІР»РµРЅ u.type === 'scout'
+   - FE_10E1_isScout: РґРѕР±Р°РІР»РµРЅ u.type === 'scout'
+   - FE_10H1_isScout: РґРѕР±Р°РІР»РµРЅ u.type === 'scout'
+   - Scout type СЂР°СЃРїРѕР·РЅР°С‘С‚СЃСЏ РєР°Рє scout РІРѕ РІСЃРµС… РїРѕРґСЃРёСЃС‚РµРјР°С…
+
+9. Scout vision telemetry:
+   - FE_SCOUT01UpdateScoutVision() вЂ” РїСЂРѕРІРµСЂСЏРµС‚ С‡С‚Рѕ РІРёРґСЏС‚ enemy scout'С‹
+   - Р•СЃР»Рё scout РІРёРґРёС‚ player unit/building РІ СЂР°РґРёСѓСЃРµ view (7) вЂ” Р·Р°РїРёСЃС‹РІР°РµС‚:
+     lastSeenPlayerObjectId, lastSeenX, lastSeenY, lastSeenAt
+   - Telemetry: game._botScout01 = {
+       scoutsAlive, scoutCap, activeScoutId,
+       targetX, targetY, mode,
+       lastSeenPlayerObjectId, lastSeenX, lastSeenY, lastSeenAt
+     }
+
+10. updateEnemyBot hooks:
+    - FE_SCOUT01UpdateEnemyScoutBehavior() вЂ” РєР°Р¶РґС‹Р№ С‚РёРє
+    - FE_SCOUT01UpdateScoutVision() вЂ” РєР°Р¶РґС‹Р№ С‚РёРє
+    - РћС€РёР±РєРё РїРёС€СѓС‚СЃСЏ РІ game._botScout01BehaviorError / _botScout01VisionError
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/config/units.js вЂ” scout speed 0.72в†’1.08
+- src/config/sprite_profiles.js вЂ” scout size [84,84]в†’[92,92], hpOffset 34в†’38
+- src/main.js вЂ” scout cap, player cap enforcement, enemy scout production, scout behavior, scout vision, isScout updates, selection ring, factory UI cap
+- PATCH_REPORT.txt
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+- node --check src/config/units.js -> PASS
+- node --check src/config/sprite_profiles.js -> PASS
+
+РќРµ С‚СЂРѕРЅСѓС‚Рѕ:
+- findPath вЂ” РЅРµС‚
+- passable вЂ” РЅРµС‚
+- combat damage/range/cooldown вЂ” РЅРµС‚
+- ATTACK-08 invariant repair вЂ” РЅРµС‚
+- ATTACK-09 cap logic вЂ” РЅРµС‚ (scout РЅРµ СЃС‡РёС‚Р°РµС‚СЃСЏ РєР°Рє light_tank)
+- ATTACK-10 wave-lock вЂ” РЅРµС‚ (scout РЅРµ РІС…РѕРґРёС‚ РІ wave С‡РµСЂРµР· EnemyCombatUnits)
+- economy formulas вЂ” РЅРµС‚
+- map generation вЂ” РЅРµС‚
+- render/fog вЂ” РЅРµС‚ (РєСЂРѕРјРµ selection ring Рё hpOffset)
+- save/load вЂ” РЅРµС‚
+- pathfinding вЂ” РЅРµС‚
+
+РљР°Рє С‚РµСЃС‚РёСЂРѕРІР°С‚СЊ:
+1. Р—Р°РїСѓСЃС‚РёС‚СЊ РёРіСЂСѓ, РЅР°С‡Р°С‚СЊ skirmish
+2. Player РјРѕР¶РµС‚ РїСЂРѕРёР·РІРѕРґРёС‚СЊ scout РёР· С„Р°Р±СЂРёРєРё
+3. Player РЅРµ РјРѕР¶РµС‚ РїСЂРѕРёР·РІРµСЃС‚Рё Р±РѕР»СЊС€Рµ 2 scout (alive + queued + producing)
+4. Р•СЃР»Рё РѕРґРёРЅ scout СѓРЅРёС‡С‚РѕР¶РµРЅ вЂ” РјРѕР¶РЅРѕ РїСЂРѕРёР·РІРµСЃС‚Рё РЅРѕРІРѕРіРѕ
+5. Enemy РїСЂРѕРёР·РІРѕРґРёС‚ scout РїРµСЂРµРґ light_tank (1-2 scout)
+6. Enemy scout РґРІРёРіР°РµС‚СЃСЏ Рє scouting point
+7. Scout РЅРµ Р°С‚Р°РєСѓРµС‚
+8. Scout РЅРµ РІС…РѕРґРёС‚ РІ attack wave
+9. Enemy РїСЂРѕРґРѕР»Р¶Р°РµС‚ РїСЂРѕРёР·РІРѕРґРёС‚СЊ light_tank
+10. game._botScout01 РѕР±РЅРѕРІР»СЏРµС‚СЃСЏ РєР°Р¶РґС‹Р№ С‚РёРє
+11. game._botScout01.lastSeenPlayerObjectId РѕР±РЅРѕРІР»СЏРµС‚СЃСЏ РєРѕРіРґР° scout РІРёРґРёС‚ player РѕР±СЉРµРєС‚
+
+---
+
+Р—Р°РґР°С‡Р°: BOT-SCOUT-01B вЂ” РёСЃРїСЂР°РІРёС‚СЊ РЅР°Р·РЅР°С‡РµРЅРёРµ РїСѓС‚Рё РґРІРёР¶РµРЅРёСЏ РІСЂР°Р¶РµСЃРєРѕРіРѕ СЃРєР°СѓС‚Р°
+Р”Р°С‚Р°: 2026-05-11
+Lane: Review
+Р’РµС‚РєР°: glm/bot-scout-01b-fix-enemy-scout-movement (РѕС‚ glm/bot-scout-01-enemy-scout-mvp)
+
+РџСЂРѕР±Р»РµРјР°:
+Р’СЂР°Р¶РµСЃРєРёРµ СЃРєР°СѓС‚С‹ РїСЂРѕРёР·РІРѕРґСЏС‚СЃСЏ РєРѕСЂСЂРµРєС‚РЅРѕ, РІС‹Р±РёСЂР°СЋС‚ С†РµР»СЊ, РЅРѕ РЅРµ РґРІРёРіР°СЋС‚СЃСЏ.
+Runtime-РЅР°Р±Р»СЋРґРµРЅРёРµ: scout_129: state='idle', command='move', pathLen=0.
+
+РџСЂРёС‡РёРЅР°:
+Р’ FE_10C1_trySetScoutMove РІС‹Р·РѕРІ findPath РёСЃРїРѕР»СЊР·РѕРІР°Р» РЅРµРїСЂР°РІРёР»СЊРЅСѓСЋ СЃРёРіРЅР°С‚СѓСЂСѓ:
+  maybePathFn(sx, sy, tx, ty)  вЂ” 4 С‡РёСЃР»Р°
+РќРѕ findPath РѕР¶РёРґР°РµС‚: findPath(start, goal, unitId) вЂ” 2 РѕР±СЉРµРєС‚Р° {x,y} + unitId.
+Р РµР·СѓР»СЊС‚Р°С‚: findPath РїРѕР»СѓС‡Р°Р» РЅРµРІР°Р»РёРґРЅС‹Рµ Р°СЂРіСѓРјРµРЅС‚С‹, РїСѓС‚СЊ РЅРµ СЃРѕР·РґР°РІР°Р»СЃСЏ,
+scout РѕСЃС‚Р°РІР°Р»СЃСЏ РІ state='idle' СЃ pathLen=0.
+
+Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕ:
+- state СѓСЃС‚Р°РЅР°РІР»РёРІР°Р»СЃСЏ РІ 'moving' РІРјРµСЃС‚Рѕ 'manual_move' (РєР°РЅРѕРЅРёС‡РµСЃРєРёР№ state РґР»СЏ СЂСѓС‡РЅРѕРіРѕ РґРІРёР¶РµРЅРёСЏ)
+- direction cache (_dirTargetKey, _dirDx, _dirDy) РЅРµ СЃР±СЂР°СЃС‹РІР°Р»СЃСЏ
+- РќРµ Р±С‹Р»Рѕ telemetry РґР»СЏ РґРёР°РіРЅРѕСЃС‚РёРєРё РїСЂРѕР±Р»РµРј РїСѓС‚Рё
+- РџСЂРё РёСЃС‡РµСЂРїР°РЅРёРё РїСѓС‚Рё scout РѕСЃС‚Р°РІР°Р»СЃСЏ РІ state='manual_move' РЅР°РІСЃРµРіРґР°
+
+Р§С‚Рѕ РёСЃРїСЂР°РІР»РµРЅРѕ:
+
+1. FE_10C1_trySetScoutMove вЂ” РїРѕР»РЅР°СЏ РїРµСЂРµСЂР°Р±РѕС‚РєР°:
+   - РЈР±СЂР°РЅ РїРѕРёСЃРє РЅРµСЃСѓС‰РµСЃС‚РІСѓСЋС‰РёС… helper-С„СѓРЅРєС†РёР№ (issueUnitMoveCommand Рё С‚.Рґ.)
+   - РџСЂСЏРјРѕР№ РІС‹Р·РѕРІ findPath({x:sx, y:sy}, {x:tx, y:ty}, unit.id) вЂ” РїСЂР°РІРёР»СЊРЅР°СЏ СЃРёРіРЅР°С‚СѓСЂР°
+   - РћР±СЂР°Р±РѕС‚РєР° СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ: null в†’ 'unreachable', [] в†’ 'empty_path', OK в†’ path РїСЂРёСЃРІРѕРµРЅ
+   - state = 'manual_move' РїСЂРё СѓСЃРїРµС€РЅРѕРј РїСѓС‚Рё (РІРјРµСЃС‚Рѕ 'moving')
+   - РЎР±СЂРѕСЃ direction cache: _dirTargetKey=null, _dirDx=0, _dirDy=0
+   - РЎР±СЂРѕСЃ stuck/blocked timers: _blockedTimer=0, _stuckTimer=0
+   - РЎРёРЅС…СЂРѕРЅРёР·Р°С†РёСЏ target-РїРѕР»РµР№: targetX/Y, destX/Y, goalX/Y, command='move'
+   - РџСЂРё РѕС€РёР±РєРµ РїСѓС‚Рё state РЅРµ РјРµРЅСЏРµС‚СЃСЏ (РїРѕРІРµРґРµРЅС‡РµСЃРєРёР№ С†РёРєР» РїРѕРїСЂРѕР±СѓРµС‚ РЅРѕРІСѓСЋ С†РµР»СЊ)
+   - Return pathOk (true/false) РІРјРµСЃС‚Рѕ РІСЃРµРіРґР° true
+
+2. Game loop (СЃС‚СЂРѕРєР° ~12196) вЂ” scout path exhaustion reset:
+   - Р”РѕР±Р°РІР»РµРЅР° РїСЂРѕРІРµСЂРєР°: if (state === 'manual_move' && path РїСѓСЃС‚) в†’ state = 'idle'
+   - РџРѕР·РІРѕР»СЏРµС‚ РїРѕРІРµРґРµРЅС‡РµСЃРєРѕРјСѓ С†РёРєР»Сѓ FE_SCOUT01UpdateEnemyScoutBehavior
+     РїРµСЂРµРЅР°Р·РЅР°С‡РёС‚СЊ С†РµР»СЊ РїРѕСЃР»Рµ РґРѕСЃС‚РёР¶РµРЅРёСЏ С‚РµРєСѓС‰РµР№
+
+3. Telemetry: game._botScout01MoveFix
+   РџРѕР»СЏ: {scoutId, fromX, fromY, targetX, targetY, beforeState, afterState,
+          beforePathLen, pathLen, ok, reason, at}
+   - reason РїСЂРё РЅРµСѓРґР°С‡Рµ: 'same_tile', 'no_findPath', 'unreachable', 'empty_path', 'exception:...'
+   - reason РїСЂРё СѓСЃРїРµС…Рµ: 'ok'
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/main.js вЂ” FE_10C1_trySetScoutMove (РїРµСЂРµРїРёСЃР°РЅР°), game loop scout section (РґРѕР±Р°РІР»РµРЅ state reset)
+- PATCH_REPORT.txt (РґРѕР±Р°РІР»РµРЅР° СЌС‚Р° Р·Р°РїРёСЃСЊ)
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+
+Р§С‚Рѕ РќР• С‚СЂРѕРЅСѓС‚Рѕ:
+- ATTACK-08/09/10 вЂ” РЅРµ РёР·РјРµРЅРµРЅС‹
+- findPath вЂ” РЅРµ РёР·РјРµРЅС‘РЅ
+- passable вЂ” РЅРµ РёР·РјРµРЅС‘РЅ
+- combat вЂ” РЅРµ РёР·РјРµРЅС‘РЅ
+- production/cap вЂ” РЅРµ РёР·РјРµРЅС‘РЅ (ChooseFactoryUnitType, queueUnitProduction, openFactoryMenu)
+- render/fog вЂ” РЅРµ РёР·РјРµРЅРµРЅС‹
+- map generation вЂ” РЅРµ РёР·РјРµРЅРµРЅР°
+- FE_SCOUT01UpdateEnemyScoutBehavior вЂ” РЅРµ РёР·РјРµРЅРµРЅР°
+- FE_SCOUT01ChooseScoutTarget вЂ” РЅРµ РёР·РјРµРЅРµРЅР°
+- FE_SCOUT01IsScoutEnRoute вЂ” РЅРµ РёР·РјРµРЅРµРЅР°
+- FE_SCOUT01UpdateScoutVision вЂ” РЅРµ РёР·РјРµРЅРµРЅР°
+
+Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ:
+- assets РёР·РјРµРЅРµРЅС‹: РЅРµС‚
+- economy РёР·РјРµРЅРµРЅР°: РЅРµС‚
+- combat РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- pathfinding РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- production/cap РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- Google Drive sync С‚СЂРѕРЅСѓС‚: РЅРµС‚
+- production paths С‚СЂРѕРЅСѓС‚С‹: РЅРµС‚
+
+РљР°Рє С‚РµСЃС‚РёСЂРѕРІР°С‚СЊ:
+1. Р—Р°РїСѓСЃС‚РёС‚СЊ РёРіСЂСѓ, РґРѕР¶РґР°С‚СЊСЃСЏ РїСЂРѕРёР·РІРѕРґСЃС‚РІР° enemy scout
+2. Р’ РєРѕРЅСЃРѕР»Рё: game._botScout01MoveFix
+   РћР¶РёРґР°РЅРёРµ: {ok: true, afterState: 'manual_move', pathLen: >0, reason: 'ok'}
+3. Р’РёР·СѓР°Р»СЊРЅРѕ: scout РµРґРµС‚ Рє С†РµР»Рё
+4. Р”РѕР¶РґР°С‚СЊСЃСЏ РґРѕСЃС‚РёР¶РµРЅРёСЏ С†РµР»Рё: state в†’ 'idle', РїРѕРІРµРґРµРЅС‡РµСЃРєРёР№ С†РёРєР» РЅР°Р·РЅР°С‡Р°РµС‚ РЅРѕРІСѓСЋ С†РµР»СЊ
+
+---
+
+Р—Р°РґР°С‡Р°: BOT-SCOUT-01C вЂ” РёСЃРїСЂР°РІРёС‚СЊ Р·Р°РІРёСЃР°РЅРёРµ СЃРєР°СѓС‚Р° СЃ РјРµС‚Р°РґР°РЅРЅС‹РјРё С†РµР»Рё, РЅРѕ Р±РµР· РїСѓС‚Рё
+Р”Р°С‚Р°: 2026-05-11
+Lane: Review
+Р’РµС‚РєР°: glm/bot-scout-01c-fix-scout-stuck-no-path (РѕС‚ glm/bot-scout-01b-fix-enemy-scout-movement)
+
+РџСЂРѕР±Р»РµРјР°:
+РџРѕСЃР»Рµ BOT-SCOUT-01B СЃРєР°СѓС‚С‹ РІСЃС‘ РµС‰С‘ РЅРµ РґРІРёРіР°Р»РёСЃСЊ. Р СѓС‡РЅРѕР№ С‚РµСЃС‚ РїРѕРєР°Р·Р°Р»:
+- game._botScout01MoveFix === undefined (С‚РµР»РµРјРµС‚СЂРёСЏ РЅРµ Р·Р°РїРёСЃС‹РІР°Р»Р°СЃСЊ)
+- РЎРєР°СѓС‚ СЃС‚РѕРёС‚ idle СЂСЏРґРѕРј СЃ С„Р°Р±СЂРёРєРѕР№
+- FE_10C1_trySetScoutMove СЃРѕ РёСЃРїСЂР°РІР»РµРЅРЅС‹Рј findPath РЅРё СЂР°Р·Сѓ РЅРµ РґРѕСЃС‚РёРіР°Р»СЃСЏ
+
+РџСЂРёС‡РёРЅР°:
+FE_SCOUT01IsScoutEnRoute РІРѕР·РІСЂР°С‰Р°Р» true, РµСЃР»Рё СЃРєР°СѓС‚ РёРјРµРµС‚ _fe10c1ScoutTarget
+(РјРµС‚Р°РґР°РЅРЅС‹Рµ) Рё СЂР°СЃСЃС‚РѕСЏРЅРёРµ > 3, РґР°Р¶Рµ РµСЃР»Рё path=[] Рё state='idle'. Р­С‚Рѕ РїСЂРёРІРѕРґРёР»Рѕ
+Рє С‚РѕРјСѓ, С‡С‚Рѕ FE_SCOUT01UpdateEnemyScoutBehavior РїСЂРѕРїСѓСЃРєР°Р» СЃРєР°СѓС‚Р° РєР°Р¶РґС‹Р№ С‚РёРє,
+Рё РёСЃРїСЂР°РІР»РµРЅРЅС‹Р№ FE_10C1_trySetScoutMove РЅРёРєРѕРіРґР° РЅРµ РІС‹Р·С‹РІР°Р»СЃСЏ.
+
+Р§С‚Рѕ РёСЃРїСЂР°РІР»РµРЅРѕ:
+
+1. FE_SCOUT01IsScoutEnRoute (СЃС‚СЂРѕРєР° ~3510):
+   - Р”РѕР±Р°РІР»РµРЅР° РїСЂРѕРІРµСЂРєР°: РµСЃР»Рё path РїСѓСЃС‚ Рё state='idle' в†’ РІРµСЂРЅСѓС‚СЊ false
+   - Р”РѕР±Р°РІР»РµРЅР° РїСЂРѕРІРµСЂРєР°: РµСЃР»Рё path РїСѓСЃС‚ Рё state='manual_move' в†’ РІРµСЂРЅСѓС‚СЊ false
+   - РЎРєР°СѓС‚ СЃС‡РёС‚Р°РµС‚СЃСЏ "РІ РїСѓС‚Рё" С‚РѕР»СЊРєРѕ РµСЃР»Рё Сѓ РЅРµРіРѕ РµСЃС‚СЊ СЂРµР°Р»СЊРЅС‹Р№ РїСѓС‚СЊ
+
+2. FE_SCOUT01UpdateEnemyScoutBehavior (СЃС‚СЂРѕРєР° ~3532):
+   - РџРµСЂРµСЃС‚Р°РІР»РµРЅ РїРѕСЂСЏРґРѕРє РїСЂРѕРІРµСЂРѕРє: combat/wave-С‡РµРєРё РёРґСѓС‚ РїРµСЂРІС‹РјРё
+   - Р”РѕР±Р°РІР»РµРЅ repath-Р±Р»РѕРє: РµСЃР»Рё СЃРєР°СѓС‚ РёРјРµРµС‚ РјРµС‚Р°РґР°РЅРЅС‹Рµ + РЅРµС‚ РїСѓС‚Рё + idle,
+     РїРѕРїС‹С‚Р°С‚СЊСЃСЏ РїРµСЂРµРїСЂРѕР»РѕР¶РёС‚СЊ РїСѓС‚СЊ С‡РµСЂРµР· FE_10C1_trySetScoutMove
+   - Р•СЃР»Рё repath СѓСЃРїРµС€РµРЅ вЂ” continue (СЃРєР°СѓС‚ С‚РµРїРµСЂСЊ РµРґРµС‚)
+   - Р•СЃР»Рё repath РЅРµСѓСЃРїРµС€РµРЅ вЂ” РѕС‡РёСЃС‚РёС‚СЊ СѓСЃС‚Р°СЂРµРІС€РёРµ РјРµС‚Р°РґР°РЅРЅС‹Рµ,
+     С‡С‚РѕР±С‹ РІС‹Р±СЂР°С‚СЊ РЅРѕРІСѓСЋ С†РµР»СЊ С‡РµСЂРµР· FE_SCOUT01ChooseScoutTarget
+   - IsScoutEnRoute РїСЂРѕРІРµСЂРєР° РїРµСЂРµРЅРµСЃРµРЅР° РїРѕСЃР»Рµ repath-Р±Р»РѕРєР°
+
+3. FE_10C1_trySetScoutMove (СЃС‚СЂРѕРєР° ~4004):
+   - РўРµР»РµРјРµС‚СЂРёСЏ РїРёС€РµС‚СЃСЏ Р’РЎР•Р“Р”Рђ, РґР°Р¶Рµ РїСЂРё СЂР°РЅРЅРµРј return
+   - Р”РѕР±Р°РІР»РµРЅ РІС‹Р·РѕРІ FE_SCOUT01B_WriteMoveTelemetry РІ РєР°Р¶РґРѕРј exit path
+   - РџСЂРёС‡РёРЅР° 'no_target' РїСЂРё unit/target === null
+   - РџСЂРёС‡РёРЅР° 'skipped_en_route' РїСЂРё Р°С‚Р°РєСѓСЋС‰РёС… РїРѕР»СЏС…
+   - РџСЂРёС‡РёРЅР° 'repath_empty_path' РїСЂРё РЅРµСѓРґР°С‡РЅРѕРј repath (path=[] РїРѕСЃР»Рµ idle)
+   - РџСЂРёС‡РёРЅР° 'no_path' РїСЂРё findPath===null РёР»Рё findPath РЅРµ РЅР°Р№РґРµРЅ
+   - РџСЂРёС‡РёРЅР° 'ok' РїСЂРё СѓСЃРїРµС…Рµ
+
+4. FE_SCOUT01B_WriteMoveTelemetry (РЅРѕРІР°СЏ С„СѓРЅРєС†РёСЏ, СЃС‚СЂРѕРєР° ~4099):
+   - Р¦РµРЅС‚СЂР°Р»РёР·РѕРІР°РЅРЅС‹Р№ РїРёСЃР°С‚РµР»СЊ С‚РµР»РµРјРµС‚СЂРёРё game._botScout01MoveFix
+   - Р’С‹Р·С‹РІР°РµС‚СЃСЏ РёР· РєР°Р¶РґРѕРіРѕ exit path FE_10C1_trySetScoutMove
+   - РџРѕР»СЏ: {scoutId, fromX, fromY, targetX, targetY, beforeState, afterState,
+            beforePathLen, pathLen, ok, reason, at}
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/main.js вЂ” FE_SCOUT01IsScoutEnRoute (path+idle check),
+                 FE_SCOUT01UpdateEnemyScoutBehavior (repath logic),
+                 FE_10C1_trySetScoutMove (always-write telemetry, new reason codes),
+                 FE_SCOUT01B_WriteMoveTelemetry (new helper function)
+- PATCH_REPORT.txt (РґРѕР±Р°РІР»РµРЅР° СЌС‚Р° Р·Р°РїРёСЃСЊ)
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+
+Р§С‚Рѕ РќР• С‚СЂРѕРЅСѓС‚Рѕ:
+- ATTACK-08/09/10 вЂ” РЅРµ РёР·РјРµРЅРµРЅС‹
+- findPath вЂ” РЅРµ РёР·РјРµРЅС‘РЅ
+- passable вЂ” РЅРµ РёР·РјРµРЅС‘РЅ
+- combat вЂ” РЅРµ РёР·РјРµРЅС‘РЅ
+- production/cap вЂ” РЅРµ РёР·РјРµРЅС‘РЅ
+- render/fog вЂ” РЅРµ РёР·РјРµРЅРµРЅС‹
+- map generation вЂ” РЅРµ РёР·РјРµРЅРµРЅР°
+- FE_10D1 (autopilot/patrol РґР»СЏ light_tank) вЂ” РЅРµ РёР·РјРµРЅС‘РЅ
+
+Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ:
+- assets РёР·РјРµРЅРµРЅС‹: РЅРµС‚
+- economy РёР·РјРµРЅРµРЅР°: РЅРµС‚
+- combat РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- pathfinding РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- production/cap РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- Google Drive sync С‚СЂРѕРЅСѓС‚: РЅРµС‚
+- production paths С‚СЂРѕРЅСѓС‚С‹: РЅРµС‚
+
+РљР°Рє С‚РµСЃС‚РёСЂРѕРІР°С‚СЊ:
+1. Р—Р°РїСѓСЃС‚РёС‚СЊ РёРіСЂСѓ, РґРѕР¶РґР°С‚СЊСЃСЏ РїСЂРѕРёР·РІРѕРґСЃС‚РІР° enemy scout
+2. Р’ РєРѕРЅСЃРѕР»Рё: game._botScout01MoveFix
+   РћР¶РёРґР°РЅРёРµ: {ok: true, reason: 'ok' РёР»Рё 'repath_empty_path', afterState: 'manual_move', pathLen: >0}
+3. Р’РёР·СѓР°Р»СЊРЅРѕ: scout РµРґРµС‚ РѕС‚ РІСЂР°Р¶РµСЃРєРѕР№ Р±Р°Р·С‹ Рє С†РµР»Рё
+4. FE_SCOUT01B_WriteMoveTelemetry РІС‹Р·С‹РІР°РµС‚СЃСЏ РїСЂРё РєР°Р¶РґРѕР№ РїРѕРїС‹С‚РєРµ вЂ”
+   С‚РµР»РµРјРµС‚СЂРёСЏ РІСЃРµРіРґР° СЃСѓС‰РµСЃС‚РІСѓРµС‚ РїРѕСЃР»Рµ РїРµСЂРІРѕР№ РїРѕРїС‹С‚РєРё РґРІРёР¶РµРЅРёСЏ
+
+---
+
+Р—Р°РґР°С‡Р°: BOT-SCOUT-02A вЂ” scout combat targetability + early scout production policy
+Р”Р°С‚Р°: 2026-05-11
+Lane: Review
+Р’РµС‚РєР°: glm/bot-scout-02a-scout-targetability-early-policy (РѕС‚ sandbox/main)
+
+Р¦РµР»СЊ:
+1. Enemy scout СЃС‚Р°РЅРѕРІРёС‚СЃСЏ РІР°Р»РёРґРЅРѕР№ С†РµР»СЊСЋ РґР»СЏ player light_tank (targetability).
+   canAttack:false РІ units.js РѕР·РЅР°С‡Р°РµС‚ С‡С‚Рѕ scout РќР• РјРѕР¶РµС‚ Р°С‚Р°РєРѕРІР°С‚СЊ,
+   РЅРѕ РќР• РѕР·РЅР°С‡Р°РµС‚ С‡С‚Рѕ scout РЅРµР»СЊР·СЏ Р°С‚Р°РєРѕРІР°С‚СЊ.
+2. Scout РёСЃРєР»СЋС‡Р°РµС‚СЃСЏ РёР· Р±РѕРµРІС‹С… РµРґРёРЅРёС† (combat exclusion) вЂ” РЅРµ РІС…РѕРґРёС‚ РІ attack wave,
+   РЅРµ РїРѕР»СѓС‡Р°РµС‚ waveId / _attack10WaveLocked, РЅРµ СЃС‡РёС‚Р°РµС‚СЃСЏ combat strength.
+3. Enemy scout production policy вЂ” hard cap 2, soft target 1, РІС‚РѕСЂРѕР№ scout
+   СЂР°Р·СЂРµС€С‘РЅ С‚РѕР»СЊРєРѕ РїСЂРё game.time >= 600 || game.mapSize === 'large'.
+4. Telemetry game._botScout02A.
+5. РќРµ С‚СЂРѕРіР°С‚СЊ: ATTACK-08/09/10, findPath, passable, scout movement, map gen,
+   render/fog, save/load, full lifecycle (BOT-SCOUT-02B).
+
+Р§С‚Рѕ СЃРґРµР»Р°РЅРѕ:
+
+A. Scout targetability (4 РїСЂР°РІРєРё):
+
+A1. Helper FE_SCOUT02AIsEnemyScoutTarget(attacker, target)
+   - РќРѕРІР°СЏ С„СѓРЅРєС†РёСЏ СЂСЏРґРѕРј СЃ FE_PATCH_07BGetHostileLightTankTargetKind
+   - Robust check: target && target.type === 'scout' && unitOwner(target) !== unitOwner(attacker)
+   - Р‘РµР· РѕР±СЏР·Р°С‚РµР»СЊРЅРѕРіРѕ target.kind === 'unit' вЂ” С‚РѕР»СЊРєРѕ С‚РёРї + РІР»Р°РґРµР»РµС†
+
+A2. FE_PATCH_07BGetHostileLightTankTargetKind СЂР°СЃС€РёСЂРµРЅР°
+   - Р”РѕР±Р°РІР»РµРЅ Р±Р»РѕРє: if (FE_SCOUT02AIsEnemyScoutTarget(attacker, target)) return 'unit';
+   - Р­С‚Рѕ РїРѕРєСЂС‹РІР°РµС‚ РІСЃРµ Р°С‚Р°РєСѓСЋС‰РёРµ С†РµРїРѕС‡РєРё, РєРѕС‚РѕСЂС‹Рµ РїСЂРѕС…РѕРґСЏС‚ С‡РµСЂРµР· GetHostileLightTankTargetKind:
+     updateLightTankCombat, setLightTankAttackGeneric, updateLightTankAttackApproach,
+     FE_PATCH_08BCommandEnemyTankAttack, ATTACK-03 re-issue, ATTACK-07 sync, ATTACK-06 re-path
+
+A3. onCanvasClick СЂР°СЃС€РёСЂРµРЅ
+   - РЎС‚Р°СЂС‹Р№: if (isLightTank(selected) && isPlayerUnit(selected) && isLightTank(obj) && isEnemyUnit(obj))
+   - РќРѕРІС‹Р№: РґРѕР±Р°РІР»РµРЅРѕ || FE_SCOUT02AIsEnemyScoutTarget(selected, obj)
+   - Player light_tank РјРѕР¶РµС‚ РєР»РёРєРЅСѓС‚СЊ РЅР° enemy scout в†’ attack/approach
+
+A4. setGroupLightTankAttack + setGroupLightTankAttackApproach СЂР°СЃС€РёСЂРµРЅС‹
+   - РћР±Рµ С„СѓРЅРєС†РёРё С‚РµРїРµСЂСЊ СЂР°СЃРїРѕР·РЅР°СЋС‚ enemy scout РєР°Рє РІР°Р»РёРґРЅСѓСЋ С†РµР»СЊ РіСЂСѓРїРїС‹
+   - РСЃРїРѕР»СЊР·СѓСЋС‚ FE_SCOUT02AIsEnemyScoutTarget(group[0], target) РґР»СЏ owner check
+
+B. Scout combat exclusion (1 РїСЂР°РІРєР°):
+
+B1. FE_PATCH_08BEnemyCombatUnits
+   - Р”РѕР±Р°РІР»РµРЅ С„РёР»СЊС‚СЂ u.type !== 'scout'
+   - РЎРєР°СѓС‚С‹ РЅРµ РїРѕРїР°РґР°СЋС‚ РІ enemy combat units в†’ РЅРµ РІС…РѕРґСЏС‚ РІ attack waves,
+     РЅРµ РїРѕР»СѓС‡Р°СЋС‚ waveId / _attack10WaveLocked, РЅРµ СЃС‡РёС‚Р°СЋС‚СЃСЏ combat strength
+   - Defense in depth: type 'scout' СѓР¶Рµ РёСЃРєР»СЋС‡Р°РµС‚СЃСЏ isLightTank(), РЅРѕ С„РёР»СЊС‚СЂ
+     Р·Р°С‰РёС‰Р°РµС‚ РѕС‚ Р±СѓРґСѓС‰РёС… СЂРѕР»РµР№ (light_tank СЃ _fe10c1Role='scout')
+
+C. Enemy scout production policy (1 РїСЂР°РІРєР°):
+
+C1. FE_PATCH_BASELINE_01_ChooseFactoryUnitType
+   - РЎС‚Р°СЂР°СЏ Р»РѕРіРёРєР° BOT-SCOUT-01:
+     if (scoutCount < FE_SCOUT01_ENEMY_SCOUT_MIN) return 'scout';
+     if (scoutCount < FE_SCOUT01_ENEMY_SCOUT_CAP && tankCount >= 2) return 'scout';
+   - РќРѕРІР°СЏ Р»РѕРіРёРєР° BOT-SCOUT-02A:
+     if (scoutCount < 1) return 'scout';
+     if (scoutCount < FE_SCOUT01_ENEMY_SCOUT_CAP && (game.time >= 600 || game.mapSize === 'large')) return 'scout';
+   - РџРµСЂРІС‹Р№ scout вЂ” РІСЃРµРіРґР° (scoutCount < 1)
+   - Р’С‚РѕСЂРѕР№ scout вЂ” С‚РѕР»СЊРєРѕ РїСЂРё mature game (time >= 600) РёР»Рё large map
+   - РЎРјРµСЂС‚СЊ РїРµСЂРІРѕРіРѕ scout РїРѕРєСЂС‹РІР°РµС‚СЃСЏ scoutCount < 1 в†’ respawn РєР°Рє РїРµСЂРІРѕРіРѕ
+   - Hard cap РѕСЃС‚Р°С‘С‚СЃСЏ FE_SCOUT01_ENEMY_SCOUT_CAP = 2
+   - stable economy РќР• РґРѕР±Р°РІР»РµРЅ вЂ” РЅРµС‚ РіРѕС‚РѕРІРѕРіРѕ helper
+
+D. Telemetry (1 РїСЂР°РІРєР°):
+
+D1. game._botScout02A вЂ” РѕР±РЅРѕРІР»СЏРµС‚СЃСЏ РєР°Р¶РґС‹Р№ С‚РёРє РІ updateEnemyBot
+   - enemyScoutCount: РєРѕР»РёС‡РµСЃС‚РІРѕ Р¶РёРІС‹С… enemy scout
+   - enemyScoutSoftTarget: 1
+   - enemyScoutHardCap: 2
+   - secondScoutAllowed: boolean
+   - secondScoutReason: 'first_not_yet' | 'cap_reached' | 'time_mature' | 'large_map' | 'conditions_not_met'
+   - scoutTargetableCheck: typeof FE_SCOUT02AIsEnemyScoutTarget === 'function'
+   - lastScoutAttackedId: id Р°С‚Р°РєСѓРµРјРѕРіРѕ enemy scout (РµСЃР»Рё РµСЃС‚СЊ)
+   - at: game.time
+
+РќРµ С‚СЂРѕРЅСѓС‚Рѕ:
+- ATTACK-08/09/10 вЂ” Р±РµР· РёР·РјРµРЅРµРЅРёР№
+- findPath / passable вЂ” Р±РµР· РёР·РјРµРЅРµРЅРёР№
+- Scout movement (manual_move, direction cache) вЂ” Р±РµР· РёР·РјРµРЅРµРЅРёР№
+- Map generation вЂ” Р±РµР· РёР·РјРµРЅРµРЅРёР№
+- Render / fog вЂ” Р±РµР· РёР·РјРµРЅРµРЅРёР№
+- Save / load вЂ” Р±РµР· РёР·РјРµРЅРµРЅРёР№
+- BOT-SCOUT-02B lifecycle (observe / return / cooldown) вЂ” РѕС‚РґРµР»СЊРЅС‹Р№ РїР°С‚С‡
+- FE_SCOUT01_ENEMY_SCOUT_MIN / FE_SCOUT01_ENEMY_SCOUT_CAP вЂ” РєРѕРЅСЃС‚Р°РЅС‚С‹ РЅРµ РёР·РјРµРЅРµРЅС‹
+- FE_10H1_isScout вЂ” Р±РµР· РёР·РјРµРЅРµРЅРёР№, СЃРєР°СѓС‚С‹ СѓР¶Рµ РїСЂРѕРїСѓСЃРєР°СЋС‚СЃСЏ РїСЂРё retreat/defense
+- FE_10E1_isTank вЂ” СЃРєР°СѓС‚С‹ СѓР¶Рµ РЅРµ РїСЂРѕС…РѕРґСЏС‚ (type !== 'light_tank' && !type.includes('tank'))
+
+РљР°Рє РїСЂРѕРІРµСЂРёС‚СЊ:
+1. Scout СЃС‚Р°Р» РІР°Р»РёРґРЅРѕР№ С†РµР»СЊСЋ:
+   - FE_SCOUT02AIsEnemyScoutTarget(attacker, target) в†’ true РґР»СЏ enemy scout
+   - FE_PATCH_07BGetHostileLightTankTargetKind(playerTank, enemyScout) в†’ 'unit'
+   - onCanvasClick: РєР»РёРє player tank в†’ enemy scout в†’ attack/approach
+   - setGroupLightTankAttack: РіСЂСѓРїРїР° С‚Р°РЅРєРѕРІ в†’ enemy scout в†’ attack
+   - setGroupLightTankAttackApproach: РіСЂСѓРїРїР° С‚Р°РЅРєРѕРІ в†’ enemy scout в†’ approach
+
+2. Р’С‚РѕСЂРѕР№ early scout РѕРіСЂР°РЅРёС‡РµРЅ:
+   - game._botScout02A.secondScoutAllowed === false РїСЂРё time < 600 && mapSize !== 'large'
+   - game._botScout02A.secondScoutAllowed === true РїСЂРё time >= 600 || mapSize === 'large'
+   - game._botScout02A.secondScoutReason РїРѕРєР°Р·С‹РІР°РµС‚ РїСЂРёС‡РёРЅСѓ
+
+3. Scout РїРѕР»СѓС‡Р°РµС‚ СѓСЂРѕРЅ Рё СѓРјРёСЂР°РµС‚:
+   - updateLightTankCombat РІС‹Р·С‹РІР°РµС‚ damageUnit(target, stats.damage)
+   - damageUnit СЃРЅРёР¶Р°РµС‚ hp, РїСЂРё hp <= 0 РІС‹Р·С‹РІР°РµС‚ destroyUnit
+   - РџСЂРѕРІРµСЂРёС‚СЊ: console.log(game._botScout02A.lastScoutAttackedId) РїСЂРё Р°С‚Р°РєРµ scout
+
+4. Scout РќР• РїРѕР»СѓС‡Р°РµС‚ waveId / _attack10WaveLocked:
+   - FE_PATCH_08BEnemyCombatUnits С„РёР»СЊС‚СЂСѓРµС‚ u.type !== 'scout'
+   - FE_ATTACK10CreateWave РїРѕР»СѓС‡Р°РµС‚ С‚РѕР»СЊРєРѕ enemyTanks РёР· EnemyCombatUnits
+   - РЎРєР°СѓС‚С‹ С„РёР·РёС‡РµСЃРєРё РЅРµ РїРѕРїР°РґР°СЋС‚ РІ wave.unitIds
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/main.js (6 РїСЂР°РІРѕРє: helper, GetHostileLightTankTargetKind, onCanvasClick,
+  setGroupLightTankAttack, setGroupLightTankAttackApproach, EnemyCombatUnits,
+  ChooseFactoryUnitType, telemetry)
+- PATCH_REPORT.txt (РґРѕР±Р°РІР»РµРЅР° СЌС‚Р° Р·Р°РїРёСЃСЊ)
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+
+Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ:
+- assets РёР·РјРµРЅРµРЅС‹: РЅРµС‚
+- index.html РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- РЅРѕРІС‹Рµ JS-С„Р°Р№Р»С‹ СЃРѕР·РґР°РЅС‹: РЅРµС‚
+- pathfinding РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- save/load РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- map generation РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- render / fog РёР·РјРµРЅРµРЅС‹: РЅРµС‚
+- scout movement РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- ATTACK-08/09/10 Р»РѕРіРёРєР° РЅРµ С‚СЂРѕРЅСѓС‚Р°
+- Google Drive sync С‚СЂРѕРЅСѓС‚: РЅРµС‚
+- production paths С‚СЂРѕРЅСѓС‚С‹: РЅРµС‚
+
+---
+
+Р—Р°РґР°С‡Р°: BOT-SCOUT-02B вЂ” scout observe-return-cooldown lifecycle
+Р”Р°С‚Р°: 2026-05-11
+Lane: Review
+Р’РµС‚РєР°: glm/bot-scout-02b-scout-lifecycle (РѕС‚ sandbox/main)
+
+РџСЂРѕР±Р»РµРјР°:
+Enemy scout РґРѕРµР·Р¶Р°РµС‚ РґРѕ player base / scouting area Рё СЃС‚РѕРёС‚ С‚Р°Рј Р±РµСЃРєРѕРЅРµС‡РЅРѕ.
+РќРµС‚ lifecycle вЂ” scout РЅРµ РЅР°Р±Р»СЋРґР°РµС‚, РЅРµ РІРѕР·РІСЂР°С‰Р°РµС‚СЃСЏ, РЅРµ СѓС…РѕРґРёС‚ РЅР° cooldown.
+
+Р¦РµР»СЊ:
+Р”РѕР±Р°РІРёС‚СЊ РїСЂРѕСЃС‚РѕР№ scout lifecycle: outbound -> observing -> returning -> cooldown -> outbound.
+Scout РїСЂРёР±С‹РІР°РµС‚ РЅР° РјРµСЃС‚Рѕ, СЃС‚РѕРёС‚ 4 СЃРµРє, РІРѕР·РІСЂР°С‰Р°РµС‚СЃСЏ РґРѕРјРѕР№, Р¶РґС‘С‚ 30 СЃРµРє cooldown, Р·Р°С‚РµРј РїРѕРІС‚РѕСЂСЏРµС‚.
+РњРёРЅРёРјР°Р»СЊРЅР°СЏ threat-react: РµСЃР»Рё scout РїРѕР»СѓС‡РёР» СѓСЂРѕРЅ РёР»Рё СЂСЏРґРѕРј player light_tank вЂ” retreat.
+
+Р§С‚Рѕ СЃРґРµР»Р°РЅРѕ:
+
+1. Lifecycle РєРѕРЅСЃС‚Р°РЅС‚С‹ (main.js, РїРѕСЃР»Рµ FE_SCOUT01_ENEMY_SCOUT_CAP):
+   - FE_SCOUT02B_OBSERVE_SEC = 4
+   - FE_SCOUT02B_COOLDOWN_SEC = 30
+   - FE_SCOUT02B_ARRIVE_DIST = 2 (tiles to target = "arrived")
+   - FE_SCOUT02B_HOME_ARRIVE_DIST = 3 (tiles to home = "home")
+   - FE_SCOUT02B_THREAT_RADIUS = 5 (tiles: player light_tank triggers retreat)
+
+2. Helper С„СѓРЅРєС†РёРё (main.js):
+   - FE_SCOUT02BGetEnemyHomeAnchor() вЂ” reuse FE_PATCH_08BResolveEnemyHomeBase + FE_PATCH_08BHomeAnchorFromBase, fallback {4,4}
+   - FE_SCOUT02BIsLifecycleBusy(u) вЂ” true РµСЃР»Рё _scout02BState = observing/returning/cooldown
+
+3. Lifecycle fields РЅР° scout-СЋРЅРёС‚Рµ (РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РІ FE_10C1_trySetScoutMove):
+   - _scout02BState: 'outbound' | 'observing' | 'returning' | 'cooldown'
+   - _scout02BObserveUntil: timestamp
+   - _scout02BCooldownUntil: timestamp
+   - _scout02BHomeX, _scout02BHomeY: enemy HQ anchor
+   - _scout02BLastHp: РґР»СЏ threat detection (РЅРµ maxHp)
+
+4. Lifecycle wrapper РІ FE_SCOUT01UpdateEnemyScoutBehavior:
+   - РќР• РїРµСЂРµРїРёСЃР°РЅР° РїРѕР»РЅРѕСЃС‚СЊСЋ вЂ” РјРёРЅРёРјР°Р»СЊРЅС‹Р№ wrapper РїРѕРІРµСЂС… СЃСѓС‰РµСЃС‚РІСѓСЋС‰РµР№ Р»РѕРіРёРєРё
+   - Scouts Р±РµР· _scout02BState: fallback Рє СЃСѓС‰РµСЃС‚РІСѓСЋС‰РµР№ BOT-SCOUT-01B/01C Р»РѕРіРёРєРµ
+   - outbound: РµСЃР»Рё dist <= ARRIVE_DIST РёР»Рё path consumed + idle в†’ observing (path=[], state='idle', command='')
+   - observing: Р¶РґС‘С‚ OBSERVE_SEC в†’ returning (FE_10C1_trySetScoutMove Рє home)
+   - returning: РµСЃР»Рё dist <= HOME_ARRIVE_DIST РёР»Рё idle Р±РµР· path в†’ cooldown (path=[], state='idle', command='')
+   - cooldown: Р¶РґС‘С‚ COOLDOWN_SEC в†’ outbound (clear metadata, СЃР»РµРґСѓСЋС‰РёР№ tick РЅР°Р·РЅР°С‡РёС‚ РЅРѕРІС‹Р№ target)
+
+5. Threat detection (MVP, С‚РѕР»СЊРєРѕ РґР»СЏ outbound/observing):
+   - Р•СЃР»Рё scout.hp < _scout02BLastHp в†’ returning (reason='damaged_return')
+   - Р•СЃР»Рё СЂСЏРґРѕРј player light_tank РІ СЂР°РґРёСѓСЃРµ THREAT_RADIUS в†’ returning
+   - _scout02BLastHp РѕР±РЅРѕРІР»СЏРµС‚СЃСЏ РєР°Р¶РґС‹Р№ tick
+
+6. Р—Р°С‰РёС‚Р° FE_10C1_updateEnemyScoutingMvp:
+   - freeScout.find() РґРѕР±Р°РІР»РµРЅРѕ СѓСЃР»РѕРІРёРµ !FE_SCOUT02BIsLifecycleBusy(u)
+   - Scouts РІ observing/returning/cooldown РќР• СЃС‡РёС‚Р°СЋС‚СЃСЏ СЃРІРѕР±РѕРґРЅС‹РјРё РґР»СЏ РЅРѕРІРѕР№ СЂР°Р·РІРµРґС†РµР»Рё
+
+7. Telemetry: game._botScout02B
+   - scoutId, state, targetX/Y, homeX/Y, observeUntil, cooldownUntil, pathLen, reason, at
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/main.js вЂ” lifecycle constants, helpers, FE_10C1_trySetScoutMove init, FE_SCOUT01UpdateEnemyScoutBehavior wrapper, FE_10C1_updateEnemyScoutingMvp protection, telemetry
+- PATCH_REPORT.txt
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+
+Р§С‚Рѕ РќР• С‚СЂРѕРЅСѓС‚Рѕ:
+- BOT-SCOUT-02A targetability (FE_SCOUT02AIsEnemyScoutTarget)
+- BOT-SCOUT-02A production policy (early second scout gate)
+- ATTACK-08/09/10
+- enemy light_tank attack-chain
+- findPath internals
+- passable
+- combat damage/range/cooldown
+- economy formulas
+- map generation
+- render / fog
+- save / load
+- full bot brain / attack readiness
+
+Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ:
+- assets РёР·РјРµРЅРµРЅС‹: РЅРµС‚
+- economy РёР·РјРµРЅРµРЅР°: РЅРµС‚
+- combat РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- pathfinding РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- production policy РёР·РјРµРЅРµРЅР°: РЅРµС‚
+- Google Drive sync С‚СЂРѕРЅСѓС‚: РЅРµС‚
+- production paths С‚СЂРѕРЅСѓС‚С‹: РЅРµС‚
+
+---
+
+Р—Р°РґР°С‡Р°: BOT-SCOUT-02B1 вЂ” fix scout cooldown far from home + timer base mismatch
+Р”Р°С‚Р°: 2026-05-11
+Lane: Review
+Р’РµС‚РєР°: glm/bot-scout-02b1-fix-cooldown-timerbase (РѕС‚ sandbox/main)
+
+РџСЂРѕР±Р»РµРјР°:
+BOT-SCOUT-02B (merged) СЃРѕРґРµСЂР¶Р°Р» 3 Р±Р°РіР°, РІС‹СЏРІР»РµРЅРЅС‹С… СЂСѓС‡РЅС‹Рј С‚РµСЃС‚РѕРј:
+1. Lifecycle timers РёСЃРїРѕР»СЊР·СѓСЋС‚ performance.now() (РјСЃ РѕС‚ Р·Р°РіСЂСѓР·РєРё СЃС‚СЂР°РЅРёС†С‹),
+   Р° game.time вЂ” СЃРµРєСѓРЅРґС‹ РѕС‚ РЅР°С‡Р°Р»Р° РёРіСЂС‹. РќРµСЃРѕРІРјРµСЃС‚РёРјС‹Рµ С€РєР°Р»С‹:
+   cooldownUntil=507918 РїСЂРё game.timeв‰€430 вЂ” РЅРµС‡РёС‚Р°РµРјРѕ РІ С‚РµР»РµРјРµС‚СЂРёРё.
+2. returningв†’cooldown РІРѕР·РјРѕР¶РµРЅ РїСЂРё РїСѓСЃС‚РѕРј РїСѓС‚Рё Рё idle-СЃРѕСЃС‚РѕСЏРЅРёРё, РґР°Р¶Рµ РµСЃР»Рё
+   СЃРєР°СѓС‚ РґР°Р»РµРєРѕ РѕС‚ РґРѕРјР° (distToHomeв‰€52 С‚Р°Р№Р»Р°). РЈСЃР»РѕРІРёРµ (!_hasPathR && _isIdleR)
+   РїРѕР·РІРѕР»СЏР»Рѕ РІРѕР№С‚Рё РІ cooldown РІРјРµСЃС‚Рѕ repath.
+3. damaged/threatв†’returning, РЅРѕ РµСЃР»Рё FE_10C1_trySetScoutMove РЅРµ СЃРјРѕРі РїСЂРѕР»РѕР¶РёС‚СЊ
+   РїСѓС‚СЊ, СЃРєР°СѓС‚ idle Р±РµР· РїСѓС‚Рё в†’ СЃР»РµРґСѓСЋС‰РёР№ С‚РёРє: !_hasPathR && _isIdleR в†’ cooldown.
+
+Р§С‚Рѕ РёСЃРїСЂР°РІР»РµРЅРѕ:
+
+1. Time base: performance.now() в†’ game.time (СЃРµРєСѓРЅРґС‹)
+   - FE_SCOUT01UpdateEnemyScoutBehavior: var now = Number(game.time || 0);
+   - РЈР±СЂР°РЅР° var gameTime (С‚РµРїРµСЂСЊ now = game.time)
+   - observeUntil = now + FE_SCOUT02B_OBSERVE_SEC (Р±РµР· * 1000)
+   - cooldownUntil = now + FE_SCOUT02B_COOLDOWN_SEC (Р±РµР· * 1000)
+   - РЎСЂР°РІРЅРµРЅРёСЏ now < observeUntil/cooldownUntil С‚РµРїРµСЂСЊ РІ СЃРµРєСѓРЅРґР°С…
+
+2. returningв†’cooldown С‚РѕР»СЊРєРѕ near home:
+   - РЈР±СЂР°РЅРѕ || (!_hasPathR && _isIdleR) РёР· СѓСЃР»РѕРІРёСЏ РІС…РѕРґР° РІ cooldown
+   - РўРµРїРµСЂСЊ: if (_distToHome <= FE_SCOUT02B_HOME_ARRIVE_DIST)
+   - РЎРєР°СѓС‚ РќР• РІС…РѕРґРёС‚ РІ cooldown РґР°Р»РµРєРѕ РѕС‚ РґРѕРјР°
+
+3. Repath РїСЂРё returning + РїСѓС‚СЊ РїСѓСЃС‚ + far from home:
+   - FE_10C1_trySetScoutMove СЂРµР·СѓР»СЊС‚Р°С‚ СЃРѕС…СЂР°РЅСЏРµС‚СЃСЏ РІ _repathOk
+   - success в†’ s._scout02BReason = ''
+   - fail в†’ s._scout02BReason = 'return_repath_failed'
+   - РЎРєР°СѓС‚ РѕСЃС‚Р°С‘С‚СЃСЏ РІ returning, РїРѕРІС‚РѕСЂРёС‚ repath РЅР° СЃР»РµРґСѓСЋС‰РµРј С‚РёРєРµ
+
+4. Р”РѕР±Р°РІР»РµРЅРѕ РїРѕР»Рµ _scout02BReason РЅР° РІСЃРµ lifecycle transitions:
+   - outboundв†’observing: reason='observing'
+   - observingв†’returning: reason='observe_done'
+   - damagedв†’returning: reason='damaged'
+   - threatв†’returning: reason='threat'
+   - returningв†’cooldown: reason='at_home'
+   - cooldownв†’outbound: reason='cooldown_done'
+   - repath success: reason=''
+   - repath failed: reason='return_repath_failed'
+   - Init: reason=''
+
+5. Telemetry game._botScout02B РѕР±РЅРѕРІР»С‘РЅ:
+   - Р”РѕР±Р°РІР»РµРЅС‹: reason, timeBase='game.time', gameTime, distToHome, x, y
+   - РЈР±СЂР°РЅРѕ: at (Р·Р°РјРµРЅРµРЅРѕ РЅР° gameTime)
+   - observeUntil/cooldownUntil С‚РµРїРµСЂСЊ РІ game.time СЃРµРєСѓРЅРґР°С… (С‡РёС‚Р°РµРјС‹Рµ С‡РёСЃР»Р°)
+
+РР·РјРµРЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹:
+- src/main.js вЂ” 13 РїСЂР°РІРѕРє РІРЅСѓС‚СЂРё BOT-SCOUT-02B РєРѕРґР°
+- PATCH_REPORT.txt вЂ” РґРѕР±Р°РІР»РµРЅР° СЌС‚Р° Р·Р°РїРёСЃСЊ
+
+Р§С‚Рѕ РќР• С‚СЂРѕРЅСѓС‚Рѕ:
+- FE_SCOUT01IsScoutEnRoute вЂ” РїСЂРѕРґРѕР»Р¶Р°РµС‚ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ performance.now() (scout age check, РЅРµ lifecycle)
+- _fe10c1ScoutIssuedAt вЂ” РѕСЃС‚Р°С‘С‚СЃСЏ РІ performance.now() РјР°СЃС€С‚Р°Р±Рµ
+- BOT-SCOUT-02A targetability вЂ” РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚
+- BOT-SCOUT-02A production policy вЂ” РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚
+- ATTACK-08/09/10 вЂ” РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚С‹
+- findPath internals вЂ” РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚С‹
+- passable вЂ” РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚
+- combat damage вЂ” РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚
+- map/render/save вЂ” РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚С‹
+
+Р’С‹РїРѕР»РЅРµРЅРЅС‹Рµ РїСЂРѕРІРµСЂРєРё:
+- node --check src/main.js -> PASS
+
+Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ:
+- assets РёР·РјРµРЅРµРЅС‹: РЅРµС‚
+- economy РёР·РјРµРЅРµРЅР°: РЅРµС‚
+- combat РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- pathfinding РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- production/factory РёР·РјРµРЅС‘РЅ: РЅРµС‚
+- BOT-SCOUT-02A РєРѕРґ РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚
+- ATTACK РєРѕРґ РЅРµ Р·Р°С‚СЂРѕРЅСѓС‚
+- Google Drive sync С‚СЂРѕРЅСѓС‚: РЅРµС‚
+- production paths С‚СЂРѕРЅСѓС‚С‹: РЅРµС‚
+
+Manual test plan:
+1. РќРѕРІР°СЏ РёРіСЂР°. Scout РµРґРµС‚ outbound.
+2. Scout arrives в†’ observing (4 СЃРµРє, observeUntil в‰€ game.time + 4).
+3. Observing Р·Р°РєР°РЅС‡РёРІР°РµС‚СЃСЏ в†’ returning (reason='observe_done').
+4. Scout РµРґРµС‚ РґРѕРјРѕР№. Near home в†’ cooldown (reason='at_home', cooldownUntil в‰€ game.time + 30).
+5. РРіСЂРѕРє РЅР°РЅС‘СЃ СѓСЂРѕРЅ СЃРєР°СѓС‚Сѓ far from home в†’ state='returning', reason='damaged' (РќР• cooldown).
+6. Returning path РїСѓСЃС‚ + far from home в†’ repath Рє РґРѕРјСѓ, РќР• cooldown.
+7. Repath РЅРµ СѓРґР°Р»СЃСЏ в†’ reason='return_repath_failed', state РѕСЃС‚Р°С‘С‚СЃСЏ returning.
+8. game._botScout02B.timeBase === 'game.time'.
+9. cooldownUntil в‰€ game.time + 30 (РЅРµ 500000+).
+10. Scout РїРѕ-РїСЂРµР¶РЅРµРјСѓ killable.
+11. Tank attack-chain СЂР°Р±РѕС‚Р°РµС‚.
+
 BOT-SCOUT-02B2
 
 - Added a scout return-target resolver in `src/main.js` that tries exact home first, then nearby reachable cells around the enemy base/home anchor within radius 1..4.

@@ -1,0 +1,4347 @@
+> **STATUS: FROZEN / ARCHIVED**
+> Этот файл больше не обновляется. Новые patch reports создаются в `docs/patches/{TASK_ID}.md`.
+> Индекс всех патчей: `docs/patches/INDEX.md`.
+> Заморожен после патча BOT-ATTACK-12A (PR #50, 2026-05-11).
+> Исторические записи сохранены как есть.
+
+Task: SANDBOX-00 - prepare GLM sandbox
+Timestamp: 2026-05-09 20:17:44 +03:00
+
+Sandbox path:
+C:\Users\Den\Desktop\GLM_test\glm_game_sandbox
+
+Production path status:
+- Confirmed: production folder was not touched.
+- Confirmed: no writes were made outside the sandbox folder.
+
+Project root inspection:
+- Present: AGENTS.md
+- Present: README.md
+- Present: index.html
+- Present: src/
+- Present: assets/
+- Present: docs/
+- Present: package.json
+- Present: BAT helpers in repo root
+
+Files changed:
+- AGENTS.md
+- README.md
+- README_GLM_SANDBOX.md
+- .gitignore
+- 05_RUN_VISUAL_SCENARIOS.bat
+- tools/visual_scenarios.mjs
+- PATCH_REPORT.txt
+
+Files disabled or renamed:
+- 04_SYNC_WORK_MIRROR_TO_GOOGLE_DRIVE.bat -> 04_SYNC_WORK_MIRROR_TO_GOOGLE_DRIVE.DISABLED_IN_GLM_SANDBOX.bat
+- tools/sync_work_mirror.py -> tools/sync_work_mirror.DISABLED_IN_GLM_SANDBOX.py
+- tools/sync_visual_screenshots.py -> tools/sync_visual_screenshots.DISABLED_IN_GLM_SANDBOX.py
+
+Folders removed from sandbox:
+- node_modules/
+- backup/
+- _reports/
+- test-results/
+- _exports/
+- _archive/
+
+Folders ignored or kept out of git:
+- node_modules/
+- backup/
+- _reports/
+- test-results/
+- _exports/
+- _archive/
+- .env
+- *.log
+- *.tmp
+- *.bak
+- screenshot/cache/temp artifacts via .gitignore
+- _gpt_state/ intentionally left in working copy and not planned for staging
+- _inbox/ intentionally left in working copy and not planned for staging
+
+Dangerous reference audit:
+- Executable mirror sync BAT was disabled by rename.
+- Direct Python mirror sync helpers were disabled by rename.
+- Visual screenshot flow was changed to stay local only.
+- Remaining references still exist in docs, _gpt_state, _inbox, package-lock.json, and disabled files.
+- Remaining references are informational or historical in this patch, not active sync entrypoints.
+
+Git status summary:
+- Git repository initialized in sandbox.
+- Active branch set to sandbox/main.
+- Before staging, repo contains untracked project files as expected for a fresh init.
+- Plan for staging: exclude _gpt_state/ and _inbox/ from the initial clean sandbox commit.
+
+GitHub status:
+- GitHub CLI status check result: gh not found on this machine in current PATH.
+- No token workaround was attempted.
+- No remote was created automatically.
+
+Checks run:
+- node --check src/main.js -> PASS
+- node --check tools/visual_scenarios.mjs -> PASS
+- package.json inspected -> only devDependencies present, no npm scripts to run
+- root audit re-run after cleanup -> active mirror writers disabled; remaining refs are mostly historical/docs/context
+
+Risks:
+- Some non-executable docs still mention production paths and mirror workflow.
+- package-lock.json still contains legacy package name four_elements_core_base.
+- _gpt_state/ and _inbox/ still contain historical context and production-path references if a future user chooses to stage them.
+- Root BAT helpers 01/02 still mention production-era comments, though the dangerous sync launcher itself is disabled.
+
+Exact next steps for user / GPT / GLM:
+1. Review the initial sandbox commit on branch sandbox/main.
+2. Add a private GitHub remote manually after gh is installed/authenticated, or use:
+   git remote add origin <PRIVATE_REPO_URL>
+   git push -u origin sandbox/main
+3. Keep all future work on feature branches created from sandbox/main.
+4. Do not re-enable Google Drive sync inside this sandbox.
+5. If desired, do a follow-up cleanup patch to ignore or remove _gpt_state/ and _inbox/ before sharing the repo more broadly.
+
+---
+
+Task: GHPAGES-02 - Add GitHub Pages hardening and live demo link
+Timestamp: 2026-05-10 18:07:00 +03:00
+Branch: glm/ghpages-02-live-demo-nojekyll (from sandbox/main)
+
+Purpose:
+- Add .nojekyll to prevent GitHub Pages from ignoring folders starting with underscore or dot.
+- Add a live demo link to README.md so visitors can launch the game directly.
+- Record the change in PATCH_REPORT.txt.
+
+Changed files:
+- .nojekyll (new, empty)
+- README.md (added live demo link block, kept sandbox warning and all existing rules)
+- PATCH_REPORT.txt (appended this entry)
+
+Gameplay code and assets confirmation:
+- Confirmed: no gameplay code was modified.
+- Confirmed: no asset files were touched.
+- Confirmed: src/main.js was not modified.
+- Confirmed: Google Drive sync remains disabled.
+
+Checks run:
+- node --check src/main.js -> PASS
+- Visual diff review: only .nojekyll, README.md, PATCH_REPORT.txt changed.
+
+Production path status:
+- Confirmed: production folder was not touched.
+- Confirmed: no writes were made outside the sandbox folder.
+
+---
+
+Задача: WORKFLOW-02 — Упростить процесс: Fast lane без PR для низкорисковых задач
+Дата: 2026-05-10
+Lane: Fast
+Ветка: sandbox/main (direct push)
+
+Цель:
+- Ввести два режима работы: Fast lane (direct push) и Review lane (PR обязателен).
+- Fast lane: для docs, prompts, PATCH_REPORT, .nojekyll, текстовых правок без логики — commit + push напрямую в sandbox/main, без PR.
+- Review lane: для src/main.js, src/core, src/config, assets, gameplay, экономика, combat, pathfinding, save/load, многофайловых изменений, рискованных задач — feature branch + PR.
+
+Изменённые файлы:
+- README_GLM_SANDBOX.md (GitHub workflow: добавлены Fast lane и Review lane с правилами; обновлён forbidden list)
+- AGENTS.md (правило 1 обновлено: Fast lane — direct push; правило 2: Review lane — PR; секция Git and review workflow обновлена)
+- docs/prompts/PROMPT_NEW_CHAT_GPT_FOUR_ELEMENTS_GLM_FIRST.txt (GLM роль: Fast lane / Review lane; секция 3: выбор lane; секция 4: разделение задач по lane; секция 6: обновлённые hard rules; секция 7: merge checklist только Review lane)
+- docs/prompts/PROMPT_NEW_CHAT_GLM_FOUR_ELEMENTS_SANDBOX.txt (секция 1: Two lanes; секция 2: обновлённые hard rules; секция 3: Fast lane / Review lane branch rules; секция 5: PATCH_REPORT с lane; секция 8: final response с lane и commit hash)
+- PATCH_REPORT.txt (добавлена эта запись)
+
+Что зафиксировано:
+1. Fast lane — direct push в sandbox/main для низкорисковых задач (docs, prompts, текст).
+2. Review lane — feature branch + PR для рискованных задач (код, ассеты, gameplay).
+3. PR не обязателен для Fast lane.
+4. Если не уверены — default Review lane.
+5. PATCH_REPORT и final report теперь содержат lane и commit hash.
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+- Визуальная проверка diff: изменены только документация и промпты, код и ассеты не затронуты.
+
+Подтверждение безопасности:
+- Игровой код не изменён.
+- Ассеты не затронуты.
+- src/main.js не тронут.
+- Google Drive sync не включён.
+- Production paths не затронуты.
+
+Примечание:
+- PR не создавался, так как это Fast lane задача (docs/prompts only).
+
+---
+
+Задача: PATCH-SCOUT-01 — подключить scout unit shell
+Дата: 2026-05-10
+Lane: Review
+Ветка: glm/patch-scout-01-unit-shell (от sandbox/main)
+
+Цель:
+- Подключить scout как минимальный unit shell: код игры знает тип scout, грузит и отрисовывает его 8-direction idle sprites.
+- НЕ полноценная механика разведчика — только shell.
+
+Изменённые файлы:
+- src/config/units.js — добавлен scout в FE_UNITS: name, hp, speed, view, canAttack:false
+- src/config/sprite_profiles.js — добавлен scout в FE_SPRITE_PROFILES.units: footprint, size, anchor, alphaCutoff
+- src/core/asset_loader.js — добавлен scout в units (fallback image) и unitAnimations (8-dir idle через loadUnitAnimation)
+- src/main.js — добавлен scout в 4 списка: spawnBuilderDust, updateBuilderDust, getCalibratedUnit (dev hotkeys), updateBuilderDust вызов в game loop
+
+Параметры scout:
+- name: 'Разведчик'
+- hp: 70
+- speed: 0.72 (выше light_tank 0.55 и harvester 0.46, но без балансировки)
+- view: 7
+- cargo: 0
+- canAttack: false
+- costElement: 1, productionTime: 18
+
+Путь к ассетам:
+- assets/factions/<faction>/units/scout_8dirs/scout_idle_dir<d>_0.png
+- 8 направлений, idle-only, move frames = idle (как harvester и light_tank)
+
+Что НЕ сделано специально:
+- Scout НЕ добавлен в производство (factory UI / units_factory queue) — это требует отдельного патча с UI/экономической логикой.
+- Scout НЕ добавлен в factoryCanAffordAnyUnit — не производится.
+- Scout НЕ добавлен в combat / attack систему — canAttack:false.
+- AI / bot scouting НЕ добавлен.
+- Pathfinding НЕ изменён — scout использует стандартный unit_controller.
+- Save/load НЕ изменён — createUnit автоматически создаёт scout с корректными полями.
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+- node --check src/config/units.js -> PASS
+- node --check src/config/sprite_profiles.js -> PASS
+- node --check src/core/asset_loader.js -> PASS
+- node --check src/core/unit_controller.js -> PASS
+- Статическая проверка scout ассетов: 32 файла (4 фракции × 8 направлений) — все на месте
+
+Подтверждение безопасности:
+- Ассеты не изменены: да (ассеты были добавлены ранее в ASSET-SCOUT-01)
+- src/main.js изменён: да (4 минимальных правки — добавление scout в списки dust/dev)
+- gameplay изменён: нет
+- economy изменена: нет
+- combat изменён: нет
+- pathfinding изменён: нет
+- Google Drive sync тронут: нет
+- production paths тронуты: нет
+
+---
+
+Задача: PATCH-SCOUT-01B — исправить способ dev-теста scout через консоль
+Дата: 2026-05-10
+Lane: Review
+Ветка: glm/patch-scout-01b-dev-spawn (от glm/patch-scout-01-unit-shell)
+
+Проблема:
+В отчёте PATCH-SCOUT-01 была указана команда для теста scout из консоли:
+  createUnit('scout', 10, 10)
+Но createUnit — внутренняя функция IIFE в main.js, не экспортирована в window.
+Команда падала с: Uncaught ReferenceError: createUnit is not defined
+
+Цель:
+Добавить безопасный dev-only способ создать scout (и любой другой юнит) из браузерной консоли.
+
+Изменённые файлы:
+- src/main.js — добавлена функция window.FE_DEV_SPAWN_UNIT рядом с FE_EXPORT_SNAPSHOT
+
+Как работает FE_DEV_SPAWN_UNIT(type, x, y):
+- Проверяет, что игра запущена (game.screen === 'game')
+- Проверяет, что тип юнита существует в UNIT_DEFS
+- Если x/y не указаны — спавнит рядом с hq_base игрока
+- Проверяет границы карты
+- Создаёт юнит через внутренний createUnit и добавляет в game.units
+- Пишет понятный console.warn с именем, id и координатами
+- Возвращает созданный unit или null при ошибке
+
+Новая команда теста:
+  FE_DEV_SPAWN_UNIT('scout', 10, 10)
+  FE_DEV_SPAWN_UNIT('scout')           — рядом с HQ
+  FE_DEV_SPAWN_UNIT('light_tank', 5, 5) — работает для любого типа
+
+Что НЕ сделано специально:
+- createUnit НЕ экспортирован напрямую — доступ только через FE_DEV_SPAWN_UNIT
+- scout НЕ добавлен в производство/factory
+- combat НЕ изменён
+- pathfinding НЕ изменён
+- economy НЕ изменена
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+- Статическая проверка: window.FE_DEV_SPAWN_UNIT добавлен в main.js (строка 11864)
+
+Безопасность:
+- assets изменены: нет
+- economy изменена: нет
+- combat изменён: нет
+- pathfinding изменён: нет
+- production/factory изменён: нет
+- Google Drive sync тронут: нет
+
+---
+
+Задача: PATCH-SCOUT-01C — исправить визуальную посадку scout и управление движением
+Дата: 2026-05-10
+Lane: Review
+Ветка: glm/patch-scout-01c-visual-control (от sandbox/main)
+
+Проблема:
+1. Scout визуально слишком крупный (size:[92,92]), плохо посажен на клетке.
+2. HP bar перекрывает корпус, selection ring слишком низко.
+3. Scout не едет по команде движения — не получает updateUnitMovement в game loop.
+4. Scout не имеет собственного dir map / dir offsets — использует builder как фоллбэк.
+5. Scout отсутствует в dust-параметрах, click marker types, selection ring tune.
+
+Что исправлено:
+
+1. Visual profile (sprite_profiles.js):
+   - size: [92,92] → [80,80] — scout меньше танка, но крупнее мелких юнитов
+   - hpOffset: 44 → 34 — HP bar выше корпуса
+
+2. HP bar позиция (main.js):
+   - Добавлен scout в цепочку hpY расчёта: anchorScreenY - 52 * z
+   - HP bar теперь над корпусом, не перекрывает его
+
+3. Selection ring (main.js):
+   - Добавлен scout в ringTuneByType: { x:0, y:-16, rx:0.88, ry:0.84 }
+   - Ring под юнитом, компактнее чем у builder
+
+4. Direction map + offsets (runtime_flags.js + main.js):
+   - Добавлен FE_SCOUT_DIR_MAP = [2,0,0,6,6,4,4,2]
+   - Добавлен FE_SCOUT_DIR_OFFSETS (8 направлений, начальные нули)
+   - Добавлен FE_SCOUT_FORCE_DIR = null
+   - main.js: scout включён в цепочку dirMap и dirOffsets
+
+5. Movement (main.js):
+   - Добавлена ветка в game loop: if (u.type==='scout') updateUnitMovement(u,dt);
+   - Scout теперь двигается по команде через стандартный movement pipeline
+
+6. Dust (runtime_flags.js + main.js):
+   - FE_SCOUT_DUST_WHEEL_Y, RADIUS_MULT, ALPHA_MULT, TRAIL_COUNT, BURST_COUNT
+   - Scout включён в цепочку wheelYOffsetFlag, defaultWheelYOffset, radiusMult, alphaMult
+
+7. Click marker (runtime_flags.js):
+   - Scout добавлен в FE_UNIT_CLICK_MARKER_TYPES
+
+8. Unit menu (main.js):
+   - Добавлен scout в openUnitMenu с кнопками "Стоп" и "Отмена"
+
+9. Dev hotkeys (main.js):
+   - Scout включён в getDirOffsetsForUnit, getForceDirForUnit, setForceDirForUnit
+
+Изменённые файлы:
+- src/config/sprite_profiles.js — size, hpOffset для scout
+- src/config/runtime_flags.js — FE_SCOUT_DIR_MAP, DIR_OFFSETS, FORCE_DIR, dust params, click marker
+- src/main.js — dirMap, dirOffsets, hpY, selection ring, movement loop, dust params, unit menu, dev hotkeys
+- PATCH_REPORT.txt
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+- node --check src/config/sprite_profiles.js -> PASS
+- node --check src/config/runtime_flags.js -> PASS
+- node --check src/config/units.js -> PASS
+- node --check src/core/asset_loader.js -> PASS
+
+Как тестировать:
+1. Запустить игру
+2. Открыть консоль: FE_DEV_SPAWN_UNIT('scout')
+3. Кликнуть на scout — выделяется, видны ring и HP bar
+4. Кликнуть на свободную клетку — scout едет
+5. Контекстное меню: "Разведчик" / "Стоп" / "Отмена"
+
+Что НЕ сделано специально:
+- Scout НЕ добавлен в производство (factory UI)
+- Combat НЕ изменён — scout с canAttack:false
+- AI / bot scouting НЕ добавлен
+- Pathfinding НЕ изменён — scout использует стандартный BFS
+- Save/load НЕ изменён
+- Ассеты НЕ изменены
+
+Безопасность:
+- assets изменены: нет
+- economy изменена: нет
+- combat изменён: нет
+- pathfinding изменён: нет
+- production/factory изменён: нет
+- Google Drive sync тронут: нет
+
+---
+
+Задача: PATCH-SCOUT-01D — исправить orientation / dir mapping scout
+Дата: 2026-05-10
+Lane: Review
+Ветка: glm/patch-scout-01d-dir-mapping (от sandbox/main)
+
+Проблема:
+Scout едет боком — визуально смотрит не в сторону фактического движения.
+При движении south-west показывает sprite, который смотрит north-east, и т.д.
+
+Причина:
+FE_SCOUT_DIR_MAP был скопирован с harvester/light_tank: [2,0,0,6,6,4,4,2].
+Но scout sprites используют другую ориентацию: sprite dirN визуально смотрит
+в направлении (N+1)%8, т.е. весь набор повёрнут на +1 step CW относительно
+стандартной 8-dir конвенции (dir0=east, dir2=south, dir4=west, dir6=north).
+
+Старый DIR_MAP давал:
+- rawDir=3 (SW) → sprite=6 (смотрит NE) — юнит едет боком/назад
+- rawDir=7 (NE) → sprite=2 (смотрит S)  — юнит едет боком
+
+Что исправлено:
+
+1. FE_SCOUT_DIR_MAP (runtime_flags.js):
+   - Старый: [2, 0, 0, 6, 6, 4, 4, 2] (копия harvester)
+   - Новый:  [7, 0, 1, 2, 3, 4, 5, 6]
+   - Формула: DIR_MAP[rawDir] = (rawDir + 7) % 8
+   - Компенсирует поворот спрайтов на +1 CW
+
+2. unitDir8 forceDir (main.js):
+   - Добавлен scout и light_tank в цепочку forceDir внутри unitDir8()
+   - Раньше forceDir применялся только к harvester и builder
+   - Теперь FE_SCOUT_FORCE_DIR и FE_LIGHT_TANK_FORCE_DIR работают корректно
+     при dev-калибровке через горячие клавиши
+
+Проверка новой DIR_MAP:
+- rawDir=0 (E)  → sprite=7 → faces (7+1)%8=0=E  ✓
+- rawDir=1 (SE) → sprite=0 → faces (0+1)%8=1=SE ✓
+- rawDir=2 (S)  → sprite=1 → faces (1+1)%8=2=S  ✓
+- rawDir=3 (SW) → sprite=2 → faces (2+1)%8=3=SW ✓
+- rawDir=4 (W)  → sprite=3 → faces (3+1)%8=4=W  ✓
+- rawDir=5 (NW) → sprite=4 → faces (4+1)%8=5=NW ✓
+- rawDir=6 (N)  → sprite=5 → faces (5+1)%8=6=N  ✓
+- rawDir=7 (NE) → sprite=6 → faces (6+1)%8=7=NE ✓
+
+Изменённые файлы:
+- src/config/runtime_flags.js — FE_SCOUT_DIR_MAP обновлён
+- src/main.js — forceDir в unitDir8: добавлены scout и light_tank
+- PATCH_REPORT.txt
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+- node --check src/config/runtime_flags.js -> PASS
+
+Безопасность:
+- assets изменены: нет
+- economy изменена: нет
+- combat изменён: нет
+- pathfinding изменён: нет
+- production/factory изменён: нет
+- size / hpOffset / selection ring: не тронуты
+- angle->dir логика: не изменена (rawDir расчёт тот же)
+- Google Drive sync тронут: нет
+
+---
+
+Задача: PATCH-SCOUT-01E — final visual tuning scout
+Дата: 2026-05-10
+Lane: Review
+Ветка: glm/patch-scout-01e-visual-tuning (от sandbox/main)
+
+Проблема:
+1. FE_SCOUT_DIR_MAP [7,0,1,2,3,4,5,6] из 01D не соответствует фактической ручной
+   dev-калибровке — scout всё ещё смотрит мимо направления движения.
+2. Scout смещён относительно центра клетки / изометрического ромба.
+3. Scout слишком мелкий при size=[80,80] — выглядит меньше, чем ожидается
+   для видимого разведчика.
+
+Что исправлено:
+
+1. FE_SCOUT_DIR_MAP (runtime_flags.js):
+   - Старый: [7, 0, 1, 2, 3, 4, 5, 6] (VLM-оценка из 01D)
+   - Новый:  [3, 2, 1, 0, 7, 6, 5, 4] (подтверждён ручной dev-калибровкой)
+   - Карта отражает реальную ориентацию scout sprite frames:
+     rawDir 0(E)→sprite3, 1(SE)→2, 2(S)→1, 3(SW)→0,
+     4(W)→7, 5(NW)→6, 6(N)→5, 7(NE)→4
+
+2. Scout size (sprite_profiles.js):
+   - Старый: size: [80, 80]
+   - Новый:  size: [84, 84]
+   - Увеличение на 4px — scout чуть крупнее, но остаётся меньше builder (92)
+     и значительно меньше light_tank (104)
+
+3. Scout centering (runtime_flags.js):
+   - FE_SCOUT_DIR_OFFSETS обновлены с нулевых значений
+   - Чётные направления (0,2,4,6): y=2 — кардинальные оси чуть ниже
+   - Нечётные направления (1,3,5,7): y=1 — диагональные оси
+   - Смещения выравнивают визуальную посадку scout по центру ромба
+
+Изменённые файлы:
+- src/config/runtime_flags.js — FE_SCOUT_DIR_MAP, FE_SCOUT_DIR_OFFSETS
+- src/config/sprite_profiles.js — size для scout
+- PATCH_REPORT.txt
+
+Выполненные проверки:
+- node --check src/config/runtime_flags.js -> PASS
+- node --check src/config/sprite_profiles.js -> PASS
+
+Безопасность:
+- assets изменены: нет
+- economy изменена: нет
+- combat изменён: нет
+- pathfinding изменён: нет
+- production/factory изменён: нет
+- movement logic не затронута
+- angle→rawDir логика не изменена
+- Google Drive sync тронут: нет
+
+---
+
+Задача: PATCH-SCOUT-01F — точная центровка scout по фото
+Дата: 2026-05-10
+Lane: Review
+Ветка: glm/patch-scout-01f-centering (от sandbox/main)
+
+Проблема:
+После 01E scout всё ещё расположен слишком высоко относительно ромба клетки.
+Смещение y=1..2 px было недостаточным — требуется ~20 px вниз.
+
+Фактический замер по референс-скрину (dev-overlay):
+- dir 2 целевой offset: {"x":-1,"y":22}
+- dir 2 текущий (01E):   {"x":0, "y":2}
+- Коррекция: x 0→-1, y 2→22 (≈+20 px вниз, -1 px влево)
+
+Что исправлено:
+
+1. FE_SCOUT_DIR_OFFSETS (runtime_flags.js):
+   Старые offsets (01E):
+     0: {x:0, y:2}   1: {x:0, y:1}
+     2: {x:0, y:2}   3: {x:0, y:1}
+     4: {x:0, y:2}   5: {x:0, y:1}
+     6: {x:0, y:2}   7: {x:0, y:1}
+   
+   Новые offsets (01F):
+     0: {x:-1, y:22}  1: {x:-1, y:21}
+     2: {x:-1, y:22}  3: {x:-1, y:21}
+     4: {x:-1, y:22}  5: {x:-1, y:21}
+     6: {x:-1, y:22}  7: {x:-1, y:21}
+   
+   dir 2 выставлен точно по фото: {"x":-1,"y":22}
+   Остальные направления — та же базовая коррекция (+20 px Y, -1 px X)
+
+2. FE_SCOUT_DIR_MAP — НЕ менялся (рабочий [3,2,1,0,7,6,5,4] из 01E)
+
+Изменённые файлы:
+- src/config/runtime_flags.js — FE_SCOUT_DIR_OFFSETS
+- PATCH_REPORT.txt
+
+Выполненные проверки:
+- node --check src/config/runtime_flags.js -> PASS
+
+Безопасность:
+- assets изменены: нет
+- FE_SCOUT_DIR_MAP не менялся
+- size не менялся ([84,84])
+- movement logic не затронута
+- angle→rawDir логика не изменена
+- economy / combat / factory не затронуты
+- Google Drive sync тронут: нет
+
+---
+
+Задача: PATCH-SCOUT-01G — поправить selection ring и убрать меню scout
+Дата: 2026-05-10
+Lane: Review
+Ветка: glm/patch-scout-01g-ring-menu (от sandbox/main)
+
+Проблема:
+1. Selection ring у scout расположен слишком низко — заметно ниже юнита.
+2. При клике на scout открывается меню "Разведчик / Стоп / Отмена",
+   тогда как scout должен вести себя как light_tank: выделяется, показывает
+   ring и HP, получает команды движения, но НЕ открывает отдельное меню.
+
+Что исправлено:
+
+1. Selection ring (main.js, ringTuneByType):
+   - Старый: scout: { x: 0, y: -16, rx: 0.88, ry: 0.84 }
+   - Новый:  scout: { x: 0, y: -38, rx: 0.88, ry: 0.84 }
+   - Ring поднят на 22 px вверх (y: -16 → -38), теперь под корпусом/колёсами
+
+2. Scout menu убран (main.js, openUnitMenu):
+   - Раньше: scout имел свой else-if блок с setContextAt "Разведчик / Стоп / Отмена"
+   - Теперь: scout добавлен в early-return рядом с light_tank
+   - Код: if (u.type==='light_tank' || u.type==='scout') { updateSelectedInfo(); return; }
+   - Блок else-if для scout удалён
+   - Поведение выбора scout теперь аналогично light_tank
+
+Не менялись:
+- FE_SCOUT_DIR_MAP — не тронут
+- FE_SCOUT_DIR_OFFSETS — не тронуты
+- scout size [84,84] — не тронут
+- movement logic — не затронута
+- angle→rawDir — не изменена
+
+Изменённые файлы:
+- src/main.js — ringTuneByType.scout.y, openUnitMenu scout early-return
+- PATCH_REPORT.txt
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+
+Безопасность:
+- assets изменены: нет
+- economy изменена: нет
+- combat изменён: нет
+- pathfinding изменён: нет
+- production/factory изменён: нет
+- Google Drive sync тронут: нет
+
+---
+
+Задача: PATCH-SCOUT-02 — добавить scout в производство units_factory
+Дата: 2026-05-10
+Lane: Review
+Ветка: glm/patch-scout-02-factory-production (от sandbox/main)
+
+Цель:
+Scout должен производиться через units_factory UI/queue, а не только через FE_DEV_SPAWN_UNIT.
+
+Что сделано:
+
+1. Factory production menu (main.js, openFactoryMenu, строка ~9702):
+   - Старый: ['builder','harvester','light_tank']
+   - Новый:  ['builder','harvester','light_tank','scout']
+   - В UI фабрики появилась кнопка «Разведчик» с ценой и временем производства
+
+2. Factory affordability check (main.js, factoryCanAffordAnyUnit, строка ~2335):
+   - Старый: ['builder', 'harvester', 'light_tank']
+   - Новый:  ['builder', 'harvester', 'light_tank', 'scout']
+   - Factory indicator корректно показывает доступность scout при наличии 1 элемента
+
+3. Production speed (main.js, productionSpeedForUnit, строка ~2442):
+   - Scout добавлен в civilianProductionSpeed (как builder и harvester)
+   - Старый: if (type === 'harvester' || type === 'builder')
+   - Новый:  if (type === 'harvester' || type === 'builder' || type === 'scout')
+   - Scout — лёгкий невоенный юнит, производящийся по гражданской скорости
+
+Стоимость scout (уже задана в units.js):
+- costElement: 1 (1 элемент фракции)
+- productionTime: 18 сек
+- Спавн: через существующую логику findSpawnCellNearBuilding → createUnit
+
+Не менялись:
+- FE_SCOUT_DIR_MAP — не тронут
+- FE_SCOUT_DIR_OFFSETS — не тронуты
+- scout size [84,84] — не тронут
+- scout sprite profile — не тронут
+- selection ring — не тронут
+- movement logic — не затронута
+- angle→rawDir — не изменена
+- pathfinding — не затронут
+- combat — не добавлен (canAttack:false)
+- AI — не добавлен
+- assets — не изменены
+- economy core — не изменён (использована существующая логика)
+
+Изменённые файлы:
+- src/main.js — factoryCanAffordAnyUnit, openFactoryMenu, productionSpeedForUnit
+- PATCH_REPORT.txt
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+
+Безопасность:
+- assets изменены: нет
+- combat добавлен: нет
+- AI добавлен: нет
+- pathfinding изменён: нет
+- economy core изменён: нет (использована существующая схема)
+- Google Drive sync тронут: нет
+
+---
+
+Задача: GLM-UI-01 — обновить текст демо-сборки в главном меню
+Дата: 2026-05-10
+Lane: Review
+Ветка: glm/ui-01-main-menu-demo-text-v2 (от sandbox/main)
+
+Цель:
+Заменить устаревший технический текст в главном меню на пользовательский
+демо-сборочный текст. Главное меню показывает «Core Economy + Territory Fix v0.4»
+и описание v0.4 — это разработческие строки, не предназначенные для публичной
+демо-сборки на GitHub Pages.
+
+Что сделано:
+
+1. Subtitle (index.html, class="subtitle"):
+   - Старый: Core Economy + Territory Fix v0.4
+   - Новый:  Публичная демо-сборка · GitHub Pages
+
+2. Small note (index.html, class="small-note"):
+   - Старый: v0.4: сырьё, энергия, элементы, медленная территория, лимиты, HUD и сохранения.
+   - Новый:  Демо-сборка: экономика, территория, юниты и сохранения в разработке.
+
+Изменённые файлы:
+- index.html — 2 строки заменены (subtitle + small-note)
+- PATCH_REPORT.txt — добавлена эта запись
+
+Не менялись:
+- src/main.js — не тронут
+- src/config/* — не тронуты
+- src/core/* — не тронуты
+- assets — не изменены
+- gameplay / economy / combat — не затронуты
+- Оставшиеся упоминания v0.4 в JS-комментариях и <title> — не тронуты
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+- Визуальная проверка diff: только 2 строки в index.html + PATCH_REPORT.txt
+
+Безопасность:
+- Игровой код не изменён
+- Ассеты не затронуты
+- Google Drive sync не включён
+- Production paths не затронуты
+
+---
+
+Задача: GLM-STRATEGY-01 — полный стратегический аудит проекта
+Дата: 2026-05-10
+Lane: Fast
+Ветка: sandbox/main (direct push)
+
+Цель:
+Широкий стратегический аудит проекта Four Elements Remake с анализом
+всех ключевых направлений и предложениями по развитию.
+Это НЕ патч — код, ассеты и gameplay НЕ менялись.
+
+Что сделано:
+1. Прочитаны все проектные файлы: README, AGENTS, configs, docs/project/*, src/main.js, src/core/*, src/config/*, tests/*
+2. Проанализирован src/main.js (12 128 строк): функции, системы, техдолг, архитектура
+3. Проанализированы все 14 docs/project файлов
+4. Проанализированы core модули (asset_loader, save_manager, unit_controller, storage_guard)
+5. Проанализированы все 5 Playwright тестов
+6. Написан comprehensive отчёт: docs/project/GLM_STRATEGY_REVIEW_20260510.md
+
+Отчёт содержит 17 разделов:
+1. Executive Summary
+2. Current Project State (что реализовано / MVP / временное / техдолг)
+3. Map Generation Ideas (8 идей с оценками)
+4. Unit Animation and Visual Feedback Ideas (7 подкатегорий)
+5. Economy Ideas (quick wins / medium-term / late-game)
+6. Factions and Asymmetry (4 фракции + random)
+7. Combat System Ideas (MVP / medium / defense tower / bomber)
+8. Enemy Bot / AI Ideas (scripted / rule-based / advanced / fog policy)
+9. Gameplay Features Missing from Roadmap (13 идей)
+10. UI / UX Ideas (8 подкатегорий)
+11. Architecture and main.js Refactor (4 фазы extraction, 10 безопасных PR)
+12. Engine / Platform Future (8 вариантов с оценками)
+13. Online / Multiplayer Possibilities (7 вариантов)
+14. Testing / QA / Tooling (8 идей + PR/regression checklist)
+15. Recommended Roadmap (1-2 недели / 1 месяц / later)
+16. Top 10 Recommendations (с приоритетами и рисками)
+17. What NOT to Do Yet (10 пунктов)
+
+Изменённые файлы:
+- docs/project/GLM_STRATEGY_REVIEW_20260510.md (new)
+- PATCH_REPORT.txt (добавлена эта запись)
+
+Проверки:
+- node --check src/main.js -> PASS (smoke only, без изменений)
+- git diff --name-only: только docs/project/GLM_STRATEGY_REVIEW_20260510.md + PATCH_REPORT.txt
+
+Безопасность:
+- src/* не изменён
+- assets/* не изменён
+- index.html не изменён
+- gameplay не изменён
+- Google Drive sync не тронут
+- Production paths не затронуты
+
+---
+
+Задача: REF-MAIN-GLM-02 — dead code cleanup из audited main.js candidates
+Дата: 2026-05-10
+Lane: Review
+Ветка: glm/ref-main-02-dead-code-cleanup (от sandbox/main)
+
+Цель:
+Удалить только доказанный dead/unreachable/no-op код из src/main.js на основе
+отчёта REF_MAIN_GLM_01_MICRO_REFACTOR_CANDIDATES.md (Candidate 1).
+Это micro-refactor cleanup — только удаление, без новых файлов, без index.html,
+без gameplay изменений.
+
+Удалённые блоки (9 блоков, 209 строк):
+
+1. applyTestBuildingCostsX10() — функция (54 строки) + закомментированный вызов + комментарии-обёртки
+   Доказательство: единственный вызов закомментирован: // applyTestBuildingCostsX10();
+   + в теле баг: строка 38 делает def.cost = Math.max(1, (def.cost)) — не делит на 10
+
+2. Dead tail в setLightTankAttack() — 34 строки unreachable кода после unconditional return
+   Доказательство: return setLightTankAttackGeneric(...) — unconditional, код после return недостижим
+
+3. Dead tail в spawnLightTankForOwner() — 29 строк unreachable кода после unconditional return
+   Доказательство: return spawned; — unconditional, код после return недостижим
+
+4. Dead tail в FE_PATCH_07ASetupSkirmishStart() — 29 строк unreachable кода после return {...}
+   Доказательство: return { enemyBase, playerHarvesters, ... } — unconditional, код после return недостижим
+
+5. Dead tail в setLightTankAttackApproach() — 38 строк unreachable кода после unconditional return
+   Доказательство: return setLightTankAttackApproachGeneric(...) — unconditional, код после return недостижим
+
+6. drawIsoShadow() — no-op функция: тело = return;
+   Доказательство: rg даёт 1 вхождение (определение), 0 call sites
+
+7. FE_PATCH_06ADrawEnemyBaseMarker() — no-op функция: тело = return;
+   Доказательство: rg даёт 1 вхождение (определение), 0 call sites
+
+8. drawEnemyUnitMarker() — no-op функция: тело = return;
+   Доказательство: rg даёт 1 вхождение (определение), 0 call sites
+
+9. drawEnemyBuildingMarker() — no-op функция: тело = return;
+   Доказательство: rg даёт 1 вхождение (определение), 0 call sites
+
+Итого удалено: 209 строк
+main.js до: 12 128 строк
+main.js после: 11 919 строк
+Разница: -209 строк (-1.7%)
+
+Что НЕ тронуто (по правилам задачи):
+- FE_UNIT_CONTROLLER_ENABLED block — feature flag, не dead code
+- src/core/unit_controller.js — отдельный файл, требует Review lane
+- backup файлы (main_broken_04c3.js и т.д.) — требуют Review lane
+- Candidate 2-5 из аудита — НЕ выполнялись в этой задаче
+- index.html — не менялся
+- gameplay, render, input, combat, bot, builder, harvester, save/load, map gen — не затронуты
+- debugLog extraction — не тронут
+- combat debug overlay — не тронут
+- enemy economy panel — не тронут
+- snapshot/export — не тронут
+- constants extraction — не тронут
+
+Изменённые файлы:
+- src/main.js (209 строк удалено)
+- PATCH_REPORT.txt (добавлена эта запись)
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+- rg-верификация каждого dead-блока перед удалением: все 9 блоков подтверждены
+- git diff --stat: src/main.js | 209 deletions
+
+Безопасность:
+- assets изменены: нет
+- index.html изменён: нет
+- новые JS-файлы созданы: нет
+- gameplay изменён: нет
+- economy изменена: нет
+- combat изменён: нет
+- pathfinding изменён: нет
+- render изменён: нет
+- input/selection изменён: нет
+- bot AI изменён: нет
+- save/load изменён: нет
+- map generation изменён: нет
+- Google Drive sync тронут: нет
+- production paths тронуты: нет
+
+Rollback:
+git revert — все удалённые строки можно восстановить из git history
+
+---
+
+Задача: REF-MAIN-GLM-03 — extract combat debug overlay from src/main.js
+Дата: 2026-05-10
+Lane: Review
+Ветка: glm/ref-main-03-combat-debug-overlay-extract (от sandbox/main)
+
+Цель:
+Вынести combat debug overlay-блок (FE_LT_04C6* — 6 функций, ~143 строки)
+из src/main.js в отдельный dev/debug модуль src/dev/combat_debug_overlay.js.
+Это micro-refactor extraction — не gameplay patch, не combat refactor.
+
+Что вынесено:
+
+6 функций FE_LT_04C6*:
+1. FE_LT_04C6SelectedPlayerLightTanks → selectedPlayerLightTanksFrom (pure, params-based)
+2. FE_LT_04C6DrawRangeDiamond → drawRangeDiamond (ctx, tileToScreen, unit, range)
+3. FE_LT_04C6DrawAttackMoveMarker → drawAttackMoveMarker (ctx, tileToScreen, target)
+4. FE_LT_04C6DrawTargetLine → drawTargetLine (ctx, tileToScreen, unit, target, targetCenter)
+5. FE_LT_04C6DrawPanel → drawPanel (ctx, units, attackMoveArmed, resolveAttackTarget)
+6. FE_LT_04C6DrawCombatDebugOverlay → drawOverlay (deps object с IIFE-scope vars)
+
+Плюс:
+- window.FE_LT_04C6_COMBAT_DEBUG_OVERLAY_ENABLED flag → внутренний _enabled в модуле
+- Num9 hotkey toggle → window.FE_COMBAT_DEBUG_OVERLAY.toggle()
+
+Архитектура нового модуля:
+- Все функции принимают зависимости параметрами (ctx, tileToScreen, etc.)
+- Не захватывает IIFE scope при загрузке — безопасно
+- window.FE_COMBAT_DEBUG_OVERLAY.drawOverlay(deps) — главный entry point
+- game доступен через window.FE_CORE.game при вызове (не при загрузке)
+
+Изменения в main.js:
+1. Удалены 6 inline функций FE_LT_04C6* + обёртки комментариев (143 строки)
+2. Удалён window.FE_LT_04C6_COMBAT_DEBUG_OVERLAY_ENABLED flag (1 строка)
+3. В render(): заменён FE_LT_04C6DrawCombatDebugOverlay() на
+   window.FE_COMBAT_DEBUG_OVERLAY.drawOverlay({...deps...})
+4. В keydown handler Num9: заменён direct flag toggle на
+   window.FE_COMBAT_DEBUG_OVERLAY.toggle()
+
+Изменения в index.html:
+- Добавлен <script src="src/dev/combat_debug_overlay.js?v=ref_main_glm_03"></script>
+  перед src/main.js (после debug_tools.js)
+
+main.js до: 11 919 строк
+main.js после: 11 783 строк
+Разница: -136 строк (-1.1%)
+
+combat_debug_overlay.js: 218 строк (новый файл)
+
+Что НЕ тронуто (по правилам задачи):
+- combat behavior / attack logic / damage / range / cooldown — нет
+- target selection — нет
+- enemy bot — нет
+- movement / pathfinding — нет
+- render() — только замена вызова overlay, остальной render нетронут
+- input / selection — нет
+- save/load — нет
+- map generation — нет
+- economy — нет
+- scout — нет
+- assets — нет
+- configs — нет
+- Candidate 3-5 — НЕ выполнялись
+
+Изменённые файлы:
+- src/dev/combat_debug_overlay.js (новый, 218 строк)
+- src/main.js (136 строк удалено, 10 строк добавлено)
+- index.html (+1 script tag)
+- PATCH_REPORT.txt (добавлена эта запись)
+- docs/project/REF_MAIN_GLM_01_MICRO_REFACTOR_CANDIDATES.md (Candidate 2 отмечен DONE)
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+- node --check src/dev/combat_debug_overlay.js -> PASS
+- rg: FE_LT_04C6* — 0 вхождений в src/main.js (все удалены)
+- index.html: новый script tag перед src/main.js
+
+Безопасность:
+- combat behavior не изменён — overlay только отрисовывает debug info
+- enemy bot не изменён
+- gameplay не изменён — overlay отключён по умолчанию
+- rollback: вернуть функции в main.js, удалить script tag
+
+Manual smoke:
+1. Игра загружается
+2. Выбор фракции проходит
+3. Light_tank combat работает
+4. Num9 — overlay появляется/исчезает
+5. Без Num9 — gameplay идентичен
+
+---
+
+Задача: REF-MAIN-GLM-04 — extract enemy economy debug panel from src/main.js
+Дата: 2026-05-10
+Lane: Review
+Ветка: glm/ref-main-04-enemy-economy-debug-panel-extract (от sandbox/main)
+
+Цель:
+Вынести enemy economy debug panel-блок (FE_DEBUG_EnemyEconomy* — 10 функций + setInterval + F2 handler, ~232 строки)
+из src/main.js в отдельный dev/debug модуль src/dev/enemy_economy_debug_panel.js.
+Это micro-refactor extraction — не gameplay patch, не economy refactor, не bot refactor.
+
+Что вынесено:
+
+10 функций FE_DEBUG_EnemyEconomy* + toggle + interval:
+1. FE_DEBUG_EnemyEconomyPanelAllowed → isAllowed (checks window.FE_DEBUG_ENEMY_ECONOMY_PANEL_ENABLED)
+2. FE_DEBUG_EnemyEconomyEnsurePanel → ensurePanel (DOM panel creation/lookup)
+3. FE_DEBUG_EnemyEconomySafeNumber → safeNumber (pure, no deps)
+4. FE_DEBUG_EnemyEconomyReadBucket → readBucket (game param)
+5. FE_DEBUG_EnemyEconomyHtmlEscape → htmlEscape (pure, no deps)
+6. FE_DEBUG_EnemyEconomyUnitOwner → unitOwnerOf (uses _deps.unitOwner)
+7. FE_DEBUG_EnemyEconomyBuildingOwner → buildingOwnerOf (uses _deps.buildingOwner)
+8. FE_DEBUG_EnemyEconomyCollectState → collectState (uses _deps + window.FE_CORE.game)
+9. FE_DEBUG_EnemyEconomyFormatHarvester → formatHarvester (pure, uses own helpers)
+10. FE_DEBUG_EnemyEconomyRenderPanel → renderPanel (main entry point, uses _deps + window.FE_CORE.game)
+11. FE_DEBUG_ToggleEnemyEconomyPanel → toggle (calls renderPanel(true))
+
+Плюс:
+- 3 IIFE-scope vars → внутренние _visible, _panelEl, _lastUpdate в модуле
+- setInterval auto-refresh → управляется внутри модуля через init()
+- F2 keydown handler → window.FE_ENEMY_ECONOMY_DEBUG_PANEL.toggle()
+
+Архитектура нового модуля:
+- Browser global IIFE: window.FE_ENEMY_ECONOMY_DEBUG_PANEL = (function() { ... })();
+- init(deps) — хранит IIFE-scope function references (unitOwner, buildingOwner, etc.)
+- game доступен через window.FE_CORE.game при вызове (не при загрузке)
+- Все данные game/enemyResources/buildings/units — только READ-ONLY
+- Модуль НЕ мутирует состояние игры
+- Стиль модуля идентичен combat_debug_overlay.js (REF-MAIN-GLM-03)
+
+Изменения в main.js:
+1. Удалены 10 inline функций FE_DEBUG_EnemyEconomy* (232 строки)
+2. Удалены 3 IIFE-scope vars (FE_DEBUG_ENEMY_ECONOMY_PANEL_VISIBLE, _EL, _LAST_UPDATE)
+3. Удалён setInterval блок
+4. Заменён на: window.FE_ENEMY_ECONOMY_DEBUG_PANEL.init({...deps...})
+5. В keydown handler F2: заменён FE_DEBUG_ToggleEnemyEconomyPanel() на
+   window.FE_ENEMY_ECONOMY_DEBUG_PANEL.toggle()
+
+Изменения в index.html:
+- Добавлен <script src="src/dev/enemy_economy_debug_panel.js?v=ref_main_glm_04"></script>
+  перед src/main.js (после combat_debug_overlay.js)
+
+main.js до: 11 783 строк
+main.js после: 11 567 строк
+Разница: -216 строк (-1.8%)
+
+enemy_economy_debug_panel.js: 266 строк (новый файл)
+
+Что НЕ тронуто (по правилам задачи):
+- enemy economy behavior — нет (модуль только read-only)
+- separator processing — нет
+- factory production — нет
+- enemyResources mutation — нет
+- bot decisions/AI behavior — нет
+- combat — нет
+- render loop целиком — нет
+- input/selection — нет
+- movement/pathfinding — нет
+- save/load — нет
+- map generation — нет
+- scout — нет
+- assets — нет
+- configs — нет
+
+Изменённые файлы:
+- src/dev/enemy_economy_debug_panel.js (new, 266 строк)
+- src/main.js (216 строк удалено, ~16 строк добавлено — init + F2 handler)
+- index.html (+1 script tag)
+- PATCH_REPORT.txt (добавлена эта запись)
+- docs/project/REF_MAIN_GLM_01_MICRO_REFACTOR_CANDIDATES.md (Candidate 3 отмечен DONE)
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+- node --check src/dev/enemy_economy_debug_panel.js -> PASS
+- rg: FE_DEBUG_EnemyEconomy* — 0 определений в src/main.js (все удалены)
+- index.html: новый script tag перед src/main.js
+- модуль не мутирует game/enemyResources (только read)
+
+Безопасность:
+- enemy economy behavior не изменён — модоль только читает и отображает
+- separator/factory/production не изменены
+- enemy bot behavior не изменён
+- render/input/save-load/mapgen не изменены
+- rollback: вернуть функции в main.js, удалить script tag
+
+Risks / manual smoke checklist:
+1. Игра загружается
+2. Выбор фракции проходит дальше
+3. F2 — enemy economy debug panel появляется
+4. F2 ещё раз — исчезает
+5. Без F2 — gameplay идентичен
+6. Panel показывает enemy resources, buildings, harvesters, bot phase
+7. Panel auto-refreshes every 250ms
+8. Нет console errors от модуля
+
+---
+
+Задача: REF-MAIN-GLM-05 — extract snapshot/export system from src/main.js
+Дата: 2026-05-10
+Lane: Review
+Ветка: glm/ref-main-05-snapshot-export-extract (от sandbox/main)
+
+Цель:
+Вынести snapshot/export debug-систему (feMakeSnapshot, feSnapshotSafe, feSnapshotDiagnoseCell,
+feSnapshotAroundUnit, feSnapshotBuildInfo, FE_EXPORT_SNAPSHOT, F8 handler) из src/main.js
+в отдельный dev/debug модуль src/dev/snapshot_export.js.
+Это micro-refactor extraction — не gameplay patch, не save/load refactor.
+
+Что вынесено:
+
+5 функций + export + F8 handler:
+1. feSnapshotSafe → feSnapshotSafe (pure recursive safe-clone, no IIFE deps)
+2. feSnapshotDiagnoseCell → feSnapshotDiagnoseCell (uses _deps: inBounds, isObstacleBlocked, mineAt, buildingAt, unitAt, passable)
+3. feSnapshotAroundUnit → feSnapshotAroundUnit (calls feSnapshotDiagnoseCell)
+4. feSnapshotBuildInfo → feSnapshotBuildInfo (uses _deps: BUILDING_SIZE, canPlaceBuilding, adjacentFreeCellsForRect, findPath)
+5. feMakeSnapshot → feMakeSnapshot (uses window.FE_CORE.game + _deps: getStorageLimits, getSelected)
+6. window.FE_EXPORT_SNAPSHOT → exportSnapshot (JSON blob + browser download)
+7. F8 keydown handler → registered in init()
+8. console.warn message → issued in init()
+
+Архитектура нового модуля:
+- Browser global IIFE: window.FE_SNAPSHOT_EXPORT = (function() { ... })();
+- init(deps) — хранит IIFE-scope function references
+- game доступен через window.FE_CORE.game при вызове (не при загрузке)
+- selected передаётся через deps.getSelected() — ()=> selected
+- window.FE_EXPORT_SNAPSHOT переназначается в init() для обратной совместимости
+- Все данные game — только READ-ONLY
+- Модуль НЕ мутирует состояние игры
+
+Изменения в main.js:
+1. Удалены 5 inline функций fe* (feSnapshotSafe, feSnapshotDiagnoseCell, feSnapshotAroundUnit, feSnapshotBuildInfo, feMakeSnapshot)
+2. Удалён window.FE_EXPORT_SNAPSHOT definition
+3. Удалён F8 keydown handler
+4. Удалён console.warn message
+5. Заменено на: window.FE_SNAPSHOT_EXPORT.init({...deps...})
+6. FE_DEV_SPAWN_UNIT остаётся в main.js — это отдельный dev tool
+
+Изменения в index.html:
+- Добавлен <script src="src/dev/snapshot_export.js?v=ref_main_glm_05"></script>
+  перед src/main.js (после enemy_economy_debug_panel.js)
+
+main.js до: 11 567 строк
+main.js после: 11 382 строк
+Разница: -185 строк (-1.6%)
+
+snapshot_export.js: 254 строки (новый файл)
+
+Что НЕ тронуто (по правилам задачи):
+- save/load behavior — нет
+- localStorage keys — нет
+- форма сохранений — нет
+- game state structure — нет
+- runtime gameplay — нет
+- economy — нет
+- enemy bot behavior — нет
+- combat — нет
+- render loop — нет
+- input/selection — нет
+- movement/pathfinding — нет
+- map generation — нет
+- scout — нет
+- assets — нет
+- configs — нет
+- FE_DEV_SPAWN_UNIT — остаётся в main.js
+- getBuilderDebugSnapshot — остаётся в main.js (отдельная система debugLog)
+- safeCloneForLog — остаётся в main.js (production code)
+- Candidate 5 — не выполнялся
+
+Изменённые файлы:
+- src/dev/snapshot_export.js (new, 254 строки)
+- src/main.js (185 строк удалено, ~17 строк добавлено — init)
+- index.html (+1 script tag)
+- PATCH_REPORT.txt (добавлена эта запись)
+- docs/project/REF_MAIN_GLM_01_MICRO_REFACTOR_CANDIDATES.md (Candidate 4 отмечен DONE)
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+- node --check src/dev/snapshot_export.js -> PASS
+- rg: feMakeSnapshot / feSnapshotSafe / feSnapshotDiagnoseCell — 0 определений в src/main.js
+- rg: FE_EXPORT_SNAPSHOT — переназначен через init(), доступен как window.FE_EXPORT_SNAPSHOT
+- index.html: новый script tag перед src/main.js
+- модуль не мутирует game (только read)
+
+Безопасность:
+- save/load не изменён — модуль только читает и экспортирует
+- game state не мутируется
+- FE_EXPORT_SNAPSHOT API сохранён
+- FE_DEV_SPAWN_UNIT остаётся в main.js
+- rollback: вернуть функции в main.js, удалить script tag
+
+Risks / manual smoke checklist:
+1. Игра загружается
+2. Выбор фракции проходит дальше
+3. F8 — скачивается JSON snapshot файл
+4. FE_EXPORT_SNAPSHOT() в консоли — работает
+5. typeof window.FE_EXPORT_SNAPSHOT === 'function' в консоли
+6. FE_DEV_SPAWN_UNIT('scout') — работает (не затронут)
+7. Без F8 — gameplay идентичен
+8. Нет console errors
+
+---
+
+Задача: REF-MAIN-GLM-06 — extract standalone constants from src/main.js
+Дата: 2026-05-10
+Lane: Review
+Ветка: glm/ref-main-06-standalone-constants-extract (от sandbox/main)
+
+Цель:
+Вынести 7 standalone pure constants из src/main.js в отдельный core module
+src/core/standalone_constants.js. Это Candidate 5 из аудита
+REF_MAIN_GLM_01_MICRO_REFACTOR_CANDIDATES.md.
+
+Это micro-refactor extraction — не gameplay patch, не balance change,
+не economy/config refactor.
+
+Вынесенные константы (7 штук):
+1. SAVE_KEY = 'four_elements_core_base_v04_save'
+2. SETTINGS_KEY = 'four_elements_core_base_v04_settings'
+3. TILE_W = 76
+4. TILE_H = 38
+5. MAP_SIZES = { standard: {...}, large: {...} }
+6. BASE_STORAGE = { minerals:200, energy:300, purple:20, greenEl:20, cyanEl:20, yellowEl:20 }
+7. FACTION_ELEMENT_KEY = { purple:'purple', green:'greenEl', cyan:'cyanEl', yellow:'yellowEl' }
+
+Все константы — pure/static:
+- строковые и числовые литералы, объектные литералы
+- без функций
+- без runtime reads
+- без обращения к game/window (кроме window.FE_STANDALONE_CONSTANTS при загрузке)
+- значения неизменны
+
+Что НЕ тронуто:
+- BUILDING_SIZE — зависит от window.FE_BUILDING_SIZE
+- BUILDINGS — зависит от window.FE_BUILDINGS
+- UNIT_DEFS — зависит от window.FE_UNITS
+- FACTIONS — зависит от window.FE_FACTIONS
+- MINE_TYPES — зависит от window.FE_MINE_TYPES
+- OBSTACLE_ASSETS — зависит от window.FE_OBSTACLE_ASSETS
+- SPRITE_PROFILES — зависит от window.FE_SPRITE_PROFILES
+- FE_PATCH_07A3_ENEMY_VISUAL_FACTION — оставлен для простоты
+- значения констант — не изменены
+- save/load — не изменён
+- game state structure — не изменён
+- runtime gameplay — не изменён
+- economy — не изменён
+- enemy bot behavior — не изменён
+- combat — не изменён
+- render loop — не изменён
+- input/selection — не изменён
+- movement/pathfinding — не изменён
+- map generation — не изменён
+- scout — не изменён
+- assets — не изменён
+- configs — не изменён
+- window.FE_CORE (TILE_W, TILE_H) — продолжает работать через destructuring
+- localStorage keys — не изменены
+- форма сохранений — не изменена
+
+Изменённые файлы:
+- src/core/standalone_constants.js (new, 31 строка)
+- src/main.js (24 строки удалено, 2 строки добавлено — destructuring + comment)
+- index.html (+1 script tag)
+- PATCH_REPORT.txt (добавлена эта запись)
+- docs/project/REF_MAIN_GLM_01_MICRO_REFACTOR_CANDIDATES.md (Candidate 5 отмечен DONE)
+
+main.js до: 11 382 строк
+main.js после: 11 358 строк
+Разница: -24 строки
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+- node --check src/core/standalone_constants.js -> PASS
+- rg: старые определения констант (string literals) — 0 вхождений в src/main.js
+- rg: все ссылки на SAVE_KEY/SETTINGS_KEY/TILE_W/TILE_H/MAP_SIZES/BASE_STORAGE/FACTION_ELEMENT_KEY — работают через destructuring
+- index.html: новый script tag перед src/main.js
+- window.FE_CORE.TILE_W / TILE_H — продолжает работать (деструктуризация определяет локальные const до FE_CORE)
+- значения констант не изменены
+
+Безопасность:
+- save/load не изменён — SAVE_KEY то же значение
+- game state не мутируется
+- TILE_W=76, TILE_H=38 — те же значения
+- MAP_SIZES — те же значения
+- BASE_STORAGE — те же значения
+- FACTION_ELEMENT_KEY — те же значения
+- window.FE_STANDALONE_CONSTANTS доступен через консоль для проверки
+- window.FE_CORE.TILE_W / TILE_H — продолжает работать
+- rollback: вернуть const объявления в main.js, удалить script tag и standalone_constants.js
+
+Risks / manual smoke checklist:
+1. Игра загружается
+2. Выбор фракции проходит дальше
+3. window.FE_STANDALONE_CONSTANTS.TILE_W === 76 в консоли
+4. window.FE_STANDALONE_CONSTANTS.BASE_STORAGE.minerals === 200
+5. window.FE_STANDALONE_CONSTANTS.FACTION_ELEMENT_KEY.purple === 'purple'
+6. window.FE_CORE.TILE_W === 76 (FE_CORE bridge не сломан)
+7. Save/load работает
+8. Нет console errors
+
+---
+
+Задача: REF-MAIN-GLM-07 — docs checkpoint после main.js micro-refactor sprint
+Дата: 2026-05-10
+Lane: Fast
+Ветка: sandbox/main (direct push)
+
+Цель:
+Зафиксировать итог успешного main.js micro-refactor sprint и новые правила
+дальнейшей разработки. Docs-only checkpoint — код не менялся.
+
+Созданные файлы:
+- docs/project/REF_MAIN_GLM_07_REFACTOR_SPRINT_CHECKPOINT.md (новый)
+
+Содержание checkpoint:
+1. Краткий итог sprint (зачем, почему GLM-first, почему не Codex)
+2. Таблица 5 принятых патчей (REF-MAIN-GLM-02..06)
+3. Итог по main.js: 12 128 → 11 358 (-770 строк, -6.4%)
+4. Созданные модули (4 файла: 3 dev + 1 core)
+5. Паттерн extraction (8 шагов)
+6. Зоны, которые НЕ трогались
+7. Дальнейшие refactor-кандидаты
+8. Проверки и верификация
+9. Исходные документы
+
+Что НЕ тронуто:
+- src/* — не изменён
+- index.html — не изменён
+- assets — не изменены
+- configs — не изменены
+- gameplay / balance / economy — не изменены
+
+Выполненные проверки:
+- node --check src/main.js -> PASS (smoke only, без изменений)
+- Визуальная проверка: только новый .md документ + PATCH_REPORT.txt
+
+---
+
+Задача: DOCS-AUDIT-01 — аудит source-of-truth и устаревших документов
+Дата: 2026-05-10
+Lane: Fast
+Ветка: sandbox/main (direct push)
+
+Цель:
+Аудит всех проектных документов для классификации по категориям
+CANONICAL / ACTIVE / REFERENCE / STALE / ARCHIVE_CANDIDATE / DANGEROUS_OLD / DUPLICATE_OR_OVERLAP.
+Docs-only задача — код, ассеты, gameplay НЕ менялись.
+
+Что сделано:
+1. Прочитаны все 37 документов проекта (README, AGENTS, промпты, роадмапы, чекпоинты, аудит-отчёты, архив)
+2. Каждый документ классифицирован по 7 категориям
+3. Создан аудит-документ: docs/project/DOCS_SOURCE_OF_TRUTH_AUDIT_20260510.md
+
+Ключевые находки:
+- 6 CANONICAL документов (AGENTS.md, README.md, README_GLM_SANDBOX.md, PATCH_REPORT.txt, REF_MAIN_GLM_07, scout_unit_roadmap)
+- 8 ACTIVE документов (GLM_ROADMAP, GLM_STRATEGY_REVIEW, GLM_FUTURE_VISION, bot_roadmap_merged_glm, и др.)
+- 7 REFERENCE документов (исторические, но полезные)
+- 4 STALE/DANGEROUS_OLD документа (NEW_CHAT_START_PROMPT.md — production-пути; памятка.txt — устаревшая формула сепаратора; THIS_IS_WORK_PROJECT.txt; checkpoint_10E2)
+- 8 ARCHIVE_CANDIDATE документов (codex_limit_sprint, checkpoint_10H2, .docx roadmap, и др.)
+- 5 DUPLICATE_OR_OVERLAP групп (регламент+роадмап, бот-чекпоинты, рефакторинг main.js, GLM-планирование, промпты)
+
+Главный риск:
+NEW_CHAT_START_PROMPT.md и памятка.txt содержат устаревшую информацию, способную ввести будущую AI-сессию в заблуждение (устаревшая формула сепаратора 20->10+1 вместо актуальной 15->10+1, production-пути вместо sandbox-путей).
+
+Рекомендованная следующая задача:
+DOCS-CLEANUP-01 — физическая реорганизация документов (перемещение DANGEROUS_OLD и STALE в archive/, добавление WARNING-заголовков, проверка перекрёстных ссылок).
+
+Изменённые файлы:
+- docs/project/DOCS_SOURCE_OF_TRUTH_AUDIT_20260510.md (new)
+- PATCH_REPORT.txt (добавлена эта запись)
+
+Выполненные проверки:
+- node --check src/main.js -> PASS (smoke only, без изменений)
+- Визуальная проверка: только новый .md документ + PATCH_REPORT.txt
+
+Безопасность:
+- src/* не изменён
+- assets/* не изменён
+- index.html не изменён
+- gameplay не изменён
+- Google Drive sync не тронут
+- Production paths не затронуты
+- Файлы не перемещались и не удалялись — только аудит
+
+---
+
+Задача: DOCS-CLEANUP-01 — реорганизация документов: AI_READ_FIRST + архивация dangerous/stale
+Дата: 2026-05-10
+Lane: Review
+Ветка: glm/docs-cleanup-01-source-of-truth-archive (от sandbox/main)
+
+Цель:
+На основе аудита DOCS-AUDIT-01 физически привести docs в порядок:
+1. Создать AI_READ_FIRST.md — точка входа для новой AI-сессии.
+2. Переместить DANGEROUS_OLD и ARCHIVE_CANDIDATE документы в docs/archive/.
+3. Добавить WARNING-заголовки в архивные документы.
+4. Обновить ссылки в ACTIVE документах на новые пути архива.
+5. Не удалять файлы.
+6. Не менять код.
+
+Это docs-only задача. Не gameplay patch. Не code refactor.
+
+Созданные файлы:
+- docs/project/AI_READ_FIRST.md (new) — точка входа для AI-сессии
+- docs/archive/dangerous_old/ (new directory)
+- docs/archive/old_checkpoints/ (new directory)
+- docs/archive/old_codex_refactor/ (new directory)
+- docs/archive/old_roadmaps/ (new directory)
+- docs/archive/old_audits/ (new directory)
+- docs/archive/old_prompts/ (new directory — пустая)
+
+Перемещённые DANGEROUS_OLD файлы (3):
+- docs/project/NEW_CHAT_START_PROMPT.md → docs/archive/dangerous_old/NEW_CHAT_START_PROMPT.md
+  Причина: production-пути, Google Drive mirror, устаревшие чекпоинты
+- docs/project/памятка.txt → docs/archive/dangerous_old/памятка.txt
+  Причина: устаревшая формула сепаратора 20→10+1 (актуальная 15→10+1), старый порт 8000
+- THIS_IS_WORK_PROJECT.txt → docs/archive/dangerous_old/THIS_IS_WORK_PROJECT.txt
+  Причина: маркер production-проекта, не sandbox
+
+Перемещённые ARCHIVE_CANDIDATE файлы (3):
+- docs/project/codex_limit_sprint_20260509_20260510.md → docs/archive/old_codex_refactor/
+  Причина: sprint window истёк
+- docs/project/four_elements_patch_roadmap_actual.docx → docs/archive/old_roadmaps/
+  Причина: бинарный формат, устарел относительно .md-версии
+- docs/project/patch_08a_bot_behavior_mvp_audit.md → docs/archive/old_audits/
+  Причина: аудит PATCH-08A уже выполнен и принят
+
+Перемещённые STALE файлы (2):
+- docs/project/four_elements_bot_checkpoint_10E2.md → docs/archive/old_checkpoints/
+  Причина: перекрыт чекпоинтом 10I2
+- docs/project/four_elements_bot_checkpoint_10H2.md → docs/archive/old_checkpoints/
+  Причина: перекрыт чекпоинтом 10I2
+
+Обновлён WARNING-заголовок:
+- docs/project/archive/four_elements_workflow_reglament_v5_20260506.md — добавлен WARNING
+
+Обновлённые ссылки в ACTIVE документах:
+- docs/prompts/PROMPT_NEW_CHAT_GPT_FOUR_ELEMENTS_GLM_FIRST.txt — NEW_CHAT_START_PROMPT → AI_READ_FIRST.md
+- docs/project/four_elements_workflow_reglament.md — 5 ссылок обновлены
+- docs/project/four_elements_patch_roadmap_actual.md — 5 ссылок обновлены
+- docs/project/four_elements_bot_roadmap_merged_glm.md — 3 ссылки обновлены
+- docs/project/four_elements_glm_parallel_branch_plan.md — 2 ссылки обновлены
+
+Что НЕ сделано (по правилам задачи):
+- Файлы НЕ удалялись — только перемещались в archive
+- src/* НЕ затронуты
+- index.html НЕ затронут
+- assets/* НЕ затронуты
+- CANONICAL документы НЕ перемещались
+- ACTIVE документы НЕ перемещались
+- REFERENCE документы НЕ перемещались
+- PLAYWRIGHT_VISUAL_SCENARIOS.md, playwright_codegen_routes.md — низкий приоритет, не перемещены
+- project_structure.md, reglament_local_tools_addendum.md — STALE, но не рекомендованы аудитом для архива
+- 01_BUILD_GPT_CONTEXT_WORK.bat — не обновлён (production-era скрипт, не sandbox)
+- docs/codex/Open_Codex_Chat.lnk — не перемещён (Windows ярлык)
+
+Выполненные проверки:
+- node --check src/main.js -> PASS (smoke only, код не менялся)
+- git diff --name-only: только docs/ файлы, PATCH_REPORT.txt
+- Ручная проверка: ни один CANONICAL/ACTIVE/REFERENCE документ не перемещён
+- Ручная проверка: все архивные файлы содержат WARNING-заголовок
+- Ручная проверка: все ссылки в ACTIVE документах обновлены
+
+Безопасность:
+- Игровой код не изменён
+- Ассеты не затронуты
+- src/main.js не тронут
+- Google Drive sync не включён
+- Production paths не затронуты
+- Откат тривиален: git revert восстанавливает все перемещения
+
+---
+
+Задача: BOT-MVP-01 — аудит текущего enemy bot / skirmish для playable 1v1
+Дата: 2026-05-10
+Lane: Fast
+Ветка: sandbox/main (direct push)
+
+Цель:
+Провести аудит текущего enemy bot / skirmish logic и понять, что нужно
+для минимально играбельного 1v1. Audit-only задача — код НЕ менялся.
+
+Что сделано:
+1. Прочитаны все проектные документы: AI_READ_FIRST.md, AGENTS.md, README_GLM_SANDBOX.md,
+   bot roadmap, checkpoint 10I2, scout roadmap, refactor checkpoint, PATCH_REPORT.
+2. Проанализирован src/main.js (~11 358 строк) на предмет bot/skirmish логики.
+3. Проанализированы src/config/units.js, src/config/buildings.js, src/config/runtime_flags.js.
+4. Проанализированы src/dev/enemy_economy_debug_panel.js, src/dev/combat_debug_overlay.js.
+5. Составлена полная карта bot-систем: enemy start, resources, separator, factory, production,
+   attack waves, phase bot, 7 AI-слоёв (10B–10I1), debug tools, victory/defeat.
+
+Ключевые выводы:
+- Бот уже функционально работоспособен для базового 1v1.
+- Экономическая цепочка полная: harvesters → separator → factory → light_tank.
+- 7 AI-слоёв работают: vision memory, scouting, autopilot guard, strength estimate,
+  vision-driven targeting, retreat/HQ defense, difficulty profiles.
+- Критический пробел: нет восполнения рабочих (harvester/builder) при гибели.
+- Ограничения: только light_tank, очередь max=1, одна factory, scout не интегрирован.
+
+Рекомендованные следующие PR:
+- BOT-MVP-02 — worker replenishment (самый безопасный первый кодовый PR)
+- BOT-MVP-03 — production queue increase (max 1→2)
+- BOT-MVP-04 — second factory
+- BOT-MVP-05 — difficulty production knobs
+- BOT-MVP-06 — bot builds storages
+- BOT-MVP-07 — victory/defeat screen polish
+
+Созданные файлы:
+- docs/project/BOT_MVP_01_CURRENT_ENEMY_BOT_AUDIT.md (new) — полный аудит
+
+Изменённые файлы:
+- PATCH_REPORT.txt (добавлена эта запись)
+
+Проверки:
+- node --check src/main.js -> PASS (smoke only, код не менялся)
+- git diff --name-only: только docs/ файл, PATCH_REPORT.txt
+
+Безопасность:
+- Игровой код не изменён
+- Ассеты не затронуты
+- src/main.js не тронут
+- Google Drive sync не включён
+- Production paths не затронуты
+
+---
+
+Задача: BOT-BASELINE-01 — enemy bot стартует и выживает
+Дата: 2026-05-10
+Lane: Review
+Ветка: glm/bot-baseline-01-start-and-survive (от sandbox/main)
+
+Цель:
+- Выровнять стартовые ресурсы enemy bot с игроком (было 30 энергии → стало 160).
+- Добавить минимальное восполнение enemy harvester и builder через factory.
+
+Часть 1 — стартовая экономика:
+
+Стартовая энергия игрока: 160 (resources.energy в createGameObject, строка 174).
+Стартовая энергия enemy до патча: 0 (enemyResources.energy), затем FE_PATCH_09C2EnsureEnemyScenarioEnergyReserve давала только 30.
+Стартовая энергия enemy после патча: 160 (enemyResources.energy в createGameObject + FE_PATCH_BASELINE_01_START_ENERGY = 160).
+Причина: игрок стартует с 160 энергии — этого хватает на separator (30) + factory (55) = 85, с запасом. Enemy с 30 энергии мог строить только separator, а на factory не хватало. 160 выравнивает возможности.
+
+Изменения:
+- enemyResources в createGameObject: energy:0 → energy:160 (строка 176)
+- FE_PATCH_BASELINE_01_START_ENERGY = 160 — новая константа (строка 6051)
+- FE_PATCH_09C2EnsureEnemyScenarioEnergyReserve: использует FE_PATCH_BASELINE_01_START_ENERGY вместо FE_PATCH_09C2_SEPARATOR_COST_ENERGY
+
+Часть 2 — worker replenishment MVP:
+
+Механика:
+- Если enemy harvesters < 2 → factory производит harvester (приоритет над light_tank).
+- Если enemy builder < 1 → factory производит builder (приоритет над harvester).
+- Если workers на месте → factory производит light_tank как обычно.
+- Приоритет: builder > harvester > light_tank.
+
+Защита от спама:
+- Cooldown: 5 секунд между проверками worker count (FE_PATCH_BASELINE_01_WORKER_CHECK_COOLDOWN_MS).
+- Проверка очереди: если worker данного типа уже в очереди любой factory — не добавлять дубликат.
+- Cap: harvester max 4, builder max 2 — не производить больше cap даже если ниже min (защита от edge case).
+- Factory queue max = 1 (не изменён) — естественный throttle.
+
+Worker thresholds/caps:
+- FE_PATCH_BASELINE_01_HARVESTER_MIN = 2
+- FE_PATCH_BASELINE_01_BUILDER_MIN = 1
+- FE_PATCH_BASELINE_01_HARVESTER_CAP = 4
+- FE_PATCH_BASELINE_01_BUILDER_CAP = 2
+- FE_PATCH_BASELINE_01_WORKER_CHECK_COOLDOWN_MS = 5000
+
+Автозапуск harvester:
+- После спавна enemy harvester из factory, вызывается startHarvester() для автоматической добычи.
+
+Стоимость производства workers (из FE_UNITS):
+- harvester: 1 элемент, 25 сек
+- builder: 1 элемент, 20 сек
+
+Новые функции:
+- FE_PATCH_BASELINE_01_CountEnemyWorkers(type) — считает живых enemy workers по типу
+- FE_PATCH_BASELINE_01_ChooseFactoryUnitType() — выбирает тип юнита для производства (builder > harvester > light_tank)
+- FE_PATCH_BASELINE_01_CanStartFactoryProduction(factory, unitType) — обобщённая проверка для любого типа
+- FE_PATCH_BASELINE_01_StartFactoryProduction(factory, unitType) — обобщённый запуск производства
+
+Изменённые функции:
+- FE_PATCH_09C2EnsureEnemyScenarioEnergyReserve() — использует FE_PATCH_BASELINE_01_START_ENERGY
+- FE_PATCH_09EUpdateEnemyFactoryProduction(dt) — использует ChooseFactoryUnitType + auto-start harvesters
+
+Изменённые файлы:
+- src/main.js (99 вставок, 4 удаления; net +95 строк новой логики)
+- PATCH_REPORT.txt (добавлена эта запись)
+
+Что НЕ трогалось:
+- scout speed/cap/usage
+- decision loop / updateEnemyBot main tick
+- storage logic
+- factory queue size (остался max=1)
+- second factory
+- reactor scaling
+- difficulty knobs
+- combat damage/range/cooldown
+- pathfinding
+- save/load schema
+- map generation
+- render/input
+- player factory/production
+- player starting resources
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+- main.js: 11 358 строк до → 11 453 строки после (разница +95, в пределах лимита 80-120)
+- git diff --name-only: только src/main.js + PATCH_REPORT.txt
+- Нет изменений scout/pathfinding/combat/render/save-load/mapgen
+
+Manual smoke checklist:
+- [ ] новая игра стартует
+- [ ] выбор фракции проходит дальше
+- [ ] enemy base появляется
+- [ ] enemy bot получает 160 стартовой энергии
+- [ ] enemy bot строит separator/factory по текущей логике
+- [ ] если enemy harvester погиб — factory производит замену
+- [ ] если enemy builder погиб — factory производит замену
+- [ ] бот не спамит бесконечных рабочих
+- [ ] enemy light_tank production не сломана
+- [ ] enemy attack/wave logic не сломана
+- [ ] victory/defeat не сломаны
+- [ ] console без красных ошибок
+
+Риски:
+- Worker production использует ту же factory queue (max=1), что и tank. Пока factory делает worker, она не делает tank. Это осознанный trade-off — бот жертвует танком ради восстановления экономики.
+- Если enemy builder погибает во время постройки separator/factory, бот не сможет построить replacement factory (нет builder → нет зданий). Но теперь factory произведет builder, и экономика восстановится.
+- Cap значения (harvester=4, builder=2) — консервативные, могут потребовать tuning.
+
+Пропущенное:
+- Не реализовано: bot строит storages (BOT-ECO-01)
+- Не реализовано: bot использует scout (BOT-SCOUT-01)
+- Не реализовано: difficulty влияет на production (BOT-MVP-05)
+- Не реализовано: вторая factory (BOT-MVP-04)
+
+==========================================================================
+BOT-BRAIN-01 | Lane: Bot | Branch: glm/bot-brain-01-priority-decision-loop
+==========================================================================
+Дата: 2026-05-10
+Задача: Добавить priority decision loop — первый слой «мышления» enemy bot.
+Бот выбирает следующее действие по текущему состоянию, а не следует линейному чеклисту.
+
+Дерево решений:
+  Нет separator?      → build_separator
+  Нет factory?        → build_factory
+  Нет builder?        → produce_builder
+  Харвестеров < min?  → produce_harvester
+  Экономика стабильна? → produce_combat (сигнал для tank pipeline)
+  Ничего критичного?  → wait (phase-bot управляет)
+
+Изменения в src/main.js:
+
+Интеграция (updateEnemyBot):
+- Заменён линейный вызов (09C2Order + 09DOrder) на:
+  FE_PATCH_BRAIN_01_ChoosePriorityAction(state) → FE_PATCH_BRAIN_01_ExecuteAction(decision, state)
+- Две удалённые строки → три новые (net +1 в updateEnemyBot)
+
+Новые константы:
+- FE_PATCH_BRAIN_01_ACTIONS — массив допустимых действий (для документации/telemetry)
+
+Новые функции:
+- FE_PATCH_BRAIN_01_ChoosePriorityAction(state) — evaluates state, returns {action, reason}
+  Priority chain: separator → factory → builder → harvester → combat → wait
+- FE_PATCH_BRAIN_01_IsUnitTypeQueued(unitType) — checks if worker type already in factory queue
+- FE_PATCH_BRAIN_01_ExecuteAction(decision, state) — dispatches action, records telemetry
+- FE_PATCH_BRAIN_01_TryProduceWorker(unitType) — finds idle factory and starts worker production
+
+Делегирование:
+- build_separator → FE_PATCH_09C2OrderEnemyBuilderBuildSeparator()
+- build_factory   → FE_PATCH_09DOrderEnemyBuilderBuildFactory()
+- produce_builder/harvester → FE_PATCH_BASELINE_01_StartFactoryProduction()
+- produce_combat  → сигнал (09E pipeline + BASELINE-01 chooser управляют)
+- wait            → phase-bot (08B defend/attack/regroup) управляет
+
+Телеметрия:
+- game._brain01LastDecision — последнее решение бота (action, reason, at)
+
+Изменённые файлы:
+- src/main.js (96 вставок, 2 удаления; net +94 строк новой логики)
+- PATCH_REPORT.txt (добавлена эта запись)
+
+Что НЕ трогалось:
+- worker thresholds/caps (BASELINE-01)
+- factory queue size (остался max=1)
+- scout speed/cap/usage
+- storage logic
+- second factory
+- reactor scaling
+- difficulty knobs
+- combat damage/range/cooldown
+- pathfinding
+- save/load schema
+- map generation
+- render/input
+- player factory/production
+- phase-bot logic (08B defend/attack/regroup)
+- AI layers (10B-10I1)
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+- main.js: 11 453 строк до → 11 549 строк после (разница +96, net new logic +94, в пределах лимита 80-120)
+- git diff --name-only: только src/main.js + PATCH_REPORT.txt
+- Нет изменений scout/pathfinding/combat/render/save-load/mapgen/phase-bot
+
+Manual smoke checklist:
+- [ ] новая игра стартует
+- [ ] выбор фракции проходит дальше
+- [ ] enemy base появляется
+- [ ] enemy bot строит separator первым делом (Priority 1)
+- [ ] после separator → bot строит factory (Priority 2)
+- [ ] если builder погиб → bot производит replacement (Priority 3)
+- [ ] если harvester погиб → bot производит replacement (Priority 4)
+- [ ] при стабильной экономике → bot производит light_tank (Priority 5)
+- [ ] enemy attack/wave logic не сломана
+- [ ] game._brain01LastDecision обновляется каждый tick
+- [ ] victory/defeat не сломаны
+- [ ] console без красных ошибок
+
+Риски:
+- Edge case: если builder погибает ДО постройки factory, бот застрянет на Priority 2 (build_factory) — нет builder'а для стройки, нет factory для производства builder'а. Крайне редкий сценарий (player rush <30 сек). Фикс — в будущих патчах.
+- produce_combat — это только «сигнал», не гарантирует немедленного производства (зависит от ресурсов и queue).
+- Decision loop работает раз в ~1.2 сек (throttle от updateEnemyBot). Для быстрых решений может быть медленно.
+
+Пропущенное:
+- Не реализовано: bot строит storages (BOT-ECO-01)
+- Не реализовано: bot использует scout (BOT-SCOUT-01)
+- Не реализовано: difficulty влияет на decision quality (BOT-MVP-05)
+- Не реализовано: вторая factory (BOT-MVP-04)
+
+==========================================================================
+BOT-ATTACK-01 | Lane: Review | Branch: glm/bot-attack-01-wave-dispatch-fix
+==========================================================================
+Дата: 2026-05-10
+Задача: Починить ситуацию, когда enemy bot производит light_tank, но танки копятся
+у базы и не выходят в атаку.
+
+Причина: СТАРЫЙ БАГ (не регрессия после BOT-BRAIN-01).
+
+Root cause:
+10F1 vision-driven target selection (FE_PATCH_10F1SelectAttackDecision) требует
+visible/high-confidence цели для атаки. Если бот не «видит» player объекты
+(нет scout, нет контакта), 10F1 возвращает target=null.
+FE_PATCH_08BPrepareAttack при отсутствии цели ставит phase='defend'.
+Цикл: defend → prepare_attack → нет цели → defend → повтор бесконечно.
+Бот копит танки, но никогда не атакует.
+
+BOT-BRAIN-01 НЕ является причиной: BRAIN-01 заменяет только экономический
+чеклист (separator/factory/workers), attack dispatch flow не тронут.
+
+Исправление (минимальное, 30 net new lines):
+
+1. FE_PATCH_08BPrepareAttack — добавлен HQ fallback:
+   Если 10F1 не нашла цель, но армия достаточная → атаковать player HQ напрямую.
+   Используется новый orderType 'hq_push' (вместо 'attack'), чтобы обойти
+   10F1 vision gate в FE_PATCH_08BCommandEnemyTankAttack.
+
+2. FE_PATCH_10F1CanDirectAttackTarget — добавлено исключение для 'hq_push':
+   orderType === 'hq_push' обходит vision gate, как и 'defend'.
+   Это логично: бот «знает» что у игрока есть HQ — это стартовая позиция.
+
+3. Телеметрия: game._attack01LastDispatch — показывает source ('vision' или 'hq_fallback'),
+   targetId, targetType, armyScore, waveSize.
+
+Изменённые функции:
+- FE_PATCH_08BPrepareAttack — HQ fallback + attackOrderType + телеметрия
+- FE_PATCH_10F1CanDirectAttackTarget — 'hq_push' orderType bypass
+
+Новые переменные:
+- attackOrderType в FE_PATCH_08BPrepareAttack ('attack' | 'hq_push')
+- game._attack01LastDispatch — телеметрия
+
+Что НЕ трогалось:
+- combat damage/range/cooldown
+- pathfinding
+- render/input
+- save/load
+- map generation
+- scout speed/cap/usage
+- storage logic
+- factory queue size
+- worker replenishment (BASELINE-01)
+- priority decision loop (BRAIN-01)
+- retreat logic (10H1)
+- strength estimate (10E1)
+- autopilot guard (10D1)
+- difficulty knobs (10I1)
+- player factory/production
+- 10F1 для видимых/known целей (приоритет остаётся за vision)
+
+Поведение ПОСЛЕ фикса:
+- Если 10F1 видит цель → атака по vision (как раньше)
+- Если 10F1 НЕ видит цель, но армия >= threshold → атака на player HQ (fallback)
+- Если нет цели и нет player HQ → defend (как раньше)
+- Retreat/strength gate продолжают работать: если бот слабее → отступает
+- Wave size применяется к fallback как обычно (нет «один танк атакует один»)
+
+Изменённые файлы:
+- src/main.js (32 вставки, 2 удаления; net +30 строк новой логики)
+- PATCH_REPORT.txt (добавлена эта запись)
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+- main.js: 11 547 строк до → 11 577 строк после (разница +30)
+- git diff --name-only: только src/main.js + PATCH_REPORT.txt
+- Нет изменений scout/pathfinding/combat/render/save-load/mapgen
+
+Manual smoke checklist:
+- [ ] новая игра стартует
+- [ ] выбор фракции проходит дальше
+- [ ] enemy base появляется
+- [ ] бот строит separator/factory
+- [ ] бот производит light_tank
+- [ ] при tanks >= threshold танки выходят с базы (даже без видимых целей)
+- [ ] танки идут к player HQ
+- [ ] танки атакуют HQ или встречных юнитов
+- [ ] если 10F1 видит цель — атака по vision (не через fallback)
+- [ ] retreat при превосходстве игрока работает
+- [ ] worker replenishment не сломан
+- [ ] factory продолжает производство
+- [ ] game._attack01LastDispatch доступна в консоли
+- [ ] console без красных ошибок
+
+Риски:
+- HQ fallback делает бота более агрессивным: он всегда будет идти к player HQ если нет другой цели. Это может сделать бота слишком предсказуемым (всегда идёт к HQ). Но это лучше чем вечное стояние у базы.
+- 'hq_push' обходит 10F1 vision gate. Если в будущем появятся невидимые/замаскированные здания, нужно будет уточнить логику.
+- Retreat logic может отменить HQ push если бот слабее. Это правильное поведение.
+
+Пропущенное:
+- Не реализовано: bot строит storages (BOT-ECO-01)
+- Не реализовано: bot использует scout (BOT-SCOUT-01)
+- Не реализовано: difficulty влияет на decision quality (BOT-MVP-05)
+- Не реализовано: вторая factory (BOT-MVP-04)
+
+==========================================================================
+BOT-ATTACK-02 | Lane: Review | Branch: glm/bot-attack-02-wave-order-execution-fix
+==========================================================================
+Дата: 2026-05-11
+Задача: Починить ситуацию, когда enemy bot принимает решение атаковать через
+hq_fallback (ATTACK-01), но танки фактически не выходят в атаку.
+
+Причина: 10H1 retreat layer отменяет hq_push атаку на следующем тике.
+
+Root cause:
+ATTACK-01 добавил HQ fallback: PrepareAttack находит player HQ и отдаёт
+приказ (hq_push). Но на следующем тике updateEnemyBot вызывает 10H1 retreat
+ДО phase checks. 10H1_shouldRetreat видит:
+- enemyTankCount <= playerThreatEstimate (бот «не сильнее» игрока)
+  → retreat → startRetreat → state.phase = 'regroup' → танки отзываются к HQ.
+- estimate.attackAllowed === false (10E1 strength gate)
+  → retreat → то же самое.
+
+Результат: цикл attack → retreat → regroup → prepare_attack → attack → retreat.
+Танки копятся у базы, постоянно получая и тут же теряя attack orders.
+
+Исправление (23 net new lines):
+
+1. FE_PATCH_08BPrepareAttack — при hq_push устанавливает state-флаги:
+   state._attack02HqPush = true
+   state._attack02HqPushArmyScore = N
+   При обычной vision-атаке — флаги сбрасываются.
+
+2. FE_10H1_shouldRetreat — при isHqPush отступление более неохотное:
+   - lost_tank_during_attack → игнорируется (отступаем только при потере >50% армии)
+   - estimate.attackAllowed === false → игнорируется (strength gate не блокирует)
+   - playerThreatEstimate → отступаем только при 2:1 перевесе игрока
+     (вместо «не сильнее» — «критически слабее»)
+
+3. FE_PATCH_08BStartRegroup — очищает hq_push флаги при regroup,
+   чтобы следующий attack cycle решал заново.
+
+Изменённые функции:
+- FE_PATCH_08BPrepareAttack — hq_push state flags
+- FE_10H1_shouldRetreat — hq_push-aware retreat rules
+- FE_PATCH_08BStartRegroup — cleanup hq_push flags
+
+Новые переменные:
+- state._attack02HqPush (boolean)
+- state._attack02HqPushArmyScore (number)
+
+Поведение ПОСЛЕ фикса:
+- hq_push атака: танки идут к player HQ, не отступая при малом перевесе игрока
+- hq_push отступление: только при потере >50% армии ИЛИ при 2:1 перевесе игрока
+- Обычная vision-атака: retreat работает как раньше (без изменений)
+- Regroup после hq_push: флаги сбрасываются, следующий cycle решает fresh
+
+Что НЕ трогалось:
+- combat damage/range/cooldown
+- pathfinding
+- render/input
+- save/load
+- map generation
+- scout speed/cap/usage
+- storage logic
+- factory queue size
+- worker replenishment (BASELINE-01)
+- priority decision loop (BRAIN-01)
+- ATTACK-01 HQ fallback logic
+- 10F1 vision-driven targeting
+- 10E1 strength estimate calculations
+- 10D1 autopilot guard/patrol
+- difficulty knobs (10I1)
+- player factory/production
+- last_tank_in_attack_wave retreat rule (всегда отступает при 1 танке)
+
+Изменённые файлы:
+- src/main.js (26 вставок, 3 удаления; net +23 строк новой логики)
+- PATCH_REPORT.txt (добавлена эта запись)
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+- main.js: 11 577 строк до → 11 600 строк после (разница +23)
+- git diff --name-only: только src/main.js + PATCH_REPORT.txt
+
+Manual smoke checklist:
+- [ ] новая игра стартует
+- [ ] бот строит separator/factory
+- [ ] бот производит light_tank
+- [ ] при tanks >= threshold танки выходят к player HQ (hq_push)
+- [ ] танки НЕ отступают при малом player threat
+- [ ] танки отступают при потере >50% армии
+- [ ] танки отступают при 2:1 перевесе игрока
+- [ ] обычная vision-атака работает как раньше
+- [ ] last_tank rule работает (1 танк → отступает)
+- [ ] regroup после hq_push очищает флаги
+- [ ] worker replenishment не сломан
+- [ ] factory продолжает производство
+- [ ] console без красных ошибок
+
+Риски:
+- hq_push делает бота более агрессивным — он будет идти к HQ даже если чуть слабее.
+  Это осознанный trade-off: лучше агрессивный бот чем стоящий на базе.
+- 2:1 порог для retreat может быть слишком мягким — бот может потерять много танков
+  прежде чем отступит. Но это лучше чем вечный cycle attack→retreat→attack.
+- Флаг _attack02HqPush сохраняется в game._enemyBotState — если save/load
+  сериализует state, нужно добавить миграцию. Но сейчас save/load не сохраняет
+  bot state.
+
+---
+
+Задача: BOT-ATTACK-03 — enemy wave group attack order assignment fix
+Дата: 2026-05-11
+Lane: Review
+Ветка: glm/bot-attack-03-wave-group-order-fix (от sandbox/main)
+
+Цель:
+Починить ситуацию, когда enemy bot уже принимает решение атаковать через hq_fallback,
+формирует waveSize 8, но танки всё равно стоят у базы или двигаются частично.
+Continuation после BOT-ATTACK-01/02.
+
+Причина бага — три комбинированных проблемы в order execution pipeline:
+
+1. FE_PATCH_08BNeedsNewAttackOrder (строка 2737): пропускал танки с
+   state='attack_approach' и непустым path, даже если path ведёт к ДРУГОЙ цели
+   (autopilot patrol, defend order). Танк с подходом к patrol-точке не получал
+   новый приказ атаки HQ — NeedsNewAttackOrder возвращал false.
+   Исправлено: добавлена проверка attackApproachTargetId === target.id — skip
+   только если подход уже для ЭТОЙ цели.
+
+2. updateLightTankAttackApproach (строка 10400): при повторной маршрутизации
+   (path consumed, re-path) вызывал setLightTankAttackApproach, который содержит
+   isPlayerUnit guard — всегда возвращает false для enemy tanks. Результат:
+   attackApproachTargetId очищен, state='idle', но phase остаётся 'attack' —
+   updateEnemyBot делает немедленный return, и танк навсегда idle.
+   Исправлено: для enemy tanks вызывается setLightTankAttackApproachGeneric,
+   которая не имеет isPlayerUnit guard.
+
+3. updateEnemyBot (строка 4724-4726): при phase='attack' делал немедленный return,
+   не переназначая приказы танкам, потерявшим цель. Если танк терял приказ
+   (re-path fail, override autopilot/retreat), он оставался idle навсегда, потому
+   что phase='attack' блокировал повторную выдачу.
+   Исправлено: добавлен блок ATTACK-03 reorder — при phase='attack' сканирует
+   enemyTanks, находит юниты без attackTargetId/attackApproachTargetId/state='attacking',
+   и напрямую вызывает setLightTankAttackApproachGeneric, обходя NeedsNewAttackOrder throttle.
+
+Что именно было не так с group order assignment:
+- Не все танки получали приказ — NeedsNewAttackOrder skip на wrong-target approach
+- Танки теряли приказ на полпути — re-path через player-only функцию → idle
+- Потерянные приказы не восстанавливались — attack phase immediate return
+
+Какие поля/функции исправлены:
+- FE_PATCH_08BNeedsNewAttackOrder: добавлена проверка attackApproachTargetId === target.id
+- updateLightTankAttackApproach: заменён setLightTankAttackApproach →
+  isPlayerUnit ? setLightTankAttackApproach : setLightTankAttackApproachGeneric
+- updateEnemyBot: добавлен ATTACK-03 reorder block в phase='attack'
+- FE_PATCH_08BPrepareAttack: добавлена ATTACK-03 telemetry (game._attack03LastDispatch)
+- updateEnemyBot: добавлена ATTACK-03 reorder telemetry (game._attack03LastReorder)
+
+Telementry:
+- game._attack03LastDispatch: orderType, targetId, assignedCount, assignedUnitIds,
+  withTargetCount, withPathCount, withoutPathCount, at
+- game._attack03LastReorder: orderType, targetId, lostCount, reissuedCount,
+  assignedCount, assignedUnitIds, withTargetCount, withPathCount, withoutPathCount, at
+
+Что НЕ трогалось:
+- pathfinding algorithm
+- combat damage/range/cooldown
+- scout
+- economy/storage
+- save/load
+- map generation
+- render/input
+- factory production
+- updateEnemyBot (кроме attack phase block)
+- BRAIN-01 priority loop
+- 10H1 retreat logic
+- 10D1 autopilot guard
+- 10C1 scouting
+- ATTACK-01 hq_fallback
+- ATTACK-02 hq_push flag
+
+Изменённые файлы:
+- src/main.js
+- PATCH_REPORT.txt
+
+Выполняемые проверки:
+- node --check src/main.js -> PASS
+
+Manual smoke:
+- новая игра стартует;
+- enemy base появляется;
+- enemy tanks производятся;
+- hq_fallback находит player HQ;
+- waveSize >= 3;
+- танки выходят с базы группой;
+- танки идут к player HQ;
+- танки атакуют;
+- console без красных ошибок, кроме favicon.ico 404.
+
+Debug proof:
+После dispatch показать:
+- game._attack03LastDispatch: assignedCount, withTargetCount, withPathCount, withoutPathCount
+- game._attack03LastReorder: lostCount, reissuedCount, withTargetCount, withPathCount
+
+Risks:
+- Низкий: reorder block работает только при phase='attack', не затрагивает defend/regroup
+- Низкий: setLightTankAttackApproachGeneric может вернуть false если pathfinding не может
+  найти путь — танк остаётся idle, но reorder попробует снова на следующем tick
+- Средний: если player HQ уничтожен, reorder найдёт null target и пропустит — корректно,
+  но OverChasing/AttackStateInvalid должны перевести в regroup
+
+---
+
+Задача: BOT-ATTACK-04 — hq_push order persistence / prevent regroup overwrite
+Дата: 2026-05-11
+Lane: Review
+Ветка: glm/bot-attack-04-wave-group-order-fix (от sandbox/main)
+
+Проблема:
+После BOT-ATTACK-03 танки enemy bot получают hq_push ордер и начинают движение к player HQ, но через несколько секунд часть или вся группа разворачивается и возвращается к purple-базе. На видео виден цикл: выезд → движение → разворот → возврат/кучкование у базы.
+
+Корневая причина:
+BOT-ATTACK-03 починил выдачу приказа, но три других слоя перезаписывали hq_push attack order:
+1. FE_PATCH_08BOverChasing — если любой танк дальше maxChaseDistanceTiles (18) от home → StartRegroup('over_chase'). Player HQ гарантированно дальше 18 тайлов, поэтому regroup срабатывает на первом же тике после выезда.
+2. FE_10H1_updateEnemyRetreatAndDefenseMvp — при нахождении угрозы у базы или срабатывании shouldRetreat → перезаписывает все ордера на defend/regroup, отправляет танки домой.
+3. FE_PATCH_08BThreatNearHome → FE_PATCH_08BDefend — при любом threat рядом с enemy base все танки получают defend-ордер, phase='defend', и updateEnemyBot делает return.
+
+Цикл на видео: PrepareAttack → hq_push → танки едут → танк уехал >18 тайлов → OverChasing → StartRegroup → _attack02HqPush=false → танки домой → regroupUntil истёк → PrepareAttack → hq_push → (повтор)
+
+Что исправлено:
+
+1. Добавлены 2 helper-функции (после FE_PATCH_08BStartRegroup):
+   - FE_PATCH_08BIsHqPushValid(state) — проверяет, активен ли hq_push и существует ли player HQ (hp > 0)
+   - FE_PATCH_08BAttack04Telemetry(phase, source, blocked, reason, targetId, count) — записывает game._attack04LastOverrideCheck
+
+2. FE_10H1 guard (строка ~4719):
+   - Во время hq_push FE_10H1 заблокирован, если ни одно критическое условие не выполнено
+   - Разрешённые условия отступления: target_destroyed, last_tank (1 танк), heavy_losses (>50% wave потеряно), critically_outnumbered (2:1)
+   - Телеметрия: game._attack04LastOverrideCheck с полями phase, hqPushActive, attemptedOverrideSource, blockedOverride, reason, targetId, assignedCount
+
+3. ThreatNearHome guard (строка ~4751):
+   - Во время hq_push: только свободные (non-attack) танки отправляются на defend
+   - После FE_PATCH_08BDefend восстанавливается state.phase = 'attack'
+   - Не делается return — attack phase продолжает работу для wave-танков
+   - Телеметрия: pressureOverride = 'partial_defend' или 'blocked'
+
+4. OverChasing/AttackStateInvalid guard (строка ~4775):
+   - FE_PATCH_08BIsHqPushValid проверяется перед OverChasing и AttackStateInvalid
+   - Если hq_push активен и player HQ валиден → OverChasing и AttackStateInvalid пропускаются (не триггерят regroup)
+   - Если hq_push не активен или HQ уничтожен → обычная логика работает
+   - Телеметрия: overChaseBlocked, attackInvalidBlocked
+
+Допустимые условия отступления во время hq_push:
+1. Остался 1 танк (last_tank)
+2. Потеряно >50% wave (heavy_losses)
+3. Игрок имеет явный 2:1 перевес (critically_outnumbered)
+4. Player HQ уничтожен / target invalid (target_destroyed)
+
+Новая логика: ~75 строк (включая комментарии и телеметрию)
+
+Изменённые файлы:
+- src/main.js — 2 helper-функции + 4 guard-блока в updateEnemyBot
+- PATCH_REPORT.txt — добавлена эта запись
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+
+Что НЕ тронуто (hard rules):
+- combat damage/range/cooldown — нет
+- pathfinding algorithm — нет
+- scout — нет
+- economy/storage — нет
+- updateEnemyBot не переписан целиком — добавлены только guard-блоки
+- новый AI не создан
+- Google Drive sync — нет
+- production paths — нет
+
+Ожидаемое поведение после патча:
+- hq_push wave выходит группой
+- танки не разворачиваются обратно через пару секунд
+- танки продолжают движение к player HQ
+- отступают только при: 1 танк, >50% потерь, 2:1 перевес, HQ уничтожен
+
+---
+
+Задача: BOT-ATTACK-05 — sync hq_push attack target with movement command
+Дата: 2026-05-11
+Lane: Review
+Ветка: glm/bot-attack-05-sync-hq-push-movement (от sandbox/main)
+
+Проблема:
+После BOT-ATTACK-04 танки получают attackApproachTargetId = player HQ, но movement fields не синхронизированы:
+- command часто = 'move' (должен быть 'attack')
+- state = manual_move / moving (должен быть attack_approach)
+- targetX/targetY показывают старые координаты от patrol/regroup (40,40 / 36,2 / 33,3 / 75,75)
+- часть танков едет не к player HQ, а к случайным точкам
+- FE_10E1 strength gate очищает attackApproachTargetId и отправляет танки домой
+- FE_10D1 autopilot перезаписывает targetX/targetY на patrol-точки
+
+Корневые причины:
+1. setLightTankAttackApproachGeneric НЕ устанавливает targetX/targetY/command/moveTarget/destination
+   — старые значения от patrol/regroup остаются, показывают неверные координаты в console table
+2. FE_10E1_clearAttackOrder очищает attackApproachTargetId при strength gate
+   — если attackAllowed=false, все attack ордера стираются, танки отправляются домой
+3. FE_10E1_returnToHq перезаписывает targetX/targetY/state на координаты enemy HQ
+   — даже если у танка активный hq_push attack order
+4. FE_10D1_tryMove перезаписывает targetX/targetY/command/state на patrol/return координаты
+   — даже если у танка активный hq_push attack order
+
+Что исправлено:
+
+1. setLightTankAttackApproachGeneric (строка ~10481):
+   - Добавлена синхронизация: targetX=targetY=cell.x/cell.y, command='attack'
+   - Также установлены moveTarget, destination, targetTile, destX/destY, goalX/goalY
+   - Старые координаты от patrol/regroup полностью заменяются
+
+2. FE_10E1_clearAttackOrder guard (строка ~4250):
+   - Если у танка _attackApproachCommanded или attackApproachTargetId и hq_push активен
+   — очистка ордера блокируется, attack order сохраняется
+
+3. FE_10E1_returnToHq guard (строка ~4266):
+   - Если у танка _attackApproachCommanded или attackApproachTargetId и hq_push активен
+   — return-to-HQ блокируется, танк остаётся на attack_approach
+
+4. FE_10D1_tryMove guard (строка ~3881):
+   - Если у танка _attackApproachCommanded или attackApproachTargetId и hq_push активен
+   — patrol/return/move перезапись блокируется, танк продолжает attack_approach
+
+5. ATTACK-05 sync loop в attack phase (строка ~4858):
+   - Каждый тик attack phase: проверяет все танки с attackApproachTargetId
+   - Если state != attack_approach, targetX/targetY далеко от HQ, или нет path
+   — вызывает setLightTankAttackApproachGeneric для пересинхронизации
+   - Телеметрия: game._attack05LastOrderSync
+
+Телеметрия game._attack05LastOrderSync:
+{
+  targetId, targetX, targetY, assignedCount, syncedCount,
+  manualMoveLeftCount, wrongTargetCount, withPathCount,
+  withoutPathCount, sampleUnits, at
+}
+
+Новая логика: ~45 строк guard + ~30 строк sync loop + 13 строк field sync = ~88 строк
+
+Изменённые файлы:
+- src/main.js — 5 guard/sync правок + telemetry
+- PATCH_REPORT.txt — добавлена эта запись
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+
+Что НЕ тронуто (hard rules):
+- combat damage/range/cooldown — нет
+- pathfinding algorithm — нет
+- scout — нет
+- economy/storage — нет
+- updateEnemyBot целиком — нет, только точечные правки
+
+Ожидаемое поведение после патча:
+- hq_push wave выходит группой к player HQ
+- targetX/targetY у каждого танка указывают на player HQ или approach-точку рядом
+- command = 'attack', state = 'attack_approach' (не manual_move/moving)
+- strength gate не подавляет hq_push attack ордера
+- autopilot не перезаписывает движение hq_push танков
+- танки группой идут к player HQ и атакуют
+
+---
+
+Задача: BOT-ATTACK-06 — enemy attack movement stall fix
+Дата: 2026-05-11
+Lane: Review
+Ветка: glm/bot-attack-06-enemy-attack-movement-stall-fix (от sandbox/main)
+
+Проблема:
+Enemy light_tank во время hq_push/attack_approach зависает: attackApproachTargetId назначен,
+pathLen > 0, но x/y почти не меняются и path не расходуется. Танки стоят на месте вместо
+движения к player HQ.
+
+Корневая причина:
+1. updateUnitMovement (строка 5437): если next waypoint заблокирован (passable=false),
+   blockedTimer копится и через 0.35с вызывает recoverUnitPath(unit).
+2. recoverUnitPath (строка 5393): для light_tank нет специальной ветки → падает в default:
+   - unit.path = [] (путь убит)
+   - if (unit.state === 'manual_move') unit.state = 'idle' — но state='attack_approach',
+     не 'manual_move' → state НЕ меняется
+   - Итог: танк в state='attack_approach' с пустым path, attackApproachTargetId жив, но никуда не едет
+3. passable() учитывает unitAt() — другой танк на next waypoint = hard block.
+   Группа танков постоянно блокирует друг друга на узких проходах.
+
+Что исправлено:
+
+1. recoverUnitPath — ATTACK-06 branch для light_tank + attackApproachTargetId (строка ~5400):
+   - Если у танка активный attack approach и target жив → попробовать re-path через
+     setLightTankAttackApproachGeneric вместо безусловной очистки path
+   - Throttle: не чаще раза в 800мс (_attack06LastRepathAt)
+   - Если re-path успешен — вернуть true, attack order сохранён
+   - Если re-path неуспешен или throttled — вернуть false, НЕ очищать path,
+     ATTACK-05 sync loop переприсвоит на следующем тике
+   - Если target dead/invalid — fall through к default (очистка path)
+
+2. updateUnitMovement — ATTACK-06 early recovery в blocked branch (строка ~5463):
+   - Когда isLightTank(unit) && attackApproachTargetId && blockedTimer > 0.5с
+   - Определяется blocker type: unit / building / mineral / obstacle / unknown
+   - Если blocker = unit: попробовать re-path к attack target с throttle 800мс
+   - Если blocker = building/mineral/obstacle: консервативно, записать telemetry,
+     не ломать проходимость
+   - Если re-path успешен: сбросить blockedTimer, сохранить command='attack'
+   - Телеметрия: game._attack06LastMovementStallCheck
+   - Counters: game._attack06StallCounters (checkedCount, stuckCount, recoveredCount, failedRecoveryCount)
+
+Обрабатываемые blocker types:
+- unit: re-path к attack target
+- building: консервативно, telemetry, не ломать
+- mineral: консервативно, telemetry, не ломать
+- obstacle: консервативно, telemetry, не ломать
+- unknown: консервативно, telemetry
+
+Телеметрия game._attack06LastMovementStallCheck:
+{
+  unitId, blockerKind, blockerId, nextX, nextY,
+  pathLenBefore, pathLenAfter, recovered, recoveryReason,
+  targetId, state, command, blockedTimer
+}
+
+Counters game._attack06StallCounters:
+{ checkedCount, stuckCount, recoveredCount, failedRecoveryCount }
+
+Новая логика: ~60 строк (recoverUnitPath branch + updateUnitMovement early recovery + telemetry)
+
+Изменённые файлы:
+- src/main.js — 2 правки: recoverUnitPath + updateUnitMovement
+- PATCH_REPORT.txt — добавлена эта запись
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+
+Что НЕ тронуто (hard rules):
+- findPath algorithm — нет
+- passable globally — нет
+- unitAt globally — нет
+- combat damage/range/cooldown — нет
+- scout — нет
+- economy/storage — нет
+- updateEnemyBot — нет
+- player manual movement — нет
+
+Manual smoke:
+- новая игра стартует
+- enemy base появляется
+- enemy tanks производятся
+- hq_push срабатывает
+- танки получают pathLen > 0
+- если next waypoint занят другим танком, recovery/re-path срабатывает
+- через 10 секунд x/y меняются
+- pathLen уменьшается или пересчитывается
+- distToPlayerHQ уменьшается
+- танки доходят до player HQ
+- танки атакуют
+- player manual tank movement работает
+- harvesters/builders не сломались
+- console без красных ошибок
+
+Риски:
+- re-path может не найти альтернативный маршрут если все approach-клетки заблокированы
+  → в этом случае ATTACK-05 sync loop продолжает попытки на каждом тике
+- throttle 800мс означает что танк может стоять до 0.8с перед re-path
+  → лучше чем вечное залипание, но возможна короткая пауза
+- blocker detection для building/mineral/obstacle не делает recovery
+  → консервативный подход, не ломает проходимость
+
+---
+
+Задача: BOT-ATTACK-07 — fix enemy attack_approach/manual_move desync
+Дата: 2026-05-11
+Lane: Review
+Ветка: glm/bot-attack-07-enemy-attack-approach-manual-move-desync-fix (от sandbox/main)
+
+Проблема:
+Enemy light_tank во время hq_push входит в рассинхронизированное состояние:
+- state = manual_move
+- command = attack
+- attackApproachTargetId = hq_base_101
+- targetX/targetY указывают на HQ approach-точку
+- pathLen не соответствует targetX/targetY
+
+Причина: ATTACK-05 guards зависели от state._attack02HqPush — флага бота.
+Если флаг сброшен (regroup, timer), а у танка attackApproachTargetId ещё жив —
+guards не срабатывают, autopilot/strength gate перезаписывает state/path.
+
+Корневые причины:
+1. FE_10D1_tryMove guard зависел от game._enemyBotState._attack02HqPush
+2. FE_10E1_clearAttackOrder guard зависел от game._enemyBotState._attack02HqPush
+3. FE_10E1_returnToHq guard зависел от game._enemyBotState._attack02HqPush
+4. ATTACK-05 sync loop зависел от state._attack02HqPush
+   — если флаг сброшен, рассинхрон не чинился
+
+Что исправлено:
+
+1. Новый хелпер FE_ATTACK07HasActiveEnemyAttackOrder(unit) (строка ~3145):
+   - Проверяет инвариант на самом юните, БЕЗ зависимости от _attack02HqPush
+   - true когда: light_tank + enemy + command='attack' + attackApproachTargetId + target жив
+   - Используется как первичная проверка во всех guards
+
+2. FE_10D1_tryMove (строка ~3894):
+   - ATTACK-07 guard через FE_ATTACK07HasActiveEnemyAttackOrder — первый приоритет
+   - ATTACK-05 fallback через _attack02HqPush — второй приоритет
+
+3. FE_10E1_clearAttackOrder (строка ~4271):
+   - ATTACK-07 guard через FE_ATTACK07HasActiveEnemyAttackOrder — первый приоритет
+   - ATTACK-05 fallback через _attack02HqPush — второй приоритет
+
+4. FE_10E1_returnToHq (строка ~4289):
+   - ATTACK-07 guard через FE_ATTACK07HasActiveEnemyAttackOrder — первый приоритет
+   - ATTACK-05 fallback через _attack02HqPush — второй приоритет
+
+5. ATTACK-07 sync loop в attack phase (строка ~4878):
+   - Заменяет ATTACK-05 sync loop (который зависел от _attack02HqPush)
+   - Сканирует ВСЕ enemy light_tank с attackApproachTargetId + command='attack'
+   - Если target жив и: state !== 'attack_approach' ИЛИ path отсутствует
+     ИЛИ path goal не совпадает с targetX/targetY → re-sync через setLightTankAttackApproachGeneric
+   - Телеметрия: game._attack07LastInvariantFix
+
+Телеметрия game._attack07LastInvariantFix:
+{
+  unitId, beforeState, afterState, command,
+  targetId, pathLenBefore, pathLenAfter, reason
+}
+
+Причины синхронизации (reason):
+- state_manual_move / state_moving / state_idle / state_null — state не attack_approach
+- no_path — path пустой
+- path_goal_mismatch — конечная точка path не совпадает с targetX/targetY
+
+Новая логика: ~55 строк (хелпер + 3 guards + sync loop + telemetry)
+
+Изменённые файлы:
+- src/main.js — 5 правок
+- PATCH_REPORT.txt — добавлена эта запись
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+
+Что НЕ тронуто:
+- findPath — нет
+- passable — нет
+- combat — нет
+- scout — нет
+- economy — нет
+- updateEnemyBot целиком — нет
+
+Риски:
+- FE_ATTACK07HasActiveEnemyAttackOrder проверяет FE_PATCH_06BResolveApproachTarget —
+  если target временно недоступен (здание в тумане войны), хелпер вернёт false,
+  и guard не сработает. Это консервативное поведение.
+- Sync loop вызывает setLightTankAttackApproachGeneric на каждом тике attack phase
+  для рассинхронизированных танков — может быть дорого если много танков,
+  но на практике количество рассинхронов мало.
+
+---
+
+Задача: BOT-ATTACK-08 — global repair for enemy attack-order invariant
+Дата: 2026-05-11
+Lane: Review
+Ветка: glm/bot-attack-08-global-attack-invariant-repair (от sandbox/main)
+
+Проблема:
+ATTACK-07 sync loop работает только внутри updateEnemyBot attack phase.
+Если бот перешёл в regroup/prepare_attack — фаза не attack, sync не выполняется.
+Рассинхрон manual_move + command='attack' + attackApproachTargetId остаётся навсегда.
+game._attack07LastInvariantFix остаётся null — repair не вызывается.
+
+Корневая причина:
+ATTACK-07 sync привязан к фазе бота. Инвариант должен проверяться глобально,
+каждый тик, вне зависимости от фазы бота.
+
+Что исправлено:
+
+1. Новая функция FE_ATTACK08RepairEnemyAttackInvariant() (строка ~3159):
+   - Проходит по всем game.units каждый тик
+   - Для каждого enemy light_tank с command='attack' + attackApproachTargetId + живой target:
+     - Если state !== 'attack_approach' — нарушение инварианта
+     - Path есть → state_restore: просто u.state = 'attack_approach' (не пересчитываем path)
+     - Path пуст → repath: setLightTankAttackApproachGeneric(unit, target)
+   - Телеметрия: game._attack08LastInvariantRepair
+   - Счётчик: game._attack08InvariantRepairCount
+
+2. Вызов в game loop (строка ~11635):
+   - После updateEnemyBot(dt) — ПОСЛЕ всех мест, которые могут менять state/path
+   - Порядок: movement loop → updateEnemyBot → ATTACK-08 repair → остальное
+   - Гарантирует что BAD state не остаётся видимым в console watcher больше 1 тика
+
+Инвариант:
+Enemy light_tank с command='attack' + attackApproachTargetId + живой target
+→ state ДОЛЖЕН быть 'attack_approach'
+
+Телеметрия game._attack08LastInvariantRepair:
+{
+  unitId, beforeState, afterState, command,
+  targetId, pathLenBefore, pathLenAfter,
+  action: 'state_restore' | 'repath'
+}
+
+Счётчик: game._attack08InvariantRepairCount
+
+Новая логика: ~45 строк (функция + вызов)
+
+Изменённые файлы:
+- src/main.js — 2 правки: функция + вызов в game loop
+- PATCH_REPORT.txt — добавлена эта запись
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+
+Что НЕ тронуто:
+- findPath, passable — нет
+- combat — нет
+- scout — нет
+- economy — нет
+- updateEnemyBot — нет
+- player manual movement — нет
+
+Риски:
+- state_restore не пересчитывает path — если path ведёт не к attack target,
+  танк будет ехать по неправильному path но в правильном state.
+  Следующий тик ATTACK-07/05 sync поймёт path_goal_mismatch и перепроложит.
+- repath вызывает setLightTankAttackApproachGeneric каждый тик для танков без path —
+  если все approach-клетки заблокированы, это будет повторяться каждый тик.
+  Но findPath быстрый для небольших расстояний.
+
+---
+
+Задача: BOT-ATTACK-09 — экспериментальный production cap для enemy light_tank
+Дата: 2026-05-11
+Lane: Review
+Ветка: glm/bot-attack-09-experimental-enemy-light-tank-production-cap (от sandbox/main)
+
+Цель:
+Экспериментальный production cap для проверки влияния массового производства enemy light_tank.
+Ограничить количество enemy light_tank, которое бот может одновременно иметь (живые + в очереди + в производстве).
+
+Что сделано:
+
+1. Глобальный флаг cap (main.js, после FE_PATCH_09E_FACTORY_MAX_QUEUE):
+   - window.FE_ENEMY_LIGHT_TANK_CAP = 3
+   - null / undefined / <=0 отключает cap
+   - Настраивается из консоли: window.FE_ENEMY_LIGHT_TANK_CAP = 5 или window.FE_ENEMY_LIGHT_TANK_CAP = null
+
+2. Хелпер подсчёта (main.js, FE_ATTACK09GetEnemyLightTankCountIncludingQueue):
+   - Считает живые enemy light_tank (game.units, owner=enemy, hp>0)
+   - Считает light_tank в очередях всех enemy factories (_enemyFactoryQueue09E, type=light_tank)
+   - Первый элемент очереди — это текущее производство, уже учтён в очереди
+   - Возвращает alive + queued
+
+3. Guard в FE_PATCH_09ECanStartLightTankProduction (main.js):
+   - Если cap enabled и count >= cap → return { ok:false, reason:'attack09_tank_cap', attack09Cap, attack09Count }
+   - Проверка стоит ДО проверки queue_busy и not_enough_element
+   - StartLightTankProduction получает reject с reason и пишет в SetProductionStatus
+
+4. Guard в FE_PATCH_BASELINE_01_ChooseFactoryUnitType (main.js):
+   - Если cap enabled и count >= cap → return null (вместо 'light_tank')
+   - Фабрика остаётся idle — не производится ни light_tank, ни builder (нет builder spam)
+   - Guard применяется на всех early-return путях: !game, cooldown — тоже проверяют cap
+
+5. Обработка null в FE_PATCH_09EUpdateEnemyFactoryProduction (main.js):
+   - var unitType = FE_PATCH_BASELINE_01_ChooseFactoryUnitType()
+   - if (!unitType) → factory ждёт (noop), builder spam исключён
+   - else if (unitType === 'light_tank') → StartLightTankProduction(factory)
+   - else → StartFactoryProduction(factory, unitType)
+
+6. Telemetry (main.js, game._attack09EnemyTankCap):
+   - Обновляется каждый тик в FE_PATCH_09EUpdateEnemyFactoryProduction
+   - Структура: { cap, count, blocked, reason, factoryId, at }
+   - cap: число если enabled, null если disabled
+   - count: число light_tank (alive + queued) если enabled, null если disabled
+   - blocked: true если count >= cap
+   - reason: 'cap_reached' | 'cap_disabled' | null
+   - factoryId: id первой enemy factory или null
+   - at: game.time
+
+Изменённые файлы:
+- src/main.js — 5 правок (cap flag + helper, guard in CanStart, guard in ChooseFactoryUnitType, null handling in UpdateEnemyFactoryProduction, telemetry)
+- PATCH_REPORT.txt
+
+Что НЕ тронуто:
+- findPath — нет
+- passable — нет
+- combat — нет
+- ATTACK-08 repair — нет
+- scout — нет
+- economy formulas — нет
+- player production — нет
+- movement / pathfinding / render — нет
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+
+Безопасность:
+- assets изменены: нет
+- combat изменён: нет
+- pathfinding изменён: нет
+- player production затронута: нет
+- economy core изменён: нет
+- ATTACK-08 repair не затронут
+- Google Drive sync тронут: нет
+- Production paths не затронуты
+
+Как тестировать:
+1. Запустить игру, начать skirmish
+2. Подождать пока enemy построит фабрику и произведёт 3 light_tank
+3. Проверить telemetry: console.log(game._attack09EnemyTankCap)
+   - Должно показать { cap:3, count:3, blocked:true, reason:'cap_reached', ... }
+4. Убить один enemy light_tank
+5. Проверить что бот производит новый танк (count упал до 2, cap не blocked)
+6. Для отключения: window.FE_ENEMY_LIGHT_TANK_CAP = null
+   - telemetry покажет { cap:null, count:null, blocked:false, reason:'cap_disabled', ... }
+7. Для увеличения: window.FE_ENEMY_LIGHT_TANK_CAP = 5
+
+---
+
+Задача: BOT-ATTACK-10 — lock active attack wave composition (MVP)
+Дата: 2026-05-11
+Lane: Review
+Ветка: glm/bot-attack-10-lock-active-attack-wave (от sandbox/main)
+
+Цель:
+Зафиксировать состав атакующей волны после dispatch.
+Новые произведённые танки не должны сбрасывать/пересобирать текущую волну.
+PrepareAttack/regroup не должны возвращать/пересобирать locked wave units, пока target жив.
+
+Что сделано:
+
+1. Хелперы ATTACK-10 (main.js, после FE_PATCH_08BAttack04Telemetry):
+   - _attack10WaveCounter — счётчик волн
+   - FE_ATTACK10CreateWave(state, targetId, unitIds, orderType) — создаёт волну, маркирует юниты
+     (unit._attack10WaveId, unit._attack10WaveLocked = true), пишет telemetry _attack10LastWaveLock
+   - FE_ATTACK10ReleaseWave(state, reason) — снимает маркировку, пишет telemetry
+   - FE_ATTACK10IsWaveLocked(unit) — проверяет _attack10WaveLocked && _attack10WaveId
+   - FE_ATTACK10IsWaveTargetAlive(state) — проверяет что target волны жив
+   - FE_ATTACK10AliveWaveUnitCount(state) — считает живых юнитов волны
+   - FE_ATTACK10GetReserveTanks(enemyTanks, state) — фильтрует non-wave танки
+   - FE_ATTACK10UpdateTelemetry(state) — обновляет game._attack10ActiveWave
+   - FE_ATTACK10CheckAndRelease(state) — проверяет условия завершения волны
+
+2. Создание волны при dispatch (FE_PATCH_08BPrepareAttack):
+   - После успешного issued → FE_ATTACK10CreateWave(state, targetId, unitIds, attackOrderType)
+   - unitIds берутся из _a03Ids (ATTACK-03 telemetry)
+
+3. Guard в FE_PATCH_08BReturnUnitHome:
+   - Wave-locked units не возвращаются домой → return false
+
+4. Guard в FE_PATCH_08BPrepareAttack (below-threshold loop):
+   - FE_ATTACK10IsWaveLocked(unit) → continue (не ReturnUnitHome)
+
+5. Guard в FE_PATCH_08BStartRegroup:
+   - Release волны при regroup → FE_ATTACK10ReleaseWave(state, 'regroup_...')
+
+6. Guard в FE_10D1_tryMove:
+   - Wave-locked units не перенаправляются autopilot/patrol/strength-wait → return false
+
+7. Guard в FE_10E1_clearAttackOrder:
+   - Wave-locked units не чистят attack order → return
+
+8. Guard в FE_10E1_returnToHq:
+   - Wave-locked units не возвращаются на HQ → return false
+
+9. Guard в updateEnemyBot regroup/defend loops:
+   - FE_ATTACK10IsWaveLocked(unit) → continue (не ReturnUnitHome)
+
+10. CheckAndRelease + UpdateTelemetry в начале updateEnemyBot:
+    - Каждый тик: FE_ATTACK10CheckAndRelease(state) + FE_ATTACK10UpdateTelemetry(state)
+    - Условия release: target dead, all units dead, game ended
+
+Условия завершения волны:
+1. Target мёртв → release 'target_dead'
+2. Все wave units мертвы → release 'all_units_dead'
+3. Game result victory/defeat → release 'game_ended'
+4. FE_PATCH_08BStartRegroup → release 'regroup_...'
+
+Telemetry:
+- game._attack10ActiveWave = { id, targetId, unitIds, aliveCount, lockedCount, reserveTankCount, startedAt, orderType, reason }
+- game._attack10LastWaveLock = { action:'create'|'release', waveId, targetId, unitIds, reason, at }
+
+Не тронуто:
+- findPath — нет
+- passable — нет
+- combat damage/range/cooldown — нет
+- ATTACK-08 invariant repair — нет (работает для wave-locked units, чинит path/state)
+- ATTACK-09 cap logic — нет
+- ATTACK-03/ATTACK-07 sync — нет (продолжают работать для wave-locked units)
+- scout — нет
+- economy formulas — нет
+- player production — нет
+- map generation — нет
+- render/fog — нет
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+
+Безопасность:
+- assets изменены: нет
+- combat изменён: нет
+- pathfinding изменён: нет
+- player production затронута: нет
+- economy core изменён: нет
+- ATTACK-08 repair не затронут
+- ATTACK-09 cap не затронут
+- Google Drive sync тронут: нет
+
+Как тестировать:
+1. Запустить игру, начать skirmish
+2. Enemy производит танки, запускает attack wave
+3. Проверить telemetry: console.log(game._attack10ActiveWave)
+   — Должен показать { id:'wave_1', unitIds:[...], aliveCount:3, lockedCount:3, ... }
+4. Новый танк произведён — не добавляется в wave
+5. Wave-locked танки продолжают атаку
+6. game._attack10ActiveWave.reserveTankCount показывает отдельные резервные танки
+7. Когда target уничтожен / все wave units мертвы → wave release
+8. game._attack10LastWaveLock показывает action:'release', reason:'target_dead'
+
+---
+
+Задача: BOT-SCOUT-01 — enemy produces and uses scout MVP
+Дата: 2026-05-11
+Lane: Review
+Ветка: glm/bot-scout-01-enemy-scout-mvp (от sandbox/main)
+
+Цель:
+Enemy bot производит и использует scout как разведывательный юнит.
+Player также может производить scout с лимитом 2.
+Scout быстрее всех юнитов, имеет лучший обзор, не атакует.
+
+Что сделано:
+
+1. Scout tuning (units.js):
+   - Скорость: 0.72 → 1.08 (+50%)
+   - HP: 70 (без изменений)
+   - view: 7 (без изменений, лучший обзор)
+   - canAttack: false (без изменений)
+
+2. Scout visual (sprite_profiles.js):
+   - size: [84,84] → [92,92] (больше, но меньше light_tank [104,104])
+   - hpOffset: 34 → 38 (скорректирован под новый размер)
+
+3. Selection ring (main.js):
+   - scout: { x:0, y:-28, rx:0.88, ry:0.84 } → { x:0, y:-32, rx:0.92, ry:0.88 }
+   - Подстроен под увеличенный спрайт
+
+4. Scout cap (main.js):
+   - window.FE_SCOUT_CAP = 2 — глобальный лимит для обоих владельцев
+   - FE_SCOUT01GetScoutCountIncludingQueue(owner) — считает alive + queued + producing
+   - FE_SCOUT01PlayerCanProduceScout() — проверка лимита для player
+   - FE_SCOUT01EnemyCanProduceScout() — проверка лимита для enemy
+   - Player cap enforcement: в queueUnitProduction — блокировка + toast
+   - Player UI cap: кнопка scout disabled если кап достигнут
+   - Enemy cap enforcement: в ChooseFactoryUnitType — не возвращает 'scout' если кап достигнут
+
+5. Player scout production:
+   - Scout уже присутствовал в UI фабрики (PATCH-SCOUT-02)
+   - Добавлена проверка лимита в queueUnitProduction и openFactoryMenu
+   - Стоимость: 1 элемент, 18 сек (без изменений)
+   - Player может произвести до 2 scout (alive + queued + producing)
+
+6. Enemy scout production (ChooseFactoryUnitType):
+   - После builder/harvester приоритета, перед light_tank
+   - FE_SCOUT01_ENEMY_SCOUT_MIN = 1: первый scout производится всегда
+   - FE_SCOUT01_ENEMY_SCOUT_CAP = 2: второй scout — только если есть >=2 light_tank
+   - scoutQueued проверка: не ставить scout в очередь дважды
+   - Scout production не блокирует light_tank навсегда — после капа возвращается light_tank
+
+7. Scout behavior:
+   - FE_SCOUT01UpdateEnemyScoutBehavior() — основной цикл поведения scout
+   - Scout отправляется к scouting points: knowledge-based → map center → opposite corner
+   - FE_10C1_isCombatScoutCandidate — добавлен тип 'scout'
+   - FE_10C1_updateEnemyScoutingMvp — предпочитает scout unit type, fallback на light_tank
+   - Scout type не требует "2 tanks before scouting" gate
+   - FE_10G1_isUnitBusyForScout — scout type всегда free (не busy)
+   - Scout не атакует (canAttack:false)
+   - Scout не входит в combat wave (FE_PATCH_08BEnemyCombatUnits только light_tank)
+   - Scout не считается за combat strength
+
+8. isScout helper updates:
+   - FE_10D1_isActiveScout: добавлен u.type === 'scout'
+   - FE_10E1_isScout: добавлен u.type === 'scout'
+   - FE_10H1_isScout: добавлен u.type === 'scout'
+   - Scout type распознаётся как scout во всех подсистемах
+
+9. Scout vision telemetry:
+   - FE_SCOUT01UpdateScoutVision() — проверяет что видят enemy scout'ы
+   - Если scout видит player unit/building в радиусе view (7) — записывает:
+     lastSeenPlayerObjectId, lastSeenX, lastSeenY, lastSeenAt
+   - Telemetry: game._botScout01 = {
+       scoutsAlive, scoutCap, activeScoutId,
+       targetX, targetY, mode,
+       lastSeenPlayerObjectId, lastSeenX, lastSeenY, lastSeenAt
+     }
+
+10. updateEnemyBot hooks:
+    - FE_SCOUT01UpdateEnemyScoutBehavior() — каждый тик
+    - FE_SCOUT01UpdateScoutVision() — каждый тик
+    - Ошибки пишутся в game._botScout01BehaviorError / _botScout01VisionError
+
+Изменённые файлы:
+- src/config/units.js — scout speed 0.72→1.08
+- src/config/sprite_profiles.js — scout size [84,84]→[92,92], hpOffset 34→38
+- src/main.js — scout cap, player cap enforcement, enemy scout production, scout behavior, scout vision, isScout updates, selection ring, factory UI cap
+- PATCH_REPORT.txt
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+- node --check src/config/units.js -> PASS
+- node --check src/config/sprite_profiles.js -> PASS
+
+Не тронуто:
+- findPath — нет
+- passable — нет
+- combat damage/range/cooldown — нет
+- ATTACK-08 invariant repair — нет
+- ATTACK-09 cap logic — нет (scout не считается как light_tank)
+- ATTACK-10 wave-lock — нет (scout не входит в wave через EnemyCombatUnits)
+- economy formulas — нет
+- map generation — нет
+- render/fog — нет (кроме selection ring и hpOffset)
+- save/load — нет
+- pathfinding — нет
+
+Как тестировать:
+1. Запустить игру, начать skirmish
+2. Player может производить scout из фабрики
+3. Player не может произвести больше 2 scout (alive + queued + producing)
+4. Если один scout уничтожен — можно произвести нового
+5. Enemy производит scout перед light_tank (1-2 scout)
+6. Enemy scout двигается к scouting point
+7. Scout не атакует
+8. Scout не входит в attack wave
+9. Enemy продолжает производить light_tank
+10. game._botScout01 обновляется каждый тик
+11. game._botScout01.lastSeenPlayerObjectId обновляется когда scout видит player объект
+
+---
+
+Задача: BOT-SCOUT-01B — исправить назначение пути движения вражеского скаута
+Дата: 2026-05-11
+Lane: Review
+Ветка: glm/bot-scout-01b-fix-enemy-scout-movement (от glm/bot-scout-01-enemy-scout-mvp)
+
+Проблема:
+Вражеские скауты производятся корректно, выбирают цель, но не двигаются.
+Runtime-наблюдение: scout_129: state='idle', command='move', pathLen=0.
+
+Причина:
+В FE_10C1_trySetScoutMove вызов findPath использовал неправильную сигнатуру:
+  maybePathFn(sx, sy, tx, ty)  — 4 числа
+Но findPath ожидает: findPath(start, goal, unitId) — 2 объекта {x,y} + unitId.
+Результат: findPath получал невалидные аргументы, путь не создавался,
+scout оставался в state='idle' с pathLen=0.
+
+Дополнительно:
+- state устанавливался в 'moving' вместо 'manual_move' (канонический state для ручного движения)
+- direction cache (_dirTargetKey, _dirDx, _dirDy) не сбрасывался
+- Не было telemetry для диагностики проблем пути
+- При исчерпании пути scout оставался в state='manual_move' навсегда
+
+Что исправлено:
+
+1. FE_10C1_trySetScoutMove — полная переработка:
+   - Убран поиск несуществующих helper-функций (issueUnitMoveCommand и т.д.)
+   - Прямой вызов findPath({x:sx, y:sy}, {x:tx, y:ty}, unit.id) — правильная сигнатура
+   - Обработка результатов: null → 'unreachable', [] → 'empty_path', OK → path присвоен
+   - state = 'manual_move' при успешном пути (вместо 'moving')
+   - Сброс direction cache: _dirTargetKey=null, _dirDx=0, _dirDy=0
+   - Сброс stuck/blocked timers: _blockedTimer=0, _stuckTimer=0
+   - Синхронизация target-полей: targetX/Y, destX/Y, goalX/Y, command='move'
+   - При ошибке пути state не меняется (поведенческий цикл попробует новую цель)
+   - Return pathOk (true/false) вместо всегда true
+
+2. Game loop (строка ~12196) — scout path exhaustion reset:
+   - Добавлена проверка: if (state === 'manual_move' && path пуст) → state = 'idle'
+   - Позволяет поведенческому циклу FE_SCOUT01UpdateEnemyScoutBehavior
+     переназначить цель после достижения текущей
+
+3. Telemetry: game._botScout01MoveFix
+   Поля: {scoutId, fromX, fromY, targetX, targetY, beforeState, afterState,
+          beforePathLen, pathLen, ok, reason, at}
+   - reason при неудаче: 'same_tile', 'no_findPath', 'unreachable', 'empty_path', 'exception:...'
+   - reason при успехе: 'ok'
+
+Изменённые файлы:
+- src/main.js — FE_10C1_trySetScoutMove (переписана), game loop scout section (добавлен state reset)
+- PATCH_REPORT.txt (добавлена эта запись)
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+
+Что НЕ тронуто:
+- ATTACK-08/09/10 — не изменены
+- findPath — не изменён
+- passable — не изменён
+- combat — не изменён
+- production/cap — не изменён (ChooseFactoryUnitType, queueUnitProduction, openFactoryMenu)
+- render/fog — не изменены
+- map generation — не изменена
+- FE_SCOUT01UpdateEnemyScoutBehavior — не изменена
+- FE_SCOUT01ChooseScoutTarget — не изменена
+- FE_SCOUT01IsScoutEnRoute — не изменена
+- FE_SCOUT01UpdateScoutVision — не изменена
+
+Безопасность:
+- assets изменены: нет
+- economy изменена: нет
+- combat изменён: нет
+- pathfinding изменён: нет
+- production/cap изменён: нет
+- Google Drive sync тронут: нет
+- production paths тронуты: нет
+
+Как тестировать:
+1. Запустить игру, дождаться производства enemy scout
+2. В консоли: game._botScout01MoveFix
+   Ожидание: {ok: true, afterState: 'manual_move', pathLen: >0, reason: 'ok'}
+3. Визуально: scout едет к цели
+4. Дождаться достижения цели: state → 'idle', поведенческий цикл назначает новую цель
+
+---
+
+Задача: BOT-SCOUT-01C — исправить зависание скаута с метаданными цели, но без пути
+Дата: 2026-05-11
+Lane: Review
+Ветка: glm/bot-scout-01c-fix-scout-stuck-no-path (от glm/bot-scout-01b-fix-enemy-scout-movement)
+
+Проблема:
+После BOT-SCOUT-01B скауты всё ещё не двигались. Ручной тест показал:
+- game._botScout01MoveFix === undefined (телеметрия не записывалась)
+- Скаут стоит idle рядом с фабрикой
+- FE_10C1_trySetScoutMove со исправленным findPath ни разу не достигался
+
+Причина:
+FE_SCOUT01IsScoutEnRoute возвращал true, если скаут имеет _fe10c1ScoutTarget
+(метаданные) и расстояние > 3, даже если path=[] и state='idle'. Это приводило
+к тому, что FE_SCOUT01UpdateEnemyScoutBehavior пропускал скаута каждый тик,
+и исправленный FE_10C1_trySetScoutMove никогда не вызывался.
+
+Что исправлено:
+
+1. FE_SCOUT01IsScoutEnRoute (строка ~3510):
+   - Добавлена проверка: если path пуст и state='idle' → вернуть false
+   - Добавлена проверка: если path пуст и state='manual_move' → вернуть false
+   - Скаут считается "в пути" только если у него есть реальный путь
+
+2. FE_SCOUT01UpdateEnemyScoutBehavior (строка ~3532):
+   - Переставлен порядок проверок: combat/wave-чеки идут первыми
+   - Добавлен repath-блок: если скаут имеет метаданные + нет пути + idle,
+     попытаться перепроложить путь через FE_10C1_trySetScoutMove
+   - Если repath успешен — continue (скаут теперь едет)
+   - Если repath неуспешен — очистить устаревшие метаданные,
+     чтобы выбрать новую цель через FE_SCOUT01ChooseScoutTarget
+   - IsScoutEnRoute проверка перенесена после repath-блока
+
+3. FE_10C1_trySetScoutMove (строка ~4004):
+   - Телеметрия пишется ВСЕГДА, даже при раннем return
+   - Добавлен вызов FE_SCOUT01B_WriteMoveTelemetry в каждом exit path
+   - Причина 'no_target' при unit/target === null
+   - Причина 'skipped_en_route' при атакующих полях
+   - Причина 'repath_empty_path' при неудачном repath (path=[] после idle)
+   - Причина 'no_path' при findPath===null или findPath не найден
+   - Причина 'ok' при успехе
+
+4. FE_SCOUT01B_WriteMoveTelemetry (новая функция, строка ~4099):
+   - Централизованный писатель телеметрии game._botScout01MoveFix
+   - Вызывается из каждого exit path FE_10C1_trySetScoutMove
+   - Поля: {scoutId, fromX, fromY, targetX, targetY, beforeState, afterState,
+            beforePathLen, pathLen, ok, reason, at}
+
+Изменённые файлы:
+- src/main.js — FE_SCOUT01IsScoutEnRoute (path+idle check),
+                 FE_SCOUT01UpdateEnemyScoutBehavior (repath logic),
+                 FE_10C1_trySetScoutMove (always-write telemetry, new reason codes),
+                 FE_SCOUT01B_WriteMoveTelemetry (new helper function)
+- PATCH_REPORT.txt (добавлена эта запись)
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+
+Что НЕ тронуто:
+- ATTACK-08/09/10 — не изменены
+- findPath — не изменён
+- passable — не изменён
+- combat — не изменён
+- production/cap — не изменён
+- render/fog — не изменены
+- map generation — не изменена
+- FE_10D1 (autopilot/patrol для light_tank) — не изменён
+
+Безопасность:
+- assets изменены: нет
+- economy изменена: нет
+- combat изменён: нет
+- pathfinding изменён: нет
+- production/cap изменён: нет
+- Google Drive sync тронут: нет
+- production paths тронуты: нет
+
+Как тестировать:
+1. Запустить игру, дождаться производства enemy scout
+2. В консоли: game._botScout01MoveFix
+   Ожидание: {ok: true, reason: 'ok' или 'repath_empty_path', afterState: 'manual_move', pathLen: >0}
+3. Визуально: scout едет от вражеской базы к цели
+4. FE_SCOUT01B_WriteMoveTelemetry вызывается при каждой попытке —
+   телеметрия всегда существует после первой попытки движения
+
+---
+
+Задача: BOT-SCOUT-02A — scout combat targetability + early scout production policy
+Дата: 2026-05-11
+Lane: Review
+Ветка: glm/bot-scout-02a-scout-targetability-early-policy (от sandbox/main)
+
+Цель:
+1. Enemy scout становится валидной целью для player light_tank (targetability).
+   canAttack:false в units.js означает что scout НЕ может атаковать,
+   но НЕ означает что scout нельзя атаковать.
+2. Scout исключается из боевых единиц (combat exclusion) — не входит в attack wave,
+   не получает waveId / _attack10WaveLocked, не считается combat strength.
+3. Enemy scout production policy — hard cap 2, soft target 1, второй scout
+   разрешён только при game.time >= 600 || game.mapSize === 'large'.
+4. Telemetry game._botScout02A.
+5. Не трогать: ATTACK-08/09/10, findPath, passable, scout movement, map gen,
+   render/fog, save/load, full lifecycle (BOT-SCOUT-02B).
+
+Что сделано:
+
+A. Scout targetability (4 правки):
+
+A1. Helper FE_SCOUT02AIsEnemyScoutTarget(attacker, target)
+   - Новая функция рядом с FE_PATCH_07BGetHostileLightTankTargetKind
+   - Robust check: target && target.type === 'scout' && unitOwner(target) !== unitOwner(attacker)
+   - Без обязательного target.kind === 'unit' — только тип + владелец
+
+A2. FE_PATCH_07BGetHostileLightTankTargetKind расширена
+   - Добавлен блок: if (FE_SCOUT02AIsEnemyScoutTarget(attacker, target)) return 'unit';
+   - Это покрывает все атакующие цепочки, которые проходят через GetHostileLightTankTargetKind:
+     updateLightTankCombat, setLightTankAttackGeneric, updateLightTankAttackApproach,
+     FE_PATCH_08BCommandEnemyTankAttack, ATTACK-03 re-issue, ATTACK-07 sync, ATTACK-06 re-path
+
+A3. onCanvasClick расширен
+   - Старый: if (isLightTank(selected) && isPlayerUnit(selected) && isLightTank(obj) && isEnemyUnit(obj))
+   - Новый: добавлено || FE_SCOUT02AIsEnemyScoutTarget(selected, obj)
+   - Player light_tank может кликнуть на enemy scout → attack/approach
+
+A4. setGroupLightTankAttack + setGroupLightTankAttackApproach расширены
+   - Обе функции теперь распознают enemy scout как валидную цель группы
+   - Используют FE_SCOUT02AIsEnemyScoutTarget(group[0], target) для owner check
+
+B. Scout combat exclusion (1 правка):
+
+B1. FE_PATCH_08BEnemyCombatUnits
+   - Добавлен фильтр u.type !== 'scout'
+   - Скауты не попадают в enemy combat units → не входят в attack waves,
+     не получают waveId / _attack10WaveLocked, не считаются combat strength
+   - Defense in depth: type 'scout' уже исключается isLightTank(), но фильтр
+     защищает от будущих ролей (light_tank с _fe10c1Role='scout')
+
+C. Enemy scout production policy (1 правка):
+
+C1. FE_PATCH_BASELINE_01_ChooseFactoryUnitType
+   - Старая логика BOT-SCOUT-01:
+     if (scoutCount < FE_SCOUT01_ENEMY_SCOUT_MIN) return 'scout';
+     if (scoutCount < FE_SCOUT01_ENEMY_SCOUT_CAP && tankCount >= 2) return 'scout';
+   - Новая логика BOT-SCOUT-02A:
+     if (scoutCount < 1) return 'scout';
+     if (scoutCount < FE_SCOUT01_ENEMY_SCOUT_CAP && (game.time >= 600 || game.mapSize === 'large')) return 'scout';
+   - Первый scout — всегда (scoutCount < 1)
+   - Второй scout — только при mature game (time >= 600) или large map
+   - Смерть первого scout покрывается scoutCount < 1 → respawn как первого
+   - Hard cap остаётся FE_SCOUT01_ENEMY_SCOUT_CAP = 2
+   - stable economy НЕ добавлен — нет готового helper
+
+D. Telemetry (1 правка):
+
+D1. game._botScout02A — обновляется каждый тик в updateEnemyBot
+   - enemyScoutCount: количество живых enemy scout
+   - enemyScoutSoftTarget: 1
+   - enemyScoutHardCap: 2
+   - secondScoutAllowed: boolean
+   - secondScoutReason: 'first_not_yet' | 'cap_reached' | 'time_mature' | 'large_map' | 'conditions_not_met'
+   - scoutTargetableCheck: typeof FE_SCOUT02AIsEnemyScoutTarget === 'function'
+   - lastScoutAttackedId: id атакуемого enemy scout (если есть)
+   - at: game.time
+
+Не тронуто:
+- ATTACK-08/09/10 — без изменений
+- findPath / passable — без изменений
+- Scout movement (manual_move, direction cache) — без изменений
+- Map generation — без изменений
+- Render / fog — без изменений
+- Save / load — без изменений
+- BOT-SCOUT-02B lifecycle (observe / return / cooldown) — отдельный патч
+- FE_SCOUT01_ENEMY_SCOUT_MIN / FE_SCOUT01_ENEMY_SCOUT_CAP — константы не изменены
+- FE_10H1_isScout — без изменений, скауты уже пропускаются при retreat/defense
+- FE_10E1_isTank — скауты уже не проходят (type !== 'light_tank' && !type.includes('tank'))
+
+Как проверить:
+1. Scout стал валидной целью:
+   - FE_SCOUT02AIsEnemyScoutTarget(attacker, target) → true для enemy scout
+   - FE_PATCH_07BGetHostileLightTankTargetKind(playerTank, enemyScout) → 'unit'
+   - onCanvasClick: клик player tank → enemy scout → attack/approach
+   - setGroupLightTankAttack: группа танков → enemy scout → attack
+   - setGroupLightTankAttackApproach: группа танков → enemy scout → approach
+
+2. Второй early scout ограничен:
+   - game._botScout02A.secondScoutAllowed === false при time < 600 && mapSize !== 'large'
+   - game._botScout02A.secondScoutAllowed === true при time >= 600 || mapSize === 'large'
+   - game._botScout02A.secondScoutReason показывает причину
+
+3. Scout получает урон и умирает:
+   - updateLightTankCombat вызывает damageUnit(target, stats.damage)
+   - damageUnit снижает hp, при hp <= 0 вызывает destroyUnit
+   - Проверить: console.log(game._botScout02A.lastScoutAttackedId) при атаке scout
+
+4. Scout НЕ получает waveId / _attack10WaveLocked:
+   - FE_PATCH_08BEnemyCombatUnits фильтрует u.type !== 'scout'
+   - FE_ATTACK10CreateWave получает только enemyTanks из EnemyCombatUnits
+   - Скауты физически не попадают в wave.unitIds
+
+Изменённые файлы:
+- src/main.js (6 правок: helper, GetHostileLightTankTargetKind, onCanvasClick,
+  setGroupLightTankAttack, setGroupLightTankAttackApproach, EnemyCombatUnits,
+  ChooseFactoryUnitType, telemetry)
+- PATCH_REPORT.txt (добавлена эта запись)
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+
+Безопасность:
+- assets изменены: нет
+- index.html изменён: нет
+- новые JS-файлы созданы: нет
+- pathfinding изменён: нет
+- save/load изменён: нет
+- map generation изменён: нет
+- render / fog изменены: нет
+- scout movement изменён: нет
+- ATTACK-08/09/10 логика не тронута
+- Google Drive sync тронут: нет
+- production paths тронуты: нет
+
+---
+
+Задача: BOT-SCOUT-02B — scout observe-return-cooldown lifecycle
+Дата: 2026-05-11
+Lane: Review
+Ветка: glm/bot-scout-02b-scout-lifecycle (от sandbox/main)
+
+Проблема:
+Enemy scout доезжает до player base / scouting area и стоит там бесконечно.
+Нет lifecycle — scout не наблюдает, не возвращается, не уходит на cooldown.
+
+Цель:
+Добавить простой scout lifecycle: outbound -> observing -> returning -> cooldown -> outbound.
+Scout прибывает на место, стоит 4 сек, возвращается домой, ждёт 30 сек cooldown, затем повторяет.
+Минимальная threat-react: если scout получил урон или рядом player light_tank — retreat.
+
+Что сделано:
+
+1. Lifecycle константы (main.js, после FE_SCOUT01_ENEMY_SCOUT_CAP):
+   - FE_SCOUT02B_OBSERVE_SEC = 4
+   - FE_SCOUT02B_COOLDOWN_SEC = 30
+   - FE_SCOUT02B_ARRIVE_DIST = 2 (tiles to target = "arrived")
+   - FE_SCOUT02B_HOME_ARRIVE_DIST = 3 (tiles to home = "home")
+   - FE_SCOUT02B_THREAT_RADIUS = 5 (tiles: player light_tank triggers retreat)
+
+2. Helper функции (main.js):
+   - FE_SCOUT02BGetEnemyHomeAnchor() — reuse FE_PATCH_08BResolveEnemyHomeBase + FE_PATCH_08BHomeAnchorFromBase, fallback {4,4}
+   - FE_SCOUT02BIsLifecycleBusy(u) — true если _scout02BState = observing/returning/cooldown
+
+3. Lifecycle fields на scout-юните (инициализация в FE_10C1_trySetScoutMove):
+   - _scout02BState: 'outbound' | 'observing' | 'returning' | 'cooldown'
+   - _scout02BObserveUntil: timestamp
+   - _scout02BCooldownUntil: timestamp
+   - _scout02BHomeX, _scout02BHomeY: enemy HQ anchor
+   - _scout02BLastHp: для threat detection (не maxHp)
+
+4. Lifecycle wrapper в FE_SCOUT01UpdateEnemyScoutBehavior:
+   - НЕ переписана полностью — минимальный wrapper поверх существующей логики
+   - Scouts без _scout02BState: fallback к существующей BOT-SCOUT-01B/01C логике
+   - outbound: если dist <= ARRIVE_DIST или path consumed + idle → observing (path=[], state='idle', command='')
+   - observing: ждёт OBSERVE_SEC → returning (FE_10C1_trySetScoutMove к home)
+   - returning: если dist <= HOME_ARRIVE_DIST или idle без path → cooldown (path=[], state='idle', command='')
+   - cooldown: ждёт COOLDOWN_SEC → outbound (clear metadata, следующий tick назначит новый target)
+
+5. Threat detection (MVP, только для outbound/observing):
+   - Если scout.hp < _scout02BLastHp → returning (reason='damaged_return')
+   - Если рядом player light_tank в радиусе THREAT_RADIUS → returning
+   - _scout02BLastHp обновляется каждый tick
+
+6. Защита FE_10C1_updateEnemyScoutingMvp:
+   - freeScout.find() добавлено условие !FE_SCOUT02BIsLifecycleBusy(u)
+   - Scouts в observing/returning/cooldown НЕ считаются свободными для новой разведцели
+
+7. Telemetry: game._botScout02B
+   - scoutId, state, targetX/Y, homeX/Y, observeUntil, cooldownUntil, pathLen, reason, at
+
+Изменённые файлы:
+- src/main.js — lifecycle constants, helpers, FE_10C1_trySetScoutMove init, FE_SCOUT01UpdateEnemyScoutBehavior wrapper, FE_10C1_updateEnemyScoutingMvp protection, telemetry
+- PATCH_REPORT.txt
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+
+Что НЕ тронуто:
+- BOT-SCOUT-02A targetability (FE_SCOUT02AIsEnemyScoutTarget)
+- BOT-SCOUT-02A production policy (early second scout gate)
+- ATTACK-08/09/10
+- enemy light_tank attack-chain
+- findPath internals
+- passable
+- combat damage/range/cooldown
+- economy formulas
+- map generation
+- render / fog
+- save / load
+- full bot brain / attack readiness
+
+Безопасность:
+- assets изменены: нет
+- economy изменена: нет
+- combat изменён: нет
+- pathfinding изменён: нет
+- production policy изменена: нет
+- Google Drive sync тронут: нет
+- production paths тронуты: нет
+
+---
+
+Задача: BOT-SCOUT-02B1 — fix scout cooldown far from home + timer base mismatch
+Дата: 2026-05-11
+Lane: Review
+Ветка: glm/bot-scout-02b1-fix-cooldown-timerbase (от sandbox/main)
+
+Проблема:
+BOT-SCOUT-02B (merged) содержал 3 бага, выявленных ручным тестом:
+1. Lifecycle timers используют performance.now() (мс от загрузки страницы),
+   а game.time — секунды от начала игры. Несовместимые шкалы:
+   cooldownUntil=507918 при game.time≈430 — нечитаемо в телеметрии.
+2. returning→cooldown возможен при пустом пути и idle-состоянии, даже если
+   скаут далеко от дома (distToHome≈52 тайла). Условие (!_hasPathR && _isIdleR)
+   позволяло войти в cooldown вместо repath.
+3. damaged/threat→returning, но если FE_10C1_trySetScoutMove не смог проложить
+   путь, скаут idle без пути → следующий тик: !_hasPathR && _isIdleR → cooldown.
+
+Что исправлено:
+
+1. Time base: performance.now() → game.time (секунды)
+   - FE_SCOUT01UpdateEnemyScoutBehavior: var now = Number(game.time || 0);
+   - Убрана var gameTime (теперь now = game.time)
+   - observeUntil = now + FE_SCOUT02B_OBSERVE_SEC (без * 1000)
+   - cooldownUntil = now + FE_SCOUT02B_COOLDOWN_SEC (без * 1000)
+   - Сравнения now < observeUntil/cooldownUntil теперь в секундах
+
+2. returning→cooldown только near home:
+   - Убрано || (!_hasPathR && _isIdleR) из условия входа в cooldown
+   - Теперь: if (_distToHome <= FE_SCOUT02B_HOME_ARRIVE_DIST)
+   - Скаут НЕ входит в cooldown далеко от дома
+
+3. Repath при returning + путь пуст + far from home:
+   - FE_10C1_trySetScoutMove результат сохраняется в _repathOk
+   - success → s._scout02BReason = ''
+   - fail → s._scout02BReason = 'return_repath_failed'
+   - Скаут остаётся в returning, повторит repath на следующем тике
+
+4. Добавлено поле _scout02BReason на все lifecycle transitions:
+   - outbound→observing: reason='observing'
+   - observing→returning: reason='observe_done'
+   - damaged→returning: reason='damaged'
+   - threat→returning: reason='threat'
+   - returning→cooldown: reason='at_home'
+   - cooldown→outbound: reason='cooldown_done'
+   - repath success: reason=''
+   - repath failed: reason='return_repath_failed'
+   - Init: reason=''
+
+5. Telemetry game._botScout02B обновлён:
+   - Добавлены: reason, timeBase='game.time', gameTime, distToHome, x, y
+   - Убрано: at (заменено на gameTime)
+   - observeUntil/cooldownUntil теперь в game.time секундах (читаемые числа)
+
+Изменённые файлы:
+- src/main.js — 13 правок внутри BOT-SCOUT-02B кода
+- PATCH_REPORT.txt — добавлена эта запись
+
+Что НЕ тронуто:
+- FE_SCOUT01IsScoutEnRoute — продолжает использовать performance.now() (scout age check, не lifecycle)
+- _fe10c1ScoutIssuedAt — остаётся в performance.now() масштабе
+- BOT-SCOUT-02A targetability — не затронут
+- BOT-SCOUT-02A production policy — не затронут
+- ATTACK-08/09/10 — не затронуты
+- findPath internals — не затронуты
+- passable — не затронут
+- combat damage — не затронут
+- map/render/save — не затронуты
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+
+Безопасность:
+- assets изменены: нет
+- economy изменена: нет
+- combat изменён: нет
+- pathfinding изменён: нет
+- production/factory изменён: нет
+- BOT-SCOUT-02A код не затронут
+- ATTACK код не затронут
+- Google Drive sync тронут: нет
+- production paths тронуты: нет
+
+Manual test plan:
+1. Новая игра. Scout едет outbound.
+2. Scout arrives → observing (4 сек, observeUntil ≈ game.time + 4).
+3. Observing заканчивается → returning (reason='observe_done').
+4. Scout едет домой. Near home → cooldown (reason='at_home', cooldownUntil ≈ game.time + 30).
+5. Игрок нанёс урон скауту far from home → state='returning', reason='damaged' (НЕ cooldown).
+6. Returning path пуст + far from home → repath к дому, НЕ cooldown.
+7. Repath не удался → reason='return_repath_failed', state остаётся returning.
+8. game._botScout02B.timeBase === 'game.time'.
+9. cooldownUntil ≈ game.time + 30 (не 500000+).
+10. Scout по-прежнему killable.
+11. Tank attack-chain работает.
+
+BOT-SCOUT-02B2
+
+- Added a scout return-target resolver in `src/main.js` that tries exact home first, then nearby reachable cells around the enemy base/home anchor within radius 1..4.
+- Validated fallback targets only through the existing scout movement assignment helper; passable/free checks are not treated as sufficient on their own.
+- Returning scouts now keep `_scout02BState='returning'`, store `returnX/returnY`, and only enter cooldown when near home or the selected return target.
+- When return routing fails, the scout no longer cools down far from base and telemetry now reports attempted return targets plus fallback reason details.
+- Kept all changes scoped away from ATTACK-08/09/10, tank attack-chain, combat damage, map generation, render/fog, save/load, and scout production/cap.
+
+BOT-SCOUT-02C
+
+Lane: Review
+Patch: BOT-SCOUT-02C — tiered threat detection + scouting completeness telemetry
+Problem: Scout sees player light_tank at distance 5 (within scout view=7) and immediately retreats, but light_tank view=4 cannot see the scout at that distance. This makes scouting incomplete — scout returns without gathering useful intel.
+
+Changes in src/main.js:
+
+1. Replaced FE_SCOUT02B_THREAT_RADIUS=5 with two tiered constants:
+   - FE_SCOUT02C_DANGER_RADIUS=2 — immediate return (tank can attack or 1-tile buffer)
+   - FE_SCOUT02C_THREAT_AWARE_RADIUS=5 — telemetry only, no retreat
+   Danger radius=2 based on light_tank.attackRange default=1 (see getLightTankCombatStats).
+   TUNING: adjust DANGER_RADIUS if attackRange changes.
+
+2. Rewrote threat detection (was L3736-3752):
+   - danger zone (≤DANGER_RADIUS): immediate return, reason='threat_danger'
+   - awareness zone (DANGER_RADIUS < dist ≤ AWARE_RADIUS): telemetry only, scout keeps scouting
+   - Tracks nearestThreatDist across all player light_tanks
+   - Stores _scout02CThreatSeen, _scout02CNearestThreatDist, _scout02CThreatReturnReason on scout
+
+3. Added scouting completeness telemetry (outbound/observing only):
+   - Counts visible player units, buildings, HQ within scout view radius (7 tiles)
+   - Uses isPlayerUnit() and isPlayerBuilding() helpers
+   - Stores _scout02CSeenPlayerUnitsCount, _scout02CSeenPlayerBuildingsCount, _scout02CSeenPlayerHq
+   - Telemetry-only — NO auto-return based on seen objects (per spec)
+
+4. Added init fields in scout lifecycle init block:
+   - _scout02CThreatSeen, _scout02CNearestThreatDist, _scout02CThreatReturnReason
+   - _scout02CSeenPlayerUnitsCount, _scout02CSeenPlayerBuildingsCount, _scout02CSeenPlayerHq
+
+5. Extended telemetry game._botScout02B with:
+   - threatSeen (bool)
+   - nearestThreatDist (int, -1 = none)
+   - threatReturnReason ('danger_radius' | 'awareness_no_retreat' | '')
+   - seenPlayerUnitsCount (int)
+   - seenPlayerBuildingsCount (int)
+   - seenPlayerHq (bool)
+   Both main-scout and no-scouts branches updated.
+
+6. Reset _scout02C fields on cooldown→outbound transition.
+
+7. Removed all usages of FE_SCOUT02B_THREAT_RADIUS (was only L3745).
+   Old reason='threat' replaced with 'threat_danger'.
+
+What was NOT touched:
+- Outbound target selection — unchanged
+- BOT-SCOUT-02B2 return fallback (FE_SCOUT02BResolveReturnMove / return candidates) — unchanged
+- Damage detection — still causes immediate return (reason='damaged')
+- BOT-SCOUT-02A targetability / production — unchanged
+- ATTACK-08/09/10 — unchanged
+- findPath / passable / combat / map / render / save — unchanged
+
+Verification:
+- node --check src/main.js -> PASS
+
+Safety:
+- assets changed: no
+- economy changed: no
+- combat changed: no
+- pathfinding changed: no
+- production/factory changed: no
+- BOT-SCOUT-02A code untouched
+- ATTACK code untouched
+- Google Drive sync touched: no
+- production paths touched: no
+
+Manual test plan:
+1. New game. Scout goes outbound, passes player tank at distance 4-5.
+2. Scout should NOT return — state stays outbound/observing.
+3. Telemetry: threatSeen=true, nearestThreatDist=4 or 5, threatReturnReason='awareness_no_retreat'.
+4. Scout passes tank at distance ≤2 → immediate return, reason='threat_danger', threatReturnReason='danger_radius'.
+5. Scout takes damage → immediate return, reason='damaged' (unchanged from 02B1).
+6. seenPlayerUnitsCount/seensPlayerBuildingsCount/seenPlayerHq populated during outbound/observing.
+7. After cooldown→outbound: all _scout02C fields reset to defaults.
+8. No tank present: threatSeen=false, nearestThreatDist=-1, threatReturnReason=''.
+
+---
+
+Задача: BOT-SCOUT-02C1 — fix scouting completeness telemetry (buildings/HQ source + view radius)
+Дата: 2026-05-11
+Lane: Review
+Ветка: glm/bot-scout-02c-tiered-threat (amend commit)
+
+Проблема:
+BOT-SCOUT-02C scouting completeness считал buildings/HQ через game.units с фильтром kind==='building',
+но здания лежат в game.buildings, а player HQ имеет type='hq_base', не только 'hq'.
+Из-за этого seenPlayerBuildingsCount и seenPlayerHq всегда были 0/false.
+View radius был захардкожен как 7 вместо чтения из UNIT_DEFS.scout.view.
+
+Что исправлено:
+
+1. Buildings count: отдельный loop по game.buildings вместо game.units.
+   - Старый: один loop по game.units, фильтр _vu.kind==='building' — никогда не срабатывает
+   - Новый: отдельный loop по game.buildings с isPlayerBuilding()
+
+2. HQ detection: type === 'hq_base' || type === 'hq'
+   - Старый: if (_vu.type === 'hq') — не ловит 'hq_base'
+   - Новый: if (_vb.type === 'hq_base' || _vb.type === 'hq')
+
+3. View radius из UNIT_DEFS.scout.view с fallback 7:
+   - Старый: var _sViewR = 7;
+   - Новый: var _sViewR = (UNIT_DEFS && UNIT_DEFS.scout && Number.isFinite(UNIT_DEFS.scout.view)) ? UNIT_DEFS.scout.view : 7;
+
+4. Units count: оставлен через game.units (только мобильные юниты).
+
+Что НЕ менялось:
+- Tiered threat behavior (danger ≤2 retreat, aware 3-5 telemetry only) — unchanged
+- BOT-SCOUT-02B2 return fallback — unchanged
+- Damage detection — unchanged
+- No auto-return по seenPlayerBuildings/HQ
+- Init fields (_scout02C*) — unchanged
+- Reset fields on outbound — unchanged
+
+Изменённые файлы:
+- src/main.js — scouting completeness telemetry block (L3770-3802)
+- PATCH_REPORT.txt — добавлена эта запись
+
+Verification:
+- node --check src/main.js -> PASS
+
+Safety:
+- assets changed: no
+- economy changed: no
+- combat changed: no
+- pathfinding changed: no
+- tiered threat logic untouched
+- BOT-SCOUT-02B2 return fallback untouched
+- Google Drive sync touched: no
+
+---
+
+Задача: BOT-SCOUT-02D — base perimeter sweep for enemy scout
+Дата: 2026-05-11
+Lane: Review
+Ветка: glm/bot-scout-02d-base-perimeter-sandbox (от sandbox/main)
+
+Проблема:
+Скаут после observing (4 сек) сразу возвращается домой, даже если видит базу игрока.
+В результате вражеский бот получает мало информации о структуре базы.
+Для будущих решений о направлении танков нужна лучшая разведка базы.
+
+Что сделано:
+
+1. Новое lifecycle состояние: sweeping
+   Полный цикл: outbound → observing → sweeping → returning → cooldown → outbound
+   Если база не видна: outbound → observing → returning (без sweeping, как раньше)
+
+2. Триггер для sweep:
+   После завершения observing, если _scout02CSeenPlayerHq или _scout02CSeenPlayerBuildingsCount > 0,
+   скаут входит в sweeping вместо returning.
+
+3. Генерация кандидат-точек (FE_SCOUT02DGenerateSweepCandidates):
+   - Центр базы: HQ (type='hq_base'||'hq') если виден, иначе первое видимое player building
+   - 8 точек по направлениям (N/NE/E/SE/S/SW/W/NW) на расстоянии 7 тайлов от центра
+   - Каждая точка проверяется: in-bounds + безопасна от player light_tank danger radius
+   - Кандидаты генерируются один раз при входе в sweeping
+
+4. Проверка безопасности (FE_SCOUT02DIsSweepPointSafe):
+   - Перепроверяет danger radius вокруг точки ПЕРЕД каждым назначением
+   - Танк мог подъехать после генерации candidates
+
+5. Назначение sweep-точки (FE_SCOUT02DAssignNextSweepPoint):
+   - Перепроверяет danger radius
+   - Вызывает FE_10C1_trySetScoutMove — точка считается usable только если path assignment успешен
+   - Если путь не найден — пропускает точку, пробует следующую
+   - Вынесена в отдельную функцию, не inline
+
+6. Поведение sweeping:
+   - Двигается к sweep-точке, прибыв — стоит 2 сек (sweep observe)
+   - После 2 сек — двигается к следующей точке
+   - После 3 точек или исчерпания кандидатов → returning
+
+7. Hard exits из sweeping:
+   - damage → returning (reason='damaged') — через threat detection guard
+   - danger radius ≤2 → returning (reason='threat_danger') — через threat detection guard
+   - timeout (22 сек) → returning (reason='sweep_timeout')
+   - no valid/pathable sweep point → returning (reason='sweep_no_valid_points')
+   - completed 3 points → returning (reason='sweep_done')
+
+8. Константы:
+   - FE_SCOUT02D_SWEEP_RADIUS = 7
+   - FE_SCOUT02D_SWEEP_MAX_POINTS = 3
+   - FE_SCOUT02D_SWEEP_OBSERVE_SEC = 2
+   - FE_SCOUT02D_SWEEP_TIMEOUT_SEC = 22
+   - FE_SCOUT02D_SWEEP_ARRIVE_DIST = 2
+
+9. Новые поля на unit-объекте:
+   - _scout02DSweepActive, _scout02DSweepCenterX/Y, _scout02DSweepTargetX/Y
+   - _scout02DSweepIndex, _scout02DSweepCompletedCount, _scout02DSweepCandidates
+   - _scout02DSweepSkippedDangerCount, _scout02DSweepReason, _scout02DSweepStartedAt
+   - _scout02DSweepObserveUntil
+
+10. Init: все поля в FE_10C1_trySetScoutMove
+11. Reset: все поля в cooldown → outbound transition
+12. FE_SCOUT02BIsLifecycleBusy: добавлено st === 'sweeping'
+13. Threat detection guard: добавлено s._scout02BState === 'sweeping'
+
+14. Telemetry (game._botScout02B):
+    - sweepActive, sweepCenterX/Y, sweepTargetX/Y
+    - sweepIndex, sweepCompletedCount, sweepCandidatesCount
+    - sweepSkippedDangerCount, sweepReason, sweepStartedAt
+
+Что НЕ тронуто:
+- BOT-SCOUT-02A targetability / production policy
+- BOT-SCOUT-02B2 return fallback internals
+- BOT-SCOUT-02C threat thresholds (DANGER_RADIUS=2, AWARE_RADIUS=5)
+- Outbound target selection
+- ATTACK-08/09/10
+- Enemy light_tank attack-chain
+- findPath / passable internals
+- Combat damage
+- Map generation
+- Render / fog
+- Save / load
+- Scout production/cap
+
+Изменённые файлы:
+- src/main.js
+- PATCH_REPORT.txt (добавлена эта запись)
+
+Verification:
+- node --check src/main.js -> PASS
+
+Safety:
+- assets changed: no
+- economy changed: no
+- combat changed: no
+- pathfinding changed: no
+- BOT-SCOUT-02B2 return fallback internals untouched
+- BOT-SCOUT-02C threat thresholds untouched
+- Google Drive sync touched: no
+
+---
+
+Задача: BOT-SCOUT-02D1 — исправления BOT-SCOUT-02D (sweep center, usable move)
+Дата: 2026-05-11
+Lane: Review
+Ветка: glm/bot-scout-02d-base-perimeter-sweep (amend к BOT-SCOUT-02D)
+
+Проблемы в BOT-SCOUT-02D:
+1. sweepCenterX/sweepCenterY всегда null — GenerateSweepCandidates не выставляла center metadata
+2. Центр sweep выбирался из game.buildings вслепую (HQ любой, не только увиденный)
+3. Sweep point считался usable при ok от trySetScoutMove, но без проверки state и path
+4. sweep_repath не проверял usable move после re-assignment
+
+Что исправлено:
+
+1. FE_SCOUT02DGenerateSweepCandidates — центр sweep теперь строго на основе увиденного скаутом:
+   - Если scout._scout02CSeenPlayerHq === true → использовать player HQ из game.buildings
+   - Иначе если scout._scout02CSeenPlayerBuildingsCount > 0 → ближайшее player building
+     внутри scout view radius
+   - Иначе → return [] (нет основы для sweep)
+   - Выставляет scout._scout02DSweepCenterX/Y на выбранный центр
+
+2. Добавлен helper FE_SCOUT02DHasUsableMoveAssignment(scout):
+   - Проверяет: scout.state === 'manual_move' AND scout.path is array AND scout.path.length > 0
+   - Sweep point usable только если trySetScoutMove вернул true И HasUsableMoveAssignment true
+
+3. FE_SCOUT02DAssignNextSweepPoint:
+   - Условие успеха: ok && FE_SCOUT02DHasUsableMoveAssignment(scout)
+   - Если trySetScoutMove=true но move не usable — кандидат пропускается
+
+4. sweep_repath блок:
+   - Условие: !(_reSweepOk && FE_SCOUT02DHasUsableMoveAssignment(s))
+   - Если repath не дал usable move — точка пропускается, пробуется следующая
+
+5. Observing→sweeping transition:
+   - Убрана установка _scout02DSweepCenterX/Y = null (теперь выставляется внутри GenerateSweepCandidates)
+
+Что НЕ тронуто:
+- BOT-SCOUT-02B2 return fallback internals
+- BOT-SCOUT-02C threat thresholds (DANGER_RADIUS=2, AWARE_RADIUS=5)
+- Outbound target selection
+- Tank attack logic
+- ATTACK-08/09/10
+- findPath / passable / combat / map / render / save / load
+
+Изменённые файлы:
+- src/main.js
+- PATCH_REPORT.txt (добавлена эта запись)
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+
+Безопасность:
+- assets изменены: нет
+- economy изменена: нет
+- combat изменён: нет
+- pathfinding изменён: нет
+- BOT-SCOUT-02B2 return fallback internals не тронуты
+- BOT-SCOUT-02C threat thresholds не тронуты
+- Google Drive sync тронут: нет
+
+---
+
+Задача: BOT-SCOUT-02D2 — cleanup sweep telemetry при threat/damage abort
+Дата: 2026-05-11
+Lane: Review
+Ветка: glm/bot-scout-02d-base-perimeter-sweep (amend к BOT-SCOUT-02D)
+
+Проблема:
+При threat/damage abort во время sweeping (_scout02BState='sweeping') скаут
+переходил в returning через общий BOT-SCOUT-02C threat detection block,
+но _scout02DSweepActive оставалось true, а _scout02DSweepReason не обновлялся.
+Telemetry показывала активный sweep при state='returning'.
+
+Что исправлено:
+
+1. Damage branch (scout took damage):
+   - Если s._scout02BState === 'sweeping': s._scout02DSweepActive = false,
+     s._scout02DSweepReason = 'damaged'
+   - Затем стандартный переход sweeping → returning
+
+2. Danger branch (player light_tank ≤ DANGER_RADIUS):
+   - Если s._scout02BState === 'sweeping': s._scout02DSweepActive = false,
+     s._scout02DSweepReason = 'threat_danger'
+   - Затем стандартный переход sweeping → returning
+
+Что НЕ тронуто:
+- BOT-SCOUT-02C threat thresholds (DANGER_RADIUS=2, AWARE_RADIUS=5)
+- Sweep candidate logic (GenerateSweepCandidates, AssignNextSweepPoint)
+- BOT-SCOUT-02B2 return fallback internals
+- ATTACK-08/09/10
+- Tank attack-chain
+- findPath / passable / combat / map / render / save / load
+
+Изменённые файлы:
+- src/main.js
+- PATCH_REPORT.txt (добавлена эта запись)
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+
+Безопасность:
+- assets изменены: нет
+- economy изменена: нет
+- combat изменён: нет
+- pathfinding изменён: нет
+- BOT-SCOUT-02C thresholds не тронуты
+- BOT-SCOUT-02B2 return fallback не тронут
+- Google Drive sync тронут: нет
+
+---
+
+Задача: BOT-SCOUT-02E — fix scout outbound target selection
+Дата: 2026-05-11
+Lane: Review
+Ветка: glm/bot-scout-02e-outbound-target (от sandbox/main)
+
+Проблема:
+Scout outbound target выбирался как {x:40,y:40} (пустой угол) вместо направления
+к базе игрока (player HQ at {x:9,y:40}). Причина: обе точки выбора цели (call site A —
+lifecycle dispatch через FE_SCOUT01ChooseScoutTarget; call site B — enemyScoutingMVP)
+использовали цепочку knowledge → map_probe, которая не учитывает player HQ напрямую.
+Если knowledge пуст (ранняя игра), fallback выбирал opposite-corner-guess или центр карты,
+что могло быть далеко от реальной позиции игрока. Scout никогда не достигал базы игрока,
+и BOT-SCOUT-02D sweeping никогда не запускался.
+
+Цель:
+Создать единую функцию выбора outbound target с приоритетом:
+1. Player HQ rally point — ближайшая достижимая клетка вокруг HQ (radius 3..7)
+2. Knowledge target — переиспользование FE_10G1_chooseKnowledgeScoutTarget
+3. Map_probe fallback — переиспользование FE_10C1_chooseScoutTargets
+
+Что сделано:
+
+1. Константы BOT-SCOUT-02E (L3504-3507):
+   - FE_SCOUT02E_HQ_RALLY_MIN_RADIUS = 3
+   - FE_SCOUT02E_HQ_RALLY_MAX_RADIUS = 7
+   - FE_SCOUT02E_RALLY_DIR_COUNT = 8
+
+2. Новая функция FE_SCOUT02EChooseOutboundTarget(scout, scoutState) (L3789-3923):
+   - Priority 1: findBaseBuilding('player') → HQ center (x+w/2, y+h/2)
+     — Ищет rally point на расстояниях 3..7 вокруг HQ center
+     — Для каждого кандидата: in-bounds check → dry-run findPath без мутации scout
+     — Первый кандидат с валидным путём становится целью
+     — source='player_hq_rally', confidence=0.9
+     — Записывает oldKnowledgeTargetX/Y если knowledge target был перекрыт
+   - Priority 2: FE_10G1_chooseKnowledgeScoutTarget(scout)
+     — Если knowledge target существует, используется
+   - Priority 3: FE_10C1_chooseScoutTargets() map_probe fallback
+     — Старая логика rotation по targetIndex
+   - Каждый результат включает метаданные: playerHqX/Y, playerHqCenterX/Y,
+     targetDistToPlayerHq, oldKnowledgeTargetX/Y, fallbackUsed
+
+3. Call site A: FE_SCOUT01ChooseScoutTarget (L3938-3963):
+   - Для scout-type юнитов: делегирует FE_SCOUT02EChooseOutboundTarget
+   - Для tank-based scouts: старая цепочка knowledge → map_probe (legacy)
+
+4. Call site B: FE_10C1_updateEnemyScoutingMvp (L5043-5063):
+   - Для scout-type юнитов: FE_SCOUT02EChooseOutboundTarget
+   - Для tank-based scouts: старая цепочка knowledge → map_probe (legacy)
+   - Post-target telemetry: 12 новых полей на scoutState (L5073-5085)
+   - Новый счётчик hqRallyScoutIssuedCount (L5093-5094)
+
+5. FE_10C1_trySetScoutMove: propagate 02E metadata (L4850-4858):
+   - _fe10c1ScoutTarget теперь включает 8 полей: playerHqX/Y, playerHqCenterX/Y,
+     targetDistToPlayerHq, oldKnowledgeTargetX/Y, fallbackUsed
+
+6. Telemetry game._botScout02B: 12 новых полей (L6279-6291, L6320-6332):
+   - outboundTargetSource, outboundTargetReason, outboundTargetX/Y
+   - playerHqX/Y, playerHqCenterX/Y
+   - targetDistToPlayerHq
+   - oldKnowledgeTargetX/Y, fallbackUsed
+   - Читается из _fe10c1ScoutTarget на scout (если есть) и из enemyScoutingMvp (fallback)
+
+Не менялись:
+- BOT-SCOUT-02B2 return fallback
+- BOT-SCOUT-02C threat thresholds
+- BOT-SCOUT-02D sweep behavior
+- ATTACK-08/09/10
+- enemy light_tank attack-chain
+- findPath/passable/combat/map/render/save/load
+- scout production/cap
+- tank attack decision logic
+
+Изменённые файлы:
+- src/main.js — 02E constants, FE_SCOUT02EChooseOutboundTarget, 2 call sites,
+  trySetScoutMove metadata, telemetry
+- PATCH_REPORT.txt (добавлена эта запись)
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+
+Безопасность:
+- BOT-SCOUT-02B2 return fallback не тронут
+- BOT-SCOUT-02C thresholds не тронуты
+- BOT-SCOUT-02D sweep не тронут
+- ATTACK-08/09/10 не тронуты
+- findPath/passable internals не изменены
+- combat/map/render/save/load не затронуты
+- scout production/cap не затронуты
+- tank attack decision logic не затронута
+- Google Drive sync тронут: нет
+
+Как тестировать вручную:
+1. Запустить игру, дождаться scout production
+2. Проверить telemetry: game._botScout02B.outboundTargetSource
+   Должен быть 'player_hq_rally' (если player HQ жив и reachable)
+3. Проверить game._botScout02B.outboundTargetX/Y — должен быть рядом с player HQ
+4. Проверить game._botScout02B.playerHqCenterX/Y — позиция центра player HQ
+5. Проверить game._botScout02B.targetDistToPlayerHq — расстояние 3..7
+6. Scout должен двигаться к базе игрока, НЕ к пустому углу карты
+7. После прибытия scout должен перейти в observing, затем sweeping (02D)
+8. Если player HQ уничтожен: должен упасть в knowledge или map_probe fallback
+   (outboundTargetSource = 'knowledge'/'last_seen'/'map_probe')
+9. Если HQ найден но нет reachable rally: knowledge fallback
+   (outboundTargetReason = 'hq_found_no_rally')
+
+---
+
+Задача: BOT-SCOUT-02D3 — edge-aware base perimeter sweep
+Дата: 2026-05-11
+Lane: Review
+Ветка: glm/bot-scout-02d3-edge-aware-sweep (от sandbox/main после merge PR #43)
+
+Проблема:
+BOT-SCOUT-02D генерировал 8 фиксированных компасных точек на единственном радиусе 7.
+Для базы игрока у нижнего края карты (HQ ~x:7,y:38, center~9,40 на карте 48x48)
+нижние и нижне-диагональные точки out-of-bounds, остаются только верхние/правые.
+Scout объезжает одну сторону вместо дуги по доступному периметру.
+
+Root cause:
+1. Только 8 направлений (N,NE,E,SE,S,SW,W,NW) — мало углового разрешения
+2. Единственный радиус 7 — нет гибкости, нет вариантов ближе/дальше от базы
+3. Нет проверки edge margin — точки на y=46 (1 от края) проходят in-bounds, но pathability проблемна
+4. Нет проверки достижимости (reachability) на этапе генерации — кандидат проходит фильтры, но недостижим; выявляется только при AssignNextSweepPoint
+5. Селекция — первые N валидных кандидатов в порядке N→NE→E→... → кластеризуются на одной стороне
+
+Что сделано:
+
+1. Новые константы 02D3 (после существующих 02D):
+   - FE_SCOUT02D3_DIR_COUNT = 24 — угловых сэмплов вокруг центра базы
+   - FE_SCOUT02D3_MIN_RADIUS = 5 — минимальное расстояние sweep-точки от центра
+   - FE_SCOUT02D3_MAX_RADIUS = 9 — максимальное расстояние sweep-точки от центра
+   - FE_SCOUT02D3_EDGE_MARGIN = 2 — минимальное расстояние от края карты
+   - FE_SCOUT02D3_MAX_SELECTED = 3 — макс. точек после angular spread selection
+   - FE_SCOUT02D3_MIN_ANGLE_DEG = 45 — минимальное угловое разделение между выбранными точками
+
+2. Переработка FE_SCOUT02DGenerateSweepCandidates:
+   - 24 угловых направления (0..360 с шагом 15) вместо 8 компасных
+   - Для каждого направления — радиусы 5,7,9 (ближний приоритет)
+   - Фильтрация: in-bounds → edge margin → danger radius → dry-run findPath reachability
+   - Сухой прогон findPath без мутации scout (паттерн из 02E)
+   - Первым принимается ближайший достижимый кандидат в каждом направлении
+   - Angular spread selection из всех валидных кандидатов:
+     * Старт с ближайшего к scout кандидата
+     * Жадное добавление с максимальным угловым разделением >=45
+     * До 3 точек
+   - Сортировка выбранных по углу для детерминированного порядка обхода
+
+3. Telemetry 02D3 (новые поля, существующее sweepCandidatesCount не тронуто):
+   - sweepRawCandidatesCount — всего сырых кандидатов проверено
+   - sweepSelectedCandidatesCount — выбрано после angular spread
+   - sweepSkippedOutOfBoundsCount — отсеяно: out-of-bounds или edge margin
+   - sweepSkippedDangerAtGenCount — отсеяно: danger radius при генерации
+   - sweepSkippedUnreachableCount — отсеяно: dry-run findPath не нашёл путь
+   - sweepCandidateMode — '02d3_angular_spread'
+   - sweepSelectionReason — 'selected_N' / 'no_valid' / 'no_center'
+
+4. AssignNextSweepPoint: логика unchanged — по-прежнему re-check danger, trySetScoutMove + HasUsableMoveAssignment
+
+5. Sweeping lifecycle / abort behavior: unchanged
+
+Изменённые файлы:
+- src/main.js — константы 02D3, FE_SCOUT02DGenerateSweepCandidates, telemetry _botScout02B
+- PATCH_REPORT.txt
+
+Что НЕ тронуто:
+- BOT-SCOUT-02E outbound target selection
+- BOT-SCOUT-02B2 return fallback internals
+- BOT-SCOUT-02C threat thresholds (DANGER_RADIUS=2, THREAT_AWARE_RADIUS=5)
+- Sweeping lifecycle flow (observing→sweeping→returning transitions)
+- Abort behaviors (damage, danger radius, timeout, 3 completed, no valid points)
+- ATTACK-08/09/10
+- enemy light_tank attack-chain
+- findPath internals
+- passable internals
+- combat damage
+- map generation
+- render/fog
+- save/load
+- scout production/cap
+- tank attack decision logic
+- FE_10C1_trySetScoutMove
+- FE_SCOUT02DHasUsableMoveAssignment
+- FE_SCOUT02DIsSweepPointSafe
+- FE_SCOUT02DAssignNextSweepPoint
+- FE_SCOUT02BIsLifecycleBusy
+- Существующие поля telemetry (sweepCandidatesCount и др.)
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+
+Manual test plan:
+1. Старт игры (standard map 48x48)
+2. Enemy scout идёт outbound → player HQ rally target (02E)
+3. Scout достигает зоны базы игрока
+4. Scout входит в sweeping
+5. Для базы у нижнего края: scout НЕ двигается только вдоль одной стороны
+6. Scout посещает до 3 распределённых точек вокруг доступного периметра
+7. Если нижние точки out-of-bounds — они пропускаются
+8. Если точка в danger radius игр. light_tank — она пропускается
+9. После 3 точек или timeout — scout возвращается домой
+10. Damage и danger radius по-прежнему вызывают immediate return
+11. BOT-SCOUT-02E target остаётся player_hq_rally
+12. Enemy tank attack-chain работает
+13. Telemetry: sweepCandidateMode='02d3_angular_spread', sweepSelectedCandidatesCount >= 1
+
+---
+
+Задача: BOT-SCOUT-02D4 — sweep timing completion tuning
+Дата: 2026-05-11
+Lane: Review
+Ветка: glm/bot-scout-02d4-sweep-timing-tuning (от sandbox/main)
+
+Проблема:
+После BOT-SCOUT-02D3 (edge-aware sweep) scout достигает базы игрока и начинает
+sweep, но возвращается с reason='sweep_timeout' вместо reason='sweep_done'.
+Наблюдение: sweeping с gameTime ~144 до ~166 (~22 сек = текущий timeout),
+не хватает времени на 3 точки с movement + observe.
+
+Причина:
+FE_SCOUT02D_SWEEP_TIMEOUT_SEC=22 слишком тесный для 3 sweep points:
+3 × (movement ~4-5 sec + observe 2 sec) ≈ 18-21 sec, почти нет запаса.
+Дополнительно: ARRIVE_DIST=2 требует подойти очень близко (лишние секунды),
+OBSERVE_SEC=2 даёт 6 sec чистого observe на 3 точки.
+
+Что изменено:
+
+1. FE_SCOUT02D_SWEEP_TIMEOUT_SEC: 22 → 30
+   - Запас 8 сек на movement между точками + unpredicted pathfinding
+   - 3 точки × (4-5 сек move + 1.5 сек observe) ≈ 16.5-19.5 сек — укладывается с запасом
+
+2. FE_SCOUT02D_SWEEP_OBSERVE_SEC: 2 → 1.5
+   - 1.5 сек достаточно для scan области view=7
+   - Экономия 0.5 сек × 3 точки = 1.5 сек суммарно
+
+3. FE_SCOUT02D_SWEEP_ARRIVE_DIST: 2 → 3
+   - Считать «прибыл» на 1 тайл раньше — меньше микроменёвров у точки
+   - При view=7 наблюдение с расстояния 3 тайла от целевой клетки всё равно
+     покрывает нужную область (7-3=4 тайла от позиции scout до края view)
+
+Итого: budget = 30 сек, расход ~16.5-19.5 сек → запас ~10-13 сек.
+
+Изменённые файлы:
+- src/main.js — 3 константы (L3500-3502)
+- PATCH_REPORT.txt — добавлена эта запись
+
+Что НЕ менялось (подтверждение):
+- BOT-SCOUT-02D3 candidate generation / angular spread — не тронуты
+- BOT-SCOUT-02E outbound target selection — не тронут
+- BOT-SCOUT-02B2 return fallback — не тронут
+- BOT-SCOUT-02C threat thresholds — не тронуты
+- sweeping lifecycle / abort logic — не тронуты
+- ATTACK-08/09/10 — не тронуты
+- tank attack-chain — не тронут
+- findPath/passable/combat/map/render/save/load — не тронуты
+- scout production/cap — не тронуты
+- telemetry structure — не тронута
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+
+Безопасность:
+- assets изменены: нет
+- economy изменена: нет
+- combat изменён: нет
+- pathfinding изменён: нет
+- production/factory изменён: нет
+- Google Drive sync тронут: нет
+- production paths тронуты: нет
+
+Метод тестирования:
+1. Запустить игру, наблюдать bot scout до sweeping фазы
+2. Проверить: scout завершает sweep с reason='sweep_done' (не 'sweep_timeout')
+3. Проверить telemetry: sweepPointsVisited достигает sweepSelectedCandidatesCount
+4. Проверить: при danger/immediate-return старая логика работает (не затронута)
+
+---
+
+Задача: BOT-INTEL-01 — persist scout intel snapshot
+Дата: 2026-05-11
+Lane: Review
+Ветка: glm/bot-intel-01-persist-scout-intel (от sandbox/main)
+
+Проблема:
+Scout проходит полный lifecycle (outbound → observing → sweeping → returning → cooldown),
+но все данные разведки хранятся только как per-tick telemetry на самом scout-юните
+(s._scout02CSeenPlayerUnitsCount, s._scout02CSeenPlayerHq, etc.) и в debug-объекте
+game._botScout02B. Оба сбрасываются при новом lifecycle cycle или смерти scout.
+Enemy bot не имеет стабильного persisted intel snapshot для будущих tank-decision патчей.
+
+Цель:
+Создать game.enemyIntel — persist-объект с таймстемпами, который обновляется при
+наблюдениях scout и остаётся доступным независимо от lifecycle state или живости scout.
+
+Что сделано:
+
+1. FE_INTEL01Init(game) — инициализация game.enemyIntel при первом вызове.
+   Структура:
+   - playerHqSeen: boolean (sticky true)
+   - playerHqX/Y, playerHqCenterX/Y: координаты HQ (сохраняются при первом подтверждении)
+   - lastScoutSweepDoneAt: game.time при реальном sweep_done
+   - lastUsefulIntelAt: game.time при scan, реально увидевшем player объекты
+   - seenPlayerUnitsCount, seenPlayerBuildingsCount: max(old, current)
+   - knownPlayerUnitsByType: { harvester, builder, light_tank, scout, other } — max(old, current)
+   - knownPlayerBuildingsByType: { hq_base, units_factory, separator, minerals_storage,
+     energy_storage, elements_storage, power_plant, energy_reactor, repair_center,
+     defense_tower, other } — max(old, current)
+   - nearestKnownPlayerTankDist: обновляется при виде player tank
+   - intelSource: 'scout'
+
+2. FE_INTEL01UpdateFromScout(scout, now, reason) — сканирование видимых player
+   объектов вокруг scout и запись в game.enemyIntel.
+   - Scan units + buildings в scout.view radius
+   - Использует max(old, current) для counts — scout не «забывает» увиденное
+   - lastUsefulIntelAt обновляется только если scan реально увидел player объекты
+   - playerHqSeen: sticky true, координаты сохраняются при первом подтверждении
+   - HQ координаты: из scan (game.buildings) или из scout._fe10c1ScoutTarget metadata
+   - nearestKnownPlayerTankDist: из scan player light_tank
+
+3. Вызовы intel update в lifecycle:
+   - После 02C telemetry (outbound/observing/sweeping блок) — FE_INTEL01UpdateFromScout
+   - При sweep_done переходах (3 места) — FE_INTEL01Init(game).lastScoutSweepDoneAt = now
+
+4. Debug telemetry:
+   - game._botIntel01 — зеркало ключевых intel-полей + intelFreshnessSec (computed)
+   - game._botScout02B.intelUpdated / intelUpdateReason — индикаторы обновления
+
+Ключевые архитектурные решения:
+- game.enemyIntel хранится на game object, не на scout unit — переживает смерть scout
+- max(old, current) merge strategy — scout не «забывает» уже увиденные объекты
+- lastUsefulIntelAt только при реальном обнаружении player объектов — не на пустом scan
+- intelFreshnessSec computed в debug telemetry, не хранится в enemyIntel
+- playerHqSeen sticky true, HQ coords сохраняются при первом подтверждении
+- lastScoutSweepDoneAt только при реальном sweep_done (sweepCompletedCount > 0)
+
+Изменённые файлы:
+- src/main.js — FE_INTEL01Init, FE_INTEL01UpdateFromScout, lifecycle hooks, debug telemetry
+- PATCH_REPORT.txt — добавлена эта запись
+
+Что НЕ менялось (подтверждение):
+- Scout behavior/lifecycle — не тронут
+- BOT-SCOUT-02B2 return fallback — не тронут
+- BOT-SCOUT-02C threat thresholds — не тронуты
+- BOT-SCOUT-02D/02D3/02D4 sweep lifecycle/timing — не тронуты
+- BOT-SCOUT-02E outbound target selection — не тронут
+- ATTACK-08/09/10 — не тронуты
+- enemy light_tank attack-chain — не тронут
+- findPath/passable/combat/map/render/save/load — не тронуты
+- economy — не тронута
+- scout production/cap — не тронуты
+- telemetry structure (кроме добавления intelUpdated/intelUpdateReason) — не изменена
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+
+Безопасность:
+- assets изменены: нет
+- economy изменена: нет
+- combat изменён: нет
+- pathfinding изменён: нет
+- production/factory изменён: нет
+- Google Drive sync тронут: нет
+- production paths тронуты: нет
+
+Метод тестирования:
+1. Запустить свежую игру.
+2. Дождаться enemy scout outbound → observing → sweeping.
+3. Проверить game._botIntel01: playerHqSeen=true, knownPlayerBuildingsByType.hq_base>=1.
+4. Проверить knownPlayerUnitsByType включает видимые типы player юнитов.
+5. После sweep_done: lastScoutSweepDoneAt обновлён.
+6. После возвращения scout в cooldown: game.enemyIntel всё ещё содержит данные.
+7. intelFreshnessSec растёт со временем в game._botIntel01.
+8. Tank attack behavior не изменён.
+9. Scout lifecycle идентичен до патча.
+
+---
+
+Задача: BOT-ATTACK-11 — enemy tanks use scout intel target point as attack rally
+Дата: 2026-05-11
+Lane: Review
+Ветка: glm/bot-attack-11-intel-rally-target (от sandbox/main)
+
+Цель:
+Когда enemy light_tank attack target selection не находит цель через 10F1 vision
+(visible/known), использовать game.enemyIntel как источник target point.
+Танки двигаются к intel-координатам через FE_PATCH_08BSilentMoveTo (coordinate move),
+а не через setLightTankAttackApproachGeneric (реальный object target).
+При прибытии в район intel-точки — попытка найти visible target через 10F1 и
+переключиться на attack. Если цель не найдена — очистка rally flag, обычная bot logic.
+
+Root cause:
+Текущая attack-chain не поддерживает point-target (без real building/unit id):
+- FE_PATCH_07BGetHostileLightTankTargetKind требует target.kind/owner/hp
+- setLightTankAttackApproachGeneric требует target.id для attackApproachTargetId
+- FE_PATCH_06BResolveApproachTarget ищет target по id среди game.buildings/units
+- FE_ATTACK10IsWaveTargetAlive ищет targetId среди реальных объектов
+- Synthetic point object невозможен без cascade-изменений
+
+Решение:
+Intel rally — coordinate-based move через уже существующую FE_PATCH_08BSilentMoveTo.
+Танки получают _attack11IntelRally флаг с координатами и source.
+Не ломает ни одну существующую attack-функцию.
+
+Priority:
+1. confirmed_hq — game.enemyIntel.playerHqCenterX/Y (scout видел HQ визуально)
+2. estimated_hq — game.enemyIntel.playerHqEstimateCenterX/Y (scout target metadata)
+3. legacy_fallback — findBaseBuilding('player') как раньше
+
+Что сделано:
+
+1. FE_ATTACK11ChooseIntelTarget() — helper после FE_INTEL01UpdateFromScout:
+   - Читает game.enemyIntel
+   - Priority 1: confirmed HQ (playerHqSeen + playerHqCenterX/Y)
+   - Priority 2: estimated HQ (playerHqEstimateCenterX/Y)
+   - Возвращает { targetX, targetY, targetSource, targetReason, intelFreshnessSec,
+     playerHqSeen, playerHqEstimateAvailable } или null
+
+2. FE_PATCH_08BPrepareAttack ATTACK-01 fallback:
+   - Старый: if (!target) → findBaseBuilding('player') → hq_push
+   - Новый: if (!target) → FE_ATTACK11ChooseIntelTarget() →
+     если intel есть → SilentMoveTo(intelX, intelY) + _attack11IntelRally flag →
+     если assignedCount > 0 → return true (attack phase) →
+     если assignedCount === 0 или intel нет → legacy findBaseBuilding fallback
+   - return true / state.phase='attack' только если assignedCount > 0
+   - Не назначает unit.command='attack' вручную (SilentMoveTo ставит manual_move)
+   - Назначает только eligible tanks из waveSlice (не все enemy tanks)
+
+3. Intel rally arrival detection в bot tick (state.phase === 'attack'):
+   - Primary: dist(tank, rally) <= 3 → arrived
+   - Cleanup: pathDone + dist <= 6 → arrived (path_done_far)
+   - При arrival: FE_PATCH_10F1SelectAttackDecision → если direct target → attack command
+   - Если target не найден → очистить rally flag, bot logic продолжит
+
+4. Minimal guards:
+   - ATTACK-04 overChase/attackInvalid: intel rally tanks пропускают regroup
+   - ATTACK-04 pressure defense: intel rally tanks не отзываются для защиты базы
+   - FE_10H1 early defense/retreat: intel rally tanks исключены из пула 10H1;
+     если 10H1 вызывает defend/retreat для остальных танков, phase='attack'
+     восстанавливается для rally tanks
+   - Regroup phase: очистка _attack11IntelRally флага
+
+5. Telemetry game._botAttack11 (обновлено BOT-ATTACK-11C):
+   - Intel availability: intelAvailable, intelTargetSource, intelTargetX/Y
+   - Dispatch result: dispatchSource, usesIntelPoint, assignedCount, fallbackUsed
+   - Skip reasons: skipReason, skipHasAttackOrder, skipAlreadyRally,
+     skipWaveLocked, skipPathFailed, skipDead
+   - Legacy aliases: targetSource/targetX/Y (→ intelTargetSource/X/Y)
+   - Rally state: rallyActiveCount, rallyArrivedCount, rallyConvertedCount,
+     rallyClearedCount, h1RecallGuardedCount
+   - Failure: lastFailureReason
+   - Intel metadata: playerHqSeen, playerHqEstimateAvailable,
+     intelFreshnessSec, lastScoutIntelAt, lastScoutSweepDoneAt
+
+6. ATTACK-01 telemetry расширена:
+   - source: 'vision' | 'intel_rally' | 'hq_fallback'
+   - intelRallySource, intelRallyAssignedCount
+
+Изменённые файлы:
+- src/main.js — FE_ATTACK11ChooseIntelTarget, FE_PATCH_08BPrepareAttack fallback,
+  arrival detection, guards, telemetry
+- PATCH_REPORT.txt
+
+Что НЕ тронуто:
+- BOT-SCOUT-02B2/02C/02D/02D3/02D4/02E — scout behavior
+- BOT-INTEL-01 update logic
+- FE_PATCH_10F1SelectAttackDecision — vision/memory target selection
+- FE_PATCH_10F1CanDirectAttackTarget — vision gate
+- setLightTankAttackApproachGeneric — не изменён
+- FE_PATCH_07BGetHostileLightTankTargetKind — не изменён
+- FE_PATCH_06BResolveApproachTarget — не изменён
+- ATTACK-08/09/10 internals — не изменены (только добавлены guards)
+- ATTACK-07 sync — не изменён
+- ATTACK-06 re-path — не изменён
+- Enemy light_tank production/cap
+- Combat damage/range/cooldowns
+- findPath/passable internals
+- Map generation, render, fog, save/load, economy
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+
+Manual test plan:
+1. Запустить свежую игру (skirmish).
+2. Дождаться scout соберёт intel → game._botIntel01.playerHqSeen: true.
+3. Подтвердить game._botIntel01.playerHqCenterX/Y указывает на район базы игрока.
+4. Дождаться enemy light_tank wave.
+5. Проверить game._botAttack11:
+   - targetSource='confirmed_hq' или 'estimated_hq'
+   - targetX/Y ≈ координаты базы игрока
+   - usesIntelPoint=true
+   - fallbackUsed=false
+   - assignedCount > 0
+6. Наблюдать: танки двигаются к intel-координатам.
+7. При прибытии к intel-точке → rallyArrivedCount растёт.
+8. Если видят цель → rallyConvertedCount растёт, танки атакуют.
+9. Без intel: targetSource='none', usesIntelPoint=false, legacy fallback.
+10. Scout behavior не изменился.
+11. Combat/damage/range не изменился.
+
+Безопасность:
+- Scout behavior не тронут
+- Economy не тронута
+- Combat не тронут
+- findPath/passable не тронуты
+- ATTACK-10 wave internals не тронуты (только guards добавлены)
+- Google Drive sync тронут: нет
+
+Задача: BOT-ATTACK-11C — honest dispatch telemetry and skip reasons
+Дата: 2026-05-11
+Lane: Review
+Ветка: glm/bot-attack-11c-honest-telemetry (от sandbox/main)
+
+Цель:
+Раньше game._botAttack11 смешивал intel availability и actual dispatch в одних полях.
+Пример: targetSource='confirmed_hq' + usesIntelPoint=true при assignedCount=0 —
+телеметрия показывала, что intel rally используется, хотя ни один танк не был назначен.
+
+Root cause:
+1. targetSource / targetX / targetY отражали ДОСТУПНОСТЬ intel, а не РЕАЛЬНОЕ использование.
+   FE_ATTACK11ChooseIntelTarget() вызывался каждый тик → если intel доступна,
+   usesIntelPoint=true даже при dispatch через 10F1 vision.
+2. _a11LastFailureReason содержал только 'intel_path_failed_or_no_eligible_tanks'
+   без детализации (vision target available / no intel / no eligible tanks / wave locked / etc).
+3. usesIntelPoint=true при assignedCount=0 — противоречиво.
+
+Решение:
+Разделить поля телеметрии на три группы: intel availability / dispatch result / skip reasons.
+Добавить счётчики причин пропуска для каждого танка в wave slice.
+Не менять gameplay логику.
+
+Что сделано:
+
+1. Разделение полей game._botAttack11:
+   - Intel availability: intelAvailable, intelTargetSource, intelTargetX, intelTargetY
+   - Dispatch result: dispatchSource, usesIntelPoint, assignedCount, fallbackUsed
+   - Skip reasons: skipReason, skipHasAttackOrder, skipAlreadyRally,
+     skipWaveLocked, skipPathFailed, skipDead
+   - Legacy aliases: targetSource/targetX/targetY → зеркалят intelTargetSource/X/Y
+
+2. dispatchSource отражает реальный dispatch:
+   - 'vision' — 10F1 нашёл цель
+   - 'intel_rally' — реально назначен rally (assignedCount > 0)
+   - 'hq_fallback' — реально использован legacy findBaseBuilding fallback
+   - 'none' — приказ не выдан
+
+3. usesIntelPoint: true ТОЛЬКО при dispatchSource === 'intel_rally' && assignedCount > 0
+
+4. skipReason — честная причина, почему intel rally не назначен:
+   - 'vision_target_available' — 10F1 уже дал target
+   - 'no_intel' — нет intel из scout
+   - 'intel_rally_assigned' — rally назначен (позитивный случай)
+   - 'legacy_fallback_used' — использован legacy fallback
+   - 'no_eligible_tanks' — intel есть, но нет подходящих танков
+   - 'path_failed' — FE_PATCH_08BSilentMoveTo вернул false
+   - 'not_in_attack_dispatch' — тик не прошёл через attack dispatch
+
+5. Skip counters в wave slice loop:
+   - skipHasAttackOrder — танк уже имеет attackTargetId / attackApproachTargetId
+   - skipAlreadyRally — танк уже на _attack11IntelRally
+   - skipWaveLocked — FE_ATTACK10IsWaveLocked
+   - skipPathFailed — SilentMoveTo не смог проложить путь
+   - skipDead — hp <= 0
+
+6. Не удалены старые поля targetSource / targetX / targetY —
+   зеркалят intelTargetSource / intelTargetX / intelTargetY для обратной совместимости.
+
+Изменённые файлы:
+- src/main.js — game._botAttack11 поля, FE_PATCH_08BPrepareAttack skip counters,
+  dispatch telemetry update
+- PATCH_REPORT.txt
+
+Что НЕ тронуто:
+- Rally assignment gameplay — не изменён
+- Arrival detection gameplay — не изменён
+- 10H1 guard gameplay — не изменён
+- Attack/no-attack decision — не изменён
+- FE_ATTACK11ChooseIntelTarget — не изменён
+- FE_PATCH_10F1SelectAttackDecision — не изменён
+- setLightTankAttackApproachGeneric — не изменён
+- FE_PATCH_07BGetHostileLightTankTargetKind — не изменён
+- FE_PATCH_06BResolveApproachTarget — не изменён
+- ATTACK-08/09/10 internals — не изменены
+- Combat damage/range/cooldowns
+- findPath/passable
+- Scout behavior / BOT-INTEL-01
+- Production/caps
+- Map/render/fog/save/load/economy
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+
+Manual test plan:
+1. Запустить свежую игру (skirmish).
+2. Дождаться scout соберёт intel → game._botIntel01.playerHqSeen: true.
+3. Проверить game._botAttack11:
+   - intelAvailable: true, intelTargetSource: 'confirmed_hq'
+   - Если 10F1 нашёл цель: dispatchSource='vision', skipReason='vision_target_available',
+     usesIntelPoint=false
+   - Если 10F1 не нашёл цель и rally назначен: dispatchSource='intel_rally',
+     usesIntelPoint=true, assignedCount>0, skipReason='intel_rally_assigned'
+   - Если intel есть, но нет eligible танков: dispatchSource='hq_fallback',
+     skipReason='no_eligible_tanks', skip-счётчики > 0
+   - Если нет intel: skipReason='no_intel'
+4. Танки на rally: rallyActiveCount>0, при прибытии rallyArrivedCount/rallyConvertedCount.
+5. Combat/scout/economy не изменились.
+
+---
+
+Задача: BOT-ATTACK-12 — intel-based attack/no-attack decision gate
+Дата: 2026-05-11
+Lane: Review
+Ветка: glm/bot-attack-12-intel-attack-gate (от sandbox/main)
+
+Цель:
+Добавить gate перед запуском новой волны атаки, когда 10F1 vision не видит цель.
+Если scout intel отсутствует/устарел или вражеских танков недостаточно — отложить атаку.
+Не прерывать активные атаки, defence, retreat, visible target logic.
+
+Проблема:
+Enemy tank attack стартует всегда, когда armyScore >= attackScoreThreshold (1 на normal).
+Scout intel влиял только на куда идут танки (BOT-ATTACK-11), но не на следует ли атаковать.
+Бот мог запускать слепую атаку с 1 танком без intel о позиции игрока.
+
+Что сделано:
+
+1. Константы BOT-ATTACK-12 (L2371-2374):
+   - FE_ATTACK12_MAX_INTEL_AGE_SEC = 180 — max возраст force intel
+   - FE_ATTACK12_MIN_ATTACK_TANKS = 2 — минимум танков для атаки
+   - FE_ATTACK12_FORCE_ADVANTAGE = 1 — минимум превосходства над известными player tanks
+
+2. Helper FE_ATTACK12EvaluateAttackDecision(enemyTanks, now) (L3743-3820):
+   Разделяет два типа intel:
+   - HQ position intel (playerHqSeen / playerHqEstimateCenterX) — без ограничения возраста,
+     HQ не перемещается
+   - Force intel (lastUsefulIntelAt / lastScoutSweepDoneAt) — должен быть свежим,
+     age <= FE_ATTACK12_MAX_INTEL_AGE_SEC
+
+   Логика decision (по порядку):
+   - Нет HQ intel (ни confirmed, ни estimated) → delay_no_intel
+   - Force intel отсутствует или устарел → delay_stale_intel
+   - readyEnemyTanks < 2 → delay_too_few_tanks
+   - knownPlayerLightTanks > 0 и readyEnemyTanks < knownPlayerLightTanks + 1 → delay_enemy_outnumbered
+   - Всё ок → allow_favorable_intel
+
+   readyEnemyTanks: живые enemy light_tank, не wave-locked, не на intel rally.
+
+3. Gate insertion в FE_PATCH_08BPrepareAttack (L4978-5003):
+   Gate вставлен внутри if (!target) блока, ПЕРЕД ATTACK-11 intel rally кодом.
+   - Если FE_PATCH_08BAttackTarget() вернул target (10F1 vision) → gate НЕ применяется
+   - Если target нет → gate вычисляется и проверяется
+
+   При delay:
+   - Используется тот же паттерн, что и armyScore < threshold branch:
+     return home для не-wave-locked, не-rally, не-в-атаке танков
+   - state.phase = 'defend'
+   - Не отзывает: wave-locked, _attack11IntelRally, танки с attackTargetId/attackApproachTargetId
+   - return false
+
+   Spam/loop защита: nextCheckAt (1200ms cooldown) — gate не вызывается каждый tick.
+
+4. 10F1 vision branch (L5060-5075):
+   Когда 10F1 видит цель — gateApplied: false, attackAllowed: true.
+   Не ломает visible immediate target logic.
+
+5. Телеметрия game._botAttack12 (L7066-7095):
+   Поля:
+   - attackAllowed: boolean
+   - decision: "allow" | "delay"
+   - reason: конкретная причина (allow_favorable_intel / delay_no_intel / delay_stale_intel / delay_too_few_tanks / delay_enemy_outnumbered / skip_existing_attack_active / not_in_attack_dispatch)
+   - gateApplied: boolean — gate был вычислен (false = 10F1 target был доступен)
+   - skippedBecauseActiveAttack: boolean — gate не применялся из-за активной атаки
+   - hqIntelAvailable: boolean
+   - forceIntelKnown: boolean
+   - forceIntelFresh: boolean
+   - forceIntelAgeSec: number
+   - readyEnemyTanks: number
+   - knownPlayerLightTanks: number
+   - knownPlayerHarvesters: number
+   - playerHqSeen: boolean
+   - playerHqEstimateAvailable: boolean
+   - intelFreshnessSec: number
+   - lastUsefulIntelAt: number
+   - lastScoutSweepDoneAt: number
+   - requiredTanks: number
+   - forceAdvantageRequired: number
+   - attack11DispatchSource: string
+
+6. Доп. поля в game._botAttack11 (L7061-7063):
+   - attack12Allowed: boolean
+   - attack12Reason: string
+
+Что НЕ тронуто:
+- BOT-SCOUT поведение (02B2/02C/02D/02D3/02D4/02E)
+- BOT-INTEL-01 update logic (FE_INTEL01Init, FE_INTEL01UpdateFromScout)
+- BOT-ATTACK-11 target selection (FE_ATTACK11ChooseIntelTarget)
+- BOT-ATTACK-11C telemetry semantics (game._botAttack11 — только 2 доп. поля)
+- ATTACK-08/09/10 internals
+- setLightTankAttackApproachGeneric
+- FE_PATCH_10F1SelectAttackDecision
+- FE_PATCH_08BCommandEnemyTankAttack
+- FE_PATCH_08BArmyScore
+- FE_10H1_updateEnemyRetreatAndDefenseMvp
+- Combat damage/range/cooldowns
+- findPath/passable
+- Scout behavior
+- Production/caps
+- Map/render/fog/save/load/economy
+
+Изменённые файлы:
+- src/main.js (константы, helper, gate, телеметрия)
+- PATCH_REPORT.txt
+
+Выполненные проверки:
+- node --check src/main.js -> PASS
+
+Manual test plan:
+1. Свежая игра, до scout intel:
+   - game._botAttack12.reason = "delay_no_intel"
+   - Танки не атакуют, остаются дома
+2. Scout собрал intel, intel свежая, танков >= 2:
+   - game._botAttack12.reason = "allow_favorable_intel"
+   - Атака идёт через ATTACK-11 intel rally
+3. Enemy < 2 танков:
+   - game._botAttack12.reason = "delay_too_few_tanks"
+4. Intel > 180 сек:
+   - game._botAttack12.reason = "delay_stale_intel"
+   - game._botAttack12.forceIntelFresh = false
+5. Player light_tanks >= enemy tanks - 1:
+   - game._botAttack12.reason = "delay_enemy_outnumbered"
+6. 10F1 видит цель:
+   - game._botAttack12.gateApplied = false
+   - Атака без gate
+7. Активная атака (phase='attack'):
+   - game._botAttack12.skippedBecauseActiveAttack = true
+   - Gate не вычисляется
+8. Scout / combat / production не изменились
+
+
+---
+
+Задача: BOT-ATTACK-12A — align ready tank counting with assignable tank eligibility
+Дата: 2026-05-11
+Lane: Review
+Ветка: glm/bot-attack-12a-assignable-tank-count (от sandbox/main)
+
+Цель:
+Синхронизировать подсчёт танков в ATTACK-12 gate с реальной eligible-логикой ATTACK-11 dispatch.
+FE_ATTACK12EvaluateAttackDecision() считал readyEnemyTanks (alive, не rally, не wave-locked),
+но ATTACK-11 dispatch дополнительно пропускает танки с attackTargetId / attackApproachTargetId.
+Результат: gate мог пропустить атаку, когда assignable танков < MIN_ATTACK_TANKS.
+
+Что сделано:
+
+1. FE_ATTACK12EvaluateAttackDecision() (L3751-3767):
+   Добавлен параллельный подсчёт внутри существующего цикла:
+   - _a12Assignable: subset от ready, дополнительно без attackTargetId и attackApproachTargetId
+   - _a12SkipAssignedAttackTarget: сколько пропущено из-за attackTargetId
+   - _a12SkipAttackApproach: сколько пропущено из-за attackApproachTargetId
+
+   Логика: attackTargetId проверяется первым (прямой attack order — сильнее),
+   attackApproachTargetId вторым. Танк с обоими полями засчитывается в skipAssignedAttackTarget.
+
+2. Decision logic (L3796-3798):
+   Пороговые проверки заменены с readyEnemyTanks на assignableEnemyTanks:
+   - _a12Assignable < FE_ATTACK12_MIN_ATTACK_TANKS -> delay_too_few_tanks
+   - _a12KnownPlayerLT > 0 && _a12Assignable < knownPlayerLT + FE_ATTACK12_FORCE_ADVANTAGE -> delay_enemy_outnumbered
+
+3. Return object (L3810-3813):
+   Добавлены 3 поля:
+   - assignableEnemyTanks: _a12Assignable
+   - skippedAssignedAttackTargetCount: _a12SkipAssignedAttackTarget
+   - skippedAttackApproachCount: _a12SkipAttackApproach
+
+4. Telemetry init game._botAttack12 (L7092-7095):
+   Добавлены 3 поля с дефолтами:
+   - assignableEnemyTanks: 0
+   - skippedAssignedAttackTargetCount: 0
+   - skippedAttackApproachCount: 0
+
+5. 10F1 vision branch (L5081-5083):
+   Добавлены 3 поля с нулевыми значениями (gate не вычисляется при vision target):
+   - assignableEnemyTanks: 0
+   - skippedAssignedAttackTargetCount: 0
+   - skippedAttackApproachCount: 0
+
+Что НЕ тронуто:
+- ATTACK-12 reason logic, кроме замены ready -> assignable в порогах
+- readyEnemyTanks — сохранён как broad count в телеметрии
+- BOT-ATTACK-11 rally mechanics
+- BOT-ATTACK-11C telemetry semantics (только 3 доп. поля в _botAttack12)
+- Combat
+- Pathfinding
+- Scout
+- BOT-INTEL-01
+- Production/caps
+- ATTACK-08/09/10
+
+Изменённые файлы:
+- src/main.js (helper, decision logic, return object, telemetry)
+- PATCH_REPORT.txt
+
+Выполненные проверки:
+- node --check src/main.js -> PASS

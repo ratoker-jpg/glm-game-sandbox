@@ -75,3 +75,4 @@
 | ARCH-LAB-05B | 2026-05-13 | #86 | Enemy targeting contract + pure decision functions — ATTACK_TARGET_SOURCES, ATTACK_DECISION_RESULTS, ATTACK_DELAY_REASONS, ATTACK12_DEFAULTS, chooseIntelTarget, evaluateAttackDecision, factories, validators |
 | ARCH-LAB-05B2 | 2026-05-14 | TBD | Enemy targeting runtime wiring — delegation wrappers in main.js with legacy fallback, comments fix in enemy_targeting.js |
 | ARCH-LAB-05B3 | 2026-05-14 | TBD | Enemy targeting fallback cleanup — remove legacy fallback from ATTACK11/12 wrappers, first main.js-reducing architecture PR (-125 lines) |
+| ARCH-AI-05C-DESIGN | 2026-05-13 | PR TBD | Enemy tank decision / Priority Stack migration design |

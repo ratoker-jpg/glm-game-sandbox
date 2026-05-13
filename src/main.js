@@ -4016,6 +4016,15 @@ function FE_PATCH_08BAttackTarget(state, enemyUnits) {
   // Returns { targetX, targetY, targetSource, targetReason, intelFreshnessSec,
   //           playerHqSeen, playerHqEstimateAvailable } or null if no intel.
   function FE_ATTACK11ChooseIntelTarget() {
+    // ARCH-LAB-05B2: delegate to module when available
+    if (typeof window !== 'undefined' && window.FE_ENEMY_TARGETING
+        && typeof window.FE_ENEMY_TARGETING.chooseIntelTarget === 'function') {
+      return window.FE_ENEMY_TARGETING.chooseIntelTarget(
+        game && game.enemyIntel,
+        game ? (game.time || 0) : 0
+      );
+    }
+    // === LEGACY FALLBACK (original code, do not modify) ===
     var intel = game && game.enemyIntel;
     var now = game ? (game.time || 0) : 0;
     if (!intel) return null;
@@ -4057,6 +4066,33 @@ function FE_PATCH_08BAttackTarget(state, enemyUnits) {
   // This gates only NEW offensive waves when 10F1 vision has no target.
   // Does NOT interrupt active attacks, defense, or retreat.
   function FE_ATTACK12EvaluateAttackDecision(enemyTanks, now) {
+    // ARCH-LAB-05B2: delegate to module when available
+    if (typeof window !== 'undefined' && window.FE_ENEMY_TARGETING
+        && typeof window.FE_ENEMY_TARGETING.evaluateAttackDecision === 'function') {
+      var _a12statuses = [];
+      for (var _a12si = 0; _a12si < (enemyTanks || []).length; _a12si++) {
+        var _a12su = enemyTanks[_a12si];
+        _a12statuses.push({
+          isAlive: !!_a12su && (_a12su.hp || 0) > 0,
+          isIntelRally: !!(_a12su && _a12su._attack11IntelRally),
+          isWaveLocked: !!(_a12su && typeof FE_ATTACK10IsWaveLocked === 'function' && FE_ATTACK10IsWaveLocked(_a12su)),
+          hasAttackTargetId: !!(_a12su && _a12su.attackTargetId),
+          hasAttackApproachTargetId: !!(_a12su && _a12su.attackApproachTargetId)
+        });
+      }
+      return window.FE_ENEMY_TARGETING.evaluateAttackDecision(
+        game && game.enemyIntel,
+        _a12statuses,
+        now,
+        {
+          attack11DispatchSource: game && game._botAttack11 ? (game._botAttack11.dispatchSource || '') : '',
+          maxIntelAgeSec: FE_ATTACK12_MAX_INTEL_AGE_SEC,
+          minAttackTanks: FE_ATTACK12_MIN_ATTACK_TANKS,
+          forceAdvantage: FE_ATTACK12_FORCE_ADVANTAGE
+        }
+      );
+    }
+    // === LEGACY FALLBACK (original code, do not modify) ===
     var intel = game && game.enemyIntel;
     var _a12Attack11Ds = game && game._botAttack11 ? (game._botAttack11.dispatchSource || '') : '';
 

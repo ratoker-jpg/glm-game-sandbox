@@ -12,6 +12,7 @@
   var HARVESTING = window.FE_NEXT_HARVESTING;
   var CONSTRUCTION = window.FE_NEXT_CONSTRUCTION;
   var PRODUCTION = window.FE_NEXT_PRODUCTION;
+  var COMBAT = window.FE_NEXT_COMBAT;
 
   function initInput(canvas, state) {
     function onKeyDown(e) {
@@ -120,6 +121,7 @@
     bindBuildButton(state, 'build-factory', 'units_factory');
     bindProductionButton(state, 'produce-harvester', 'harvester');
     bindProductionButton(state, 'produce-builder', 'builder');
+    bindProductionButton(state, 'produce-light-tank', 'light_tank');
   }
 
   function bindBuildButton(state, id, buildingType) {
@@ -195,6 +197,13 @@
     var node = STATE.findResourceNodeAtTile(state, tx, ty);
     if (node && selectedUnit && selectedUnit.type === 'harvester') {
       HARVESTING.issueHarvestCommand(state, selectedUnit.id, node.id);
+      return;
+    }
+
+    // FEN-06: right-click enemy building with selected light_tank = attack command
+    var enemyBuilding = STATE.findEnemyBuildingAtTile(state, tx, ty);
+    if (enemyBuilding && selectedUnit && selectedUnit.type === 'light_tank') {
+      COMBAT.issueAttackCommand(state, selectedUnit.id, enemyBuilding.id, 'building');
       return;
     }
 

@@ -89,3 +89,4 @@
 | FEN-03 | 2026-05-15 | TBD | FE Next resource nodes + harvester gather/dropoff + separator economy loop |
 | FEN-04 | 2026-05-15 | TBD | FE Next builder construction MVP + auto-placement + dynamic occupancy |
 | FEN-05 | 2026-05-15 | TBD | FE Next units_factory construction + harvester/builder production MVP |
+| FEN-06 | 2026-05-16 | TBD | FE Next basic combat + light_tank production MVP |

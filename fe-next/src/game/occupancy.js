@@ -51,6 +51,10 @@
    * @param {number} h - Map height
    */
   function markBuilding(grid, building, w, h) {
+    // FEN-06: destroyed buildings no longer block occupancy.
+    // Accepted construction sites (complete===false) still block occupancy
+    // per FEN-04 design — they reserve tiles immediately after order acceptance.
+    if (building.destroyed) return;
     var s = building.size || 1;
     for (var dy = 0; dy < s; dy++) {
       for (var dx = 0; dx < s; dx++) {

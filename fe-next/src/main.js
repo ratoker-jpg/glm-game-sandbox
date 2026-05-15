@@ -21,6 +21,7 @@
   var CONSTRUCTION = window.FE_NEXT_CONSTRUCTION;
   var PRODUCTION = window.FE_NEXT_PRODUCTION;
   var ECONOMY = window.FE_NEXT_ECONOMY;
+  var COMBAT = window.FE_NEXT_COMBAT;
   var OCCUPANCY = window.FE_NEXT_OCCUPANCY;
   var ASSETS_LIB = window.FE_NEXT_ASSETS;
 
@@ -73,6 +74,7 @@
     CONSTRUCTION.updateConstruction(state, dt);
     PRODUCTION.updateProduction(state, dt);
     ECONOMY.updateEconomy(state, dt);
+    COMBAT.updateCombat(state, dt);
     MOVEMENT.updateMoveMarkers(state, dt);
 
     state.time += dt;
@@ -108,6 +110,7 @@
     getConstruction: function () { return CONSTRUCTION; },
     getProduction: function () { return PRODUCTION; },
     getEconomy: function () { return ECONOMY; },
+    getCombat: function () { return COMBAT; },
     isRunning: function () { return running; },
     pause: function () { running = false; },
     resume: function () {
@@ -124,5 +127,5 @@
     debug: window.FE_NEXT_DEBUG
   };
 
-  console.info('[FE Next] FEN-05 initialized. Production loop ready. Assets loading:', assets.stats());
+  console.info('[FE Next] FEN-06 initialized. Combat loop ready. Assets loading:', assets.stats());
 })();

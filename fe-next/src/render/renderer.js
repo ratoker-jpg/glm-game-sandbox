@@ -143,6 +143,10 @@
       renderUnitsFactory(ctx, building, canvasPos, z);
       return;
     }
+    if (building.type === 'enemy_bunker') {
+      if (!building.destroyed) renderEnemyBunker(ctx, building, canvasPos, z);
+      return;
+    }
 
     // Geometric fallback: isometric box
     var hw = C.TILE_W / 2 * s * z;
@@ -247,6 +251,59 @@
     ctx.fillStyle = isConstructing ? '#d6ecff' : '#9dff9d';
     ctx.fillRect(barX, barY, barW * progress, barH);
     ctx.restore();
+  }
+
+  function renderEnemyBunker(ctx, building, canvasPos, z) {
+    var s = building.size || 1;
+    var hw = C.TILE_W / 2 * s * z;
+    var hh = C.TILE_H / 2 * s * z;
+    var bHeight = 12 * z;
+
+    // Dark red isometric box
+    ctx.beginPath();
+    ctx.moveTo(canvasPos.x + hw, canvasPos.y);
+    ctx.lineTo(canvasPos.x, canvasPos.y + hh);
+    ctx.lineTo(canvasPos.x, canvasPos.y + hh - bHeight);
+    ctx.lineTo(canvasPos.x + hw, canvasPos.y - bHeight);
+    ctx.closePath();
+    ctx.fillStyle = '#8b2020';
+    ctx.fill();
+    ctx.strokeStyle = '#5a0e0e';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(canvasPos.x - hw, canvasPos.y);
+    ctx.lineTo(canvasPos.x, canvasPos.y + hh);
+    ctx.lineTo(canvasPos.x, canvasPos.y + hh - bHeight);
+    ctx.lineTo(canvasPos.x - hw, canvasPos.y - bHeight);
+    ctx.closePath();
+    ctx.fillStyle = '#6b1515';
+    ctx.fill();
+    ctx.strokeStyle = '#440909';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    drawDiamond(ctx, canvasPos.x, canvasPos.y - bHeight, hw, hh, '#a03030', '#5a0e0e');
+
+    ctx.fillStyle = '#2a0505';
+    ctx.font = (9 * z) + 'px "Trebuchet MS", Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('ENM', canvasPos.x, canvasPos.y - bHeight);
+
+    // HP bar if damaged
+    if (building.hp < building.maxHp) {
+      var barW = 30 * z;
+      var barH = 3 * z;
+      var barX = canvasPos.x - barW / 2;
+      var barY = canvasPos.y - bHeight - 14 * z;
+      var hpRatio = building.hp / building.maxHp;
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.fillRect(barX, barY, barW, barH);
+      ctx.fillStyle = hpRatio > 0.5 ? '#5de06b' : hpRatio > 0.25 ? '#f2d75c' : '#e05243';
+      ctx.fillRect(barX, barY, barW * hpRatio, barH);
+    }
   }
 
   function renderResourceNode(ctx, node, state, canvasW, canvasH) {
@@ -453,6 +510,7 @@
 
     for (var i = 0; i < state.buildings.length; i++) {
       var b = state.buildings[i];
+      if (b.destroyed) continue;
       entities.push({ type: 'building', entity: b, sortKey: (b.tx + b.ty) * 10 });
     }
 
@@ -504,6 +562,37 @@
       } else if (sorted[i].type === 'resourceNode') {
         renderResourceNode(ctx, sorted[i].entity, state, canvasW, canvasH);
       }
+    }
+
+    // Attack indicators (red line from attacking unit to target)
+    renderAttackIndicators(ctx, state, canvasW, canvasH);
+  }
+
+  function renderAttackIndicators(ctx, state, canvasW, canvasH) {
+    var camera = state.camera;
+    var z = camera.zoom;
+    if (!state.units) return;
+    for (var i = 0; i < state.units.length; i++) {
+      var unit = state.units[i];
+      if (unit.type !== 'light_tank' || unit.attackState !== 'attacking' || !unit.attackTarget) continue;
+      var target = null;
+      if (unit.attackTarget.kind === 'building') {
+        target = window.FE_NEXT_STATE.findBuildingById(state, unit.attackTarget.id);
+      }
+      if (!target || target.destroyed) continue;
+      var unitScr = COORDS.tileToScreen(unit.tx + 0.5, unit.ty + 0.5);
+      var unitCanvas = COORDS.worldToCanvas(unitScr.x, unitScr.y, camera, canvasW, canvasH);
+      var ts = target.size || 1;
+      var targetScr = COORDS.tileToScreen(target.tx + ts / 2, target.ty + ts / 2);
+      var targetCanvas = COORDS.worldToCanvas(targetScr.x, targetScr.y, camera, canvasW, canvasH);
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(unitCanvas.x, unitCanvas.y);
+      ctx.lineTo(targetCanvas.x, targetCanvas.y);
+      ctx.strokeStyle = 'rgba(224,60,60,0.6)';
+      ctx.lineWidth = 2 * z;
+      ctx.stroke();
+      ctx.restore();
     }
   }
 

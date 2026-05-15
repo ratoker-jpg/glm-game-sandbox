@@ -75,15 +75,22 @@
       owner: 'player',
       tx: 7,
       ty: 5,
-      hp: C.UNIT_HP,
-      maxHp: C.UNIT_HP,
+      hp: C.LIGHT_TANK_HP,
+      maxHp: C.LIGHT_TANK_HP,
       selected: false,
       moving: false,
       moveTarget: null,
       moveProgress: 0,
       moveFrom: null,
       path: null,
-      pathIndex: 0
+      pathIndex: 0,
+      speed: C.LIGHT_TANK_SPEED,
+      damage: C.LIGHT_TANK_DAMAGE,
+      range: C.LIGHT_TANK_RANGE,
+      attackCooldownMax: C.LIGHT_TANK_ATTACK_COOLDOWN,
+      attackCooldown: 0,
+      attackTarget: null,
+      attackState: 'idle'
     };
 
     var harvester = {
@@ -129,6 +136,18 @@
       buildOrder: null
     };
 
+    var enemyBunker = {
+      id: 'enemy_bunker_1',
+      type: 'enemy_bunker',
+      owner: 'enemy',
+      tx: 16,
+      ty: 10,
+      size: 1,
+      hp: C.ENEMY_DUMMY_HP,
+      maxHp: C.ENEMY_DUMMY_HP,
+      destroyed: false
+    };
+
     var resourceNodes = [
       createMineralNode('mineral_node_1', 14, 8),
       createMineralNode('mineral_node_2', 10, 14),
@@ -163,7 +182,7 @@
       camPanStartX: 0,
       camPanStartY: 0,
 
-      buildings: [hq, separator],
+      buildings: [hq, separator, enemyBunker],
       units: [testUnit, harvester, builder],
       resourceNodes: resourceNodes,
 
@@ -224,6 +243,18 @@
       var b = state.buildings[i];
       var s = b.size || 1;
       if (b.complete === false) continue;
+      if (b.destroyed) continue;
+      if (tx >= b.tx && tx < b.tx + s && ty >= b.ty && ty < b.ty + s) return b;
+    }
+    return null;
+  }
+
+  function findEnemyBuildingAtTile(state, tx, ty) {
+    if (!state.buildings) return null;
+    for (var i = 0; i < state.buildings.length; i++) {
+      var b = state.buildings[i];
+      if (b.owner !== 'enemy' || b.destroyed) continue;
+      var s = b.size || 1;
       if (tx >= b.tx && tx < b.tx + s && ty >= b.ty && ty < b.ty + s) return b;
     }
     return null;
@@ -244,6 +275,7 @@
     findResourceNodeById: findResourceNodeById,
     findBuildingByType: findBuildingByType,
     findBuildingAtTile: findBuildingAtTile,
-    findBuildingById: findBuildingById
+    findBuildingById: findBuildingById,
+    findEnemyBuildingAtTile: findEnemyBuildingAtTile
   };
 })();

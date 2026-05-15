@@ -935,6 +935,11 @@ test('FE Next FEN-06: light tank production and basic combat loop', async ({ pag
   expect(tankProduction.tankAttackState, 'Produced light_tank should start idle').toBe('idle');
   expect(tankProduction.tankAttackTarget, 'Produced light_tank should have null attackTarget').toBe(null);
 
+  // Pause game loop so only our manual updateCombat calls apply damage
+  await page.evaluate(() => {
+    window.FE_NEXT_DEBUG.pause();
+  });
+
   // Issue attack command with test_unit_1 against enemy bunker
   const attackCommand = await page.evaluate(() => {
     const s = window.FE_NEXT_GAME.state;

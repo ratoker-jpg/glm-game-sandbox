@@ -1,4 +1,4 @@
-// FEN-01: Minimal HUD updater.
+// FEN-02: Minimal HUD updater.
 // Reads game state and updates DOM HUD elements.
 // No state mutation — pure read + DOM write.
 // Exposed as window.FE_NEXT_HUD.
@@ -41,7 +41,7 @@
     if (!selInfo) return;
 
     var selectedUnit = state.selectedUnitId
-      ? window.FE_NEXT_STATE.findUnit(state, state.selectedUnitId)
+      ? window.FE_NEXT_MOVEMENT.findUnit(state, state.selectedUnitId)
       : null;
 
     if (selectedUnit) {

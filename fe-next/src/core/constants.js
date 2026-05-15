@@ -1,4 +1,4 @@
-// FEN-01: FE Next core constants.
+// FEN-02: FE Next core constants.
 // Zero dependencies. All values are pure constants for the FE Next game.
 // Exposed as window.FE_NEXT_CONSTANTS.
 
@@ -35,6 +35,7 @@
     UNIT_SELECTED: '#ffd66c',
     GRID_COLOR:   'rgba(0,0,0,0.08)',
     MOVE_MARKER_COLOR: 'rgba(255,214,108,0.7)',
+    BLOCKED_MARKER_COLOR: 'rgba(224,82,67,0.8)',
 
     // Unit
     UNIT_SPEED: 3.0,            // tiles per second
@@ -43,6 +44,21 @@
 
     // HQ
     HQ_SIZE: 2,                 // tiles (2x2 building)
+
+    // Occupancy — terrain types that block movement
+    BLOCKED_TERRAIN: ['water', 'rock'],
+
+    // Asset manifest — paths relative to fe-next/index.html
+    // These use ../ to reach the root assets/ directory.
+    // All assets are optional; missing assets fall back to geometric rendering.
+    ASSET_MANIFEST: {
+      terrain_sand:       '../assets/tiles/sand_tile.png',
+      terrain_sand_dark:  '../assets/tiles/sand_tile_dark.png',
+      terrain_sand_light: '../assets/tiles/sand_tile_light.png',
+      terrain_grid:       '../assets/tiles/base_grid_tile.png',
+      building_hq:        '../assets/factions/cyan/buildings/hq_base.png',
+      unit_light_tank:    '../assets/factions/cyan/units/light_tank.png'
+    },
 
     // Resources
     START_MINERALS: 200,

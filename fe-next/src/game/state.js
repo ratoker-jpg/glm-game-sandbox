@@ -1,5 +1,6 @@
-// FEN-01: Minimal game state.
+// FEN-02: Game state factory and simple selectors.
 // Creates and manages the FE Next game state object.
+// Movement runtime logic lives in fe-next/src/systems/movement.js.
 // Exposed as window.FE_NEXT_STATE.
 
 (function () {
@@ -11,7 +12,7 @@
   /**
    * Create a terrain grid for the given map size.
    * Each cell is a string: 'grass', 'sand', 'dirt', 'water', 'rock'.
-   * For FEN-01 we use a simple deterministic pattern.
+   * For FEN-01/FEN-02 we use a simple deterministic pattern.
    *
    * @param {number} w
    * @param {number} h
@@ -66,9 +67,11 @@
       maxHp: C.UNIT_HP,
       selected: false,
       moving: false,
-      moveTarget: null,       // {tx, ty} — destination tile
-      moveProgress: 0,        // 0..1 interpolation
-      moveFrom: null          // {tx, ty} — origin tile
+      moveTarget: null,       // {tx, ty} — current waypoint
+      moveProgress: 0,        // 0..1 interpolation to current waypoint
+      moveFrom: null,         // {tx, ty} — origin of current segment
+      path: null,             // Array of {x, y} waypoints (from pathfinding)
+      pathIndex: 0            // Current index in path
     };
 
     // Camera centered on HQ
@@ -84,6 +87,9 @@
       mapW: C.MAP_W,
       mapH: C.MAP_H,
       terrain: terrain,
+
+      // Occupancy grid (built by occupancy.js, stored here)
+      occupancyGrid: null,
 
       // Camera
       camera: {
@@ -122,29 +128,6 @@
   }
 
   /**
-   * Find a unit by its ID.
-   * @param {object} state
-   * @param {string} id
-   * @returns {object|null}
-   */
-  function findUnit(state, id) {
-    for (var i = 0; i < state.units.length; i++) {
-      if (state.units[i].id === id) return state.units[i];
-    }
-    return null;
-  }
-
-  /**
-   * Get the currently selected unit (if any).
-   * @param {object} state
-   * @returns {object|null}
-   */
-  function getSelectedUnit(state) {
-    if (!state.selectedUnitId) return null;
-    return findUnit(state, state.selectedUnitId);
-  }
-
-  /**
    * Find a unit at the given tile position (within radius tolerance).
    * @param {object} state
    * @param {number} tx
@@ -160,97 +143,8 @@
     return null;
   }
 
-  /**
-   * Issue a move command to a unit.
-   * @param {object} state
-   * @param {string} unitId
-   * @param {number} targetTx
-   * @param {number} targetTy
-   */
-  function issueMoveCommand(state, unitId, targetTx, targetTy) {
-    var unit = findUnit(state, unitId);
-    if (!unit) return;
-
-    // Clamp target to map bounds
-    targetTx = COORDS.clamp(targetTx, 0, state.mapW - 1);
-    targetTy = COORDS.clamp(targetTy, 0, state.mapH - 1);
-
-    unit.moving = true;
-    unit.moveFrom = { tx: unit.tx, ty: unit.ty };
-    unit.moveTarget = { tx: targetTx, ty: targetTy };
-    unit.moveProgress = 0;
-
-    // Add move marker
-    state.moveMarkers.push({
-      tx: targetTx,
-      ty: targetTy,
-      life: 0.8    // seconds
-    });
-  }
-
-  /**
-   * Update movement for all units.
-   * @param {object} state
-   * @param {number} dt - Delta time in seconds
-   */
-  function updateMovement(state, dt) {
-    for (var i = 0; i < state.units.length; i++) {
-      var u = state.units[i];
-      if (!u.moving || !u.moveTarget || !u.moveFrom) continue;
-
-      var dx = u.moveTarget.tx - u.moveFrom.tx;
-      var dy = u.moveTarget.ty - u.moveFrom.ty;
-      var pathLen = Math.hypot(dx, dy);
-
-      if (pathLen < 0.01) {
-        // Already at target
-        u.tx = u.moveTarget.tx;
-        u.ty = u.moveTarget.ty;
-        u.moving = false;
-        u.moveFrom = null;
-        u.moveTarget = null;
-        u.moveProgress = 1;
-        continue;
-      }
-
-      var speed = C.UNIT_SPEED;
-      u.moveProgress += (speed * dt) / pathLen;
-
-      if (u.moveProgress >= 1) {
-        u.tx = u.moveTarget.tx;
-        u.ty = u.moveTarget.ty;
-        u.moving = false;
-        u.moveFrom = null;
-        u.moveTarget = null;
-        u.moveProgress = 1;
-      } else {
-        u.tx = u.moveFrom.tx + dx * u.moveProgress;
-        u.ty = u.moveFrom.ty + dy * u.moveProgress;
-      }
-    }
-  }
-
-  /**
-   * Update move markers (fade out over time).
-   * @param {object} state
-   * @param {number} dt
-   */
-  function updateMoveMarkers(state, dt) {
-    for (var i = state.moveMarkers.length - 1; i >= 0; i--) {
-      state.moveMarkers[i].life -= dt;
-      if (state.moveMarkers[i].life <= 0) {
-        state.moveMarkers.splice(i, 1);
-      }
-    }
-  }
-
   window.FE_NEXT_STATE = {
     createInitialState: createInitialState,
-    findUnit: findUnit,
-    getSelectedUnit: getSelectedUnit,
-    findUnitAtTile: findUnitAtTile,
-    issueMoveCommand: issueMoveCommand,
-    updateMovement: updateMovement,
-    updateMoveMarkers: updateMoveMarkers
+    findUnitAtTile: findUnitAtTile
   };
 })();

@@ -1,6 +1,7 @@
-// FEN-01: Geometric isometric renderer.
+// FEN-02: Isometric renderer with optional sprite support.
 // Renders the isometric map, buildings, units, and markers using
-// Canvas 2D geometric shapes. No sprite dependency.
+// Canvas 2D. Uses sprites when available, falls back to geometric
+// shapes when assets are missing or not loaded.
 // Exposed as window.FE_NEXT_RENDERER.
 
 (function () {
@@ -36,17 +37,46 @@
   }
 
   /**
+   * Render a terrain tile with optional sprite.
+   * Falls back to geometric diamond if sprite is unavailable.
+   *
+   * @param {CanvasRenderingContext2D} ctx
+   * @param {number} cx - Canvas X of tile center
+   * @param {number} cy - Canvas Y of tile center
+   * @param {number} hw - Half-width in canvas pixels
+   * @param {number} hh - Half-height in canvas pixels
+   * @param {string} terrainType
+   * @param {string} strokeColor
+   * @param {object|null} sprite - Loaded Image or null
+   */
+  function renderTerrainTile(ctx, cx, cy, hw, hh, terrainType, strokeColor, sprite) {
+    if (sprite) {
+      // Draw sprite centered on tile position
+      ctx.drawImage(sprite, cx - hw, cy - hh, hw * 2, hh * 2);
+    } else {
+      // Geometric fallback
+      var colors = C.TERRAIN_COLORS;
+      var color = colors[terrainType] || colors.grass;
+      drawDiamond(ctx, cx, cy, hw, hh, color, strokeColor);
+    }
+  }
+
+  /**
    * Render the full terrain grid.
    * @param {CanvasRenderingContext2D} ctx
    * @param {object} state
    * @param {number} canvasW
    * @param {number} canvasH
+   * @param {object} assets - Asset store (may be null)
    */
-  function renderTerrain(ctx, state, canvasW, canvasH) {
+  function renderTerrain(ctx, state, canvasW, canvasH, assets) {
     var camera = state.camera;
     var hw = C.TILE_W / 2 * camera.zoom;
     var hh = C.TILE_H / 2 * camera.zoom;
-    var colors = C.TERRAIN_COLORS;
+
+    // Get terrain sprite if available
+    var gridSprite = assets ? assets.get('terrain_grid') : null;
+    var sandSprite = assets ? assets.get('terrain_sand') : null;
 
     for (var ty = 0; ty < state.mapH; ty++) {
       for (var tx = 0; tx < state.mapW; tx++) {
@@ -58,29 +88,54 @@
         if (canvas.y < -hh - 10 || canvas.y > canvasH + hh + 10) continue;
 
         var terrainType = state.terrain[ty][tx];
-        var color = colors[terrainType] || colors.grass;
 
-        drawDiamond(ctx, canvas.x, canvas.y, hw, hh, color, C.GRID_COLOR);
+        // Select sprite based on terrain type
+        var sprite = gridSprite;
+        if (terrainType === 'sand' && sandSprite) {
+          sprite = sandSprite;
+        }
+
+        renderTerrainTile(ctx, canvas.x, canvas.y, hw, hh, terrainType, C.GRID_COLOR, sprite);
       }
     }
   }
 
   /**
-   * Render a building (HQ as a raised isometric box).
+   * Render a building (HQ) with optional sprite.
+   * Falls back to raised isometric box if sprite is unavailable.
+   *
    * @param {CanvasRenderingContext2D} ctx
    * @param {object} building
    * @param {object} camera
    * @param {number} canvasW
    * @param {number} canvasH
+   * @param {object|null} hqSprite - Loaded Image or null
    */
-  function renderBuilding(ctx, building, camera, canvasW, canvasH) {
+  function renderBuilding(ctx, building, camera, canvasW, canvasH, hqSprite) {
     var s = building.size || 1;
     // Center of the building (s x s tiles)
     var centerScr = COORDS.tileToScreen(building.tx + s / 2, building.ty + s / 2);
     var canvasPos = COORDS.worldToCanvas(centerScr.x, centerScr.y, camera, canvasW, canvasH);
     var z = camera.zoom;
 
-    // Draw base (same as terrain diamond but larger)
+    if (hqSprite && building.type === 'hq') {
+      // Draw HQ sprite centered on building position
+      // The sprite is 172x172 per root sprite_profiles.js
+      var spriteW = 172 * z;
+      var spriteH = 172 * z;
+      // Offset: ground offset from sprite_profiles is 36px
+      var groundOffset = 36 * z;
+      ctx.drawImage(
+        hqSprite,
+        canvasPos.x - spriteW / 2,
+        canvasPos.y - spriteH / 2 - groundOffset,
+        spriteW,
+        spriteH
+      );
+      return;
+    }
+
+    // Geometric fallback: isometric box
     var hw = C.TILE_W / 2 * s * z;
     var hh = C.TILE_H / 2 * s * z;
 
@@ -126,68 +181,91 @@
   }
 
   /**
-   * Render a unit as a colored circle with an optional selection ring.
+   * Render a unit with optional sprite.
+   * Falls back to colored circle if sprite is unavailable.
+   *
    * @param {CanvasRenderingContext2D} ctx
    * @param {object} unit
    * @param {object} state
    * @param {number} canvasW
    * @param {number} canvasH
+   * @param {object} assets - Asset store (may be null)
    */
-  function renderUnit(ctx, unit, state, canvasW, canvasH) {
+  function renderUnit(ctx, unit, state, canvasW, canvasH, assets) {
     var camera = state.camera;
     var scr = COORDS.tileToScreen(unit.tx + 0.5, unit.ty + 0.5);
     var canvasPos = COORDS.worldToCanvas(scr.x, scr.y, camera, canvasW, canvasH);
     var z = camera.zoom;
-    var r = C.UNIT_RADIUS * C.TILE_W / 2 * z;
+
+    // Try to get unit sprite
+    var unitSprite = assets ? assets.get('unit_light_tank') : null;
 
     // Selection ring
     if (unit.id === state.selectedUnitId) {
+      var selR = C.UNIT_RADIUS * C.TILE_W / 2 * z + 4 * z;
       ctx.beginPath();
-      ctx.arc(canvasPos.x, canvasPos.y, r + 4 * z, 0, Math.PI * 2);
+      ctx.arc(canvasPos.x, canvasPos.y, selR, 0, Math.PI * 2);
       ctx.strokeStyle = C.UNIT_SELECTED;
       ctx.lineWidth = 2 * z;
       ctx.stroke();
     }
 
-    // Unit body
-    ctx.beginPath();
-    ctx.arc(canvasPos.x, canvasPos.y, r, 0, Math.PI * 2);
-    ctx.fillStyle = C.UNIT_COLOR;
-    ctx.fill();
-    ctx.strokeStyle = C.UNIT_OUTLINE;
-    ctx.lineWidth = 1.5 * z;
-    ctx.stroke();
+    if (unitSprite && unit.type === 'light_tank') {
+      // Draw unit sprite
+      // sprite_profiles says size 104x104, groundFactor 0.76
+      var spriteW = 104 * z * 0.76;
+      var spriteH = 104 * z * 0.76;
+      ctx.drawImage(
+        unitSprite,
+        canvasPos.x - spriteW / 2,
+        canvasPos.y - spriteH,
+        spriteW,
+        spriteH
+      );
+    } else {
+      // Geometric fallback: circle with direction indicator
+      var r = C.UNIT_RADIUS * C.TILE_W / 2 * z;
 
-    // Unit direction indicator (small triangle pointing in move direction)
-    if (unit.moving && unit.moveTarget) {
-      var dx = unit.moveTarget.tx - unit.tx;
-      var dy = unit.moveTarget.ty - unit.ty;
-      var angle = Math.atan2(dy, dx);
-      var triSize = r * 0.7;
+      // Unit body
       ctx.beginPath();
-      ctx.moveTo(
-        canvasPos.x + Math.cos(angle) * (r + triSize),
-        canvasPos.y + Math.sin(angle) * (r + triSize)
-      );
-      ctx.lineTo(
-        canvasPos.x + Math.cos(angle + 2.5) * r * 0.5,
-        canvasPos.y + Math.sin(angle + 2.5) * r * 0.5
-      );
-      ctx.lineTo(
-        canvasPos.x + Math.cos(angle - 2.5) * r * 0.5,
-        canvasPos.y + Math.sin(angle - 2.5) * r * 0.5
-      );
-      ctx.closePath();
-      ctx.fillStyle = '#ffffff';
+      ctx.arc(canvasPos.x, canvasPos.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = C.UNIT_COLOR;
       ctx.fill();
+      ctx.strokeStyle = C.UNIT_OUTLINE;
+      ctx.lineWidth = 1.5 * z;
+      ctx.stroke();
+
+      // Unit direction indicator (small triangle pointing in move direction)
+      if (unit.moving && unit.moveTarget) {
+        var dx = unit.moveTarget.tx - unit.tx;
+        var dy = unit.moveTarget.ty - unit.ty;
+        var angle = Math.atan2(dy, dx);
+        var triSize = r * 0.7;
+        ctx.beginPath();
+        ctx.moveTo(
+          canvasPos.x + Math.cos(angle) * (r + triSize),
+          canvasPos.y + Math.sin(angle) * (r + triSize)
+        );
+        ctx.lineTo(
+          canvasPos.x + Math.cos(angle + 2.5) * r * 0.5,
+          canvasPos.y + Math.sin(angle + 2.5) * r * 0.5
+        );
+        ctx.lineTo(
+          canvasPos.x + Math.cos(angle - 2.5) * r * 0.5,
+          canvasPos.y + Math.sin(angle - 2.5) * r * 0.5
+        );
+        ctx.closePath();
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+      }
     }
 
-    // Health bar (if damaged)
+    // Health bar (if damaged) — always drawn regardless of sprite
     if (unit.hp < unit.maxHp) {
       var barW = 24 * z;
       var barH = 3 * z;
       var barX = canvasPos.x - barW / 2;
-      var barY = canvasPos.y - r - 8 * z;
+      var barY = canvasPos.y - (unitSprite ? 104 * z * 0.76 : C.UNIT_RADIUS * C.TILE_W / 2 * z) - 8 * z;
       var hpRatio = unit.hp / unit.maxHp;
 
       ctx.fillStyle = 'rgba(0,0,0,0.5)';
@@ -201,6 +279,8 @@
 
   /**
    * Render move command markers (fading circles at right-click target).
+   * Blocked markers are shown in red.
+   *
    * @param {CanvasRenderingContext2D} ctx
    * @param {object} state
    * @param {number} canvasW
@@ -219,10 +299,22 @@
 
       ctx.beginPath();
       ctx.arc(canvasPos.x, canvasPos.y, radius, 0, Math.PI * 2);
-      ctx.strokeStyle = C.MOVE_MARKER_COLOR;
+      ctx.strokeStyle = m.blocked ? C.BLOCKED_MARKER_COLOR : C.MOVE_MARKER_COLOR;
       ctx.globalAlpha = alpha * 0.7;
       ctx.lineWidth = 2 * z;
       ctx.stroke();
+
+      // X mark for blocked markers
+      if (m.blocked) {
+        var xSize = 6 * z;
+        ctx.beginPath();
+        ctx.moveTo(canvasPos.x - xSize, canvasPos.y - xSize);
+        ctx.lineTo(canvasPos.x + xSize, canvasPos.y + xSize);
+        ctx.moveTo(canvasPos.x + xSize, canvasPos.y - xSize);
+        ctx.lineTo(canvasPos.x - xSize, canvasPos.y + xSize);
+        ctx.stroke();
+      }
+
       ctx.globalAlpha = 1;
     }
   }
@@ -254,8 +346,9 @@
    * Main render function.
    * @param {CanvasRenderingContext2D} ctx
    * @param {object} state
+   * @param {object} assets - Asset store (may be null)
    */
-  function render(ctx, state) {
+  function render(ctx, state, assets) {
     var canvasW = ctx.canvas.width;
     var canvasH = ctx.canvas.height;
 
@@ -265,18 +358,19 @@
     ctx.fillRect(0, 0, canvasW, canvasH);
 
     // Terrain
-    renderTerrain(ctx, state, canvasW, canvasH);
+    renderTerrain(ctx, state, canvasW, canvasH, assets);
 
     // Move markers (below entities)
     renderMoveMarkers(ctx, state, canvasW, canvasH);
 
     // Entities (sorted for isometric depth)
     var sorted = sortEntities(state);
+    var hqSprite = assets ? assets.get('building_hq') : null;
     for (var i = 0; i < sorted.length; i++) {
       if (sorted[i].type === 'building') {
-        renderBuilding(ctx, sorted[i].entity, state.camera, canvasW, canvasH);
+        renderBuilding(ctx, sorted[i].entity, state.camera, canvasW, canvasH, hqSprite);
       } else if (sorted[i].type === 'unit') {
-        renderUnit(ctx, sorted[i].entity, state, canvasW, canvasH);
+        renderUnit(ctx, sorted[i].entity, state, canvasW, canvasH, assets);
       }
     }
   }

@@ -1,4 +1,4 @@
-// FEN-01 — Playwright E2E smoke test for FE Next scaffold.
+// FEN-02 — Playwright E2E smoke test for FE Next scaffold.
 //
 // Verifies the FE Next standalone page boots and renders:
 //   1. Page loads without errors
@@ -9,6 +9,10 @@
 //   6. Left-click selects the test unit
 //   7. Right-click issues a move command
 //   8. Unit moves toward the target over frames
+//   9. Occupancy grid is built on boot
+//  10. BFS pathfinding finds valid path around building
+//  11. BFS returns null for unreachable destination
+//  12. Asset store created and stats available
 //
 // Uses fe-next/index.html — completely independent from root game.
 
@@ -21,6 +25,7 @@ const BENIGN_PATTERNS = [
   /favicon/i,
   /DevTools/i,
   /Failed to load resource.*favicon/i,
+  /Failed to load resource.*assets/i,
 ];
 
 function isCriticalError(text) {
@@ -104,8 +109,6 @@ test('FE Next scaffold: boot -> canvas -> HUD -> select -> move unit', async ({ 
   expect(entities.unit.owner, 'Unit should be player-owned').toBe('player');
 
   // ---- Step 6: Left-click to select unit ----
-  // We need to click on the unit's position on the canvas.
-  // The unit starts at tile (7, 5). Calculate its canvas position.
   const clickResult = await page.evaluate(() => {
     const s = window.FE_NEXT_GAME.state;
     const u = s.units[0];
@@ -147,7 +150,6 @@ test('FE Next scaffold: boot -> canvas -> HUD -> select -> move unit', async ({ 
   }
 
   // ---- Step 7: Right-click to move unit ----
-  // Click somewhere to the right of the unit
   const moveResult = await page.evaluate(() => {
     const s = window.FE_NEXT_GAME.state;
     const C = window.FE_NEXT_CONSTANTS;
@@ -204,7 +206,7 @@ test('FE Next scaffold: boot -> canvas -> HUD -> select -> move unit', async ({ 
   } else {
     // Fallback: issue move command via evaluate
     await page.evaluate(() => {
-      window.FE_NEXT_STATE.issueMoveCommand(window.FE_NEXT_GAME.state, window.FE_NEXT_GAME.state.units[0].id, 12, 10);
+      window.FE_NEXT_MOVEMENT.issueMoveCommand(window.FE_NEXT_GAME.state, window.FE_NEXT_GAME.state.units[0].id, 12, 10);
     });
     await page.waitForTimeout(1500);
 
@@ -262,4 +264,109 @@ test('FE Next scaffold: camera zoom works', async ({ page }) => {
   });
 
   expect(afterZoomOut, 'Zoom should decrease after scroll down').toBeLessThan(afterZoomIn);
+});
+
+test('FE Next FEN-02: occupancy grid built on boot', async ({ page }) => {
+  const pageErrors = [];
+  page.on('pageerror', (err) => {
+    pageErrors.push(err && err.message ? err.message : String(err));
+  });
+
+  await page.goto(FE_NEXT_URL, { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(1500);
+
+  const occupancyResult = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    if (!s.occupancyGrid) return { built: false };
+    const grid = s.occupancyGrid;
+    // HQ at (4,4) size 2 — tiles (4,4), (5,4), (4,5), (5,5) should be blocked
+    const hqBlocked = grid[4][4] && grid[4][5] && grid[5][4] && grid[5][5];
+    // Grass tile should not be blocked
+    const grassPassable = !grid[2][2];
+    return {
+      built: true,
+      rows: grid.length,
+      cols: grid[0] ? grid[0].length : 0,
+      hqBlocked: hqBlocked,
+      grassPassable: grassPassable
+    };
+  });
+
+  expect(occupancyResult.built, 'Occupancy grid should be built').toBe(true);
+  expect(occupancyResult.rows, 'Grid should have 24 rows').toBe(24);
+  expect(occupancyResult.cols, 'Grid should have 24 columns').toBe(24);
+  expect(occupancyResult.hqBlocked, 'HQ footprint tiles should be blocked').toBe(true);
+  expect(occupancyResult.grassPassable, 'Grass tiles should be passable').toBe(true);
+
+  expect(pageErrors, `Page JS errors: ${pageErrors.join('\n')}`).toEqual([]);
+});
+
+test('FE Next FEN-02: BFS pathfinding finds path around building', async ({ page }) => {
+  const pageErrors = [];
+  page.on('pageerror', (err) => {
+    pageErrors.push(err && err.message ? err.message : String(err));
+  });
+
+  await page.goto(FE_NEXT_URL, { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(1500);
+
+  const pathResult = await page.evaluate(() => {
+    const PF = window.FE_NEXT_PATHFINDING;
+    const grid = window.FE_NEXT_GAME.state.occupancyGrid;
+    // Path from (7,5) to (2,2) — must go around HQ at (4,4)
+    const path = PF.findPath(grid, 7, 5, 2, 2);
+    return {
+      found: !!path,
+      length: path ? path.length : 0,
+      start: path ? path[0] : null,
+      end: path ? path[path.length - 1] : null
+    };
+  });
+
+  expect(pathResult.found, 'Path from (7,5) to (2,2) should be found').toBe(true);
+  expect(pathResult.length, 'Path should have at least 2 waypoints').toBeGreaterThanOrEqual(2);
+  expect(pathResult.start.x, 'Path should start at x=7').toBe(7);
+  expect(pathResult.start.y, 'Path should start at y=5').toBe(5);
+  expect(pathResult.end.x, 'Path should end at x=2').toBe(2);
+  expect(pathResult.end.y, 'Path should end at y=2').toBe(2);
+
+  expect(pageErrors, `Page JS errors: ${pageErrors.join('\n')}`).toEqual([]);
+});
+
+test('FE Next FEN-02: BFS returns null for unreachable destination', async ({ page }) => {
+  await page.goto(FE_NEXT_URL, { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(1500);
+
+  const nullPathResult = await page.evaluate(() => {
+    const PF = window.FE_NEXT_PATHFINDING;
+    const grid = window.FE_NEXT_GAME.state.occupancyGrid;
+    // Target is a blocked tile (inside HQ footprint at 4,4)
+    const path = PF.findPath(grid, 7, 5, 4, 4);
+    return { found: !!path };
+  });
+
+  expect(nullPathResult.found, 'Path to blocked tile should return null').toBe(false);
+});
+
+test('FE Next FEN-02: asset store created and stats available', async ({ page }) => {
+  await page.goto(FE_NEXT_URL, { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(1500);
+
+  const assetResult = await page.evaluate(() => {
+    const g = window.FE_NEXT_GAME;
+    if (!g.assets) return { hasAssets: false };
+    const stats = g.assets.stats();
+    return {
+      hasAssets: true,
+      loaded: stats.loaded,
+      pending: stats.pending,
+      failed: stats.failed,
+      canGet: typeof g.assets.get === 'function'
+    };
+  });
+
+  expect(assetResult.hasAssets, 'Asset store should exist').toBe(true);
+  expect(assetResult.canGet, 'Asset store should have get method').toBe(true);
+  // Asset loading is async — we just verify the store exists and is functional
+  expect(typeof assetResult.loaded, 'loaded should be a number').toBe('number');
 });

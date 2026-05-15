@@ -87,3 +87,4 @@
 | FEN-01 | 2026-05-15 | #100 | FE Next scaffold + map/camera/HQ/HUD/unit movement — isolated fe-next/ directory |
 | FEN-02 | 2026-05-16 | TBD | FE Next occupancy grid + BFS pathfinding + asset fallback with geometric rendering |
 | FEN-03 | 2026-05-15 | TBD | FE Next resource nodes + harvester gather/dropoff + separator economy loop |
+| FEN-04 | 2026-05-15 | TBD | FE Next builder construction MVP + auto-placement + dynamic occupancy |

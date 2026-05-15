@@ -61,6 +61,9 @@
       size: C.SEPARATOR_SIZE,
       hp: 300,
       maxHp: 300,
+      constructionState: 'completed',
+      complete: true,
+      progress: 1,
       separatorState: 'idle',
       cycleProgress: 0,
       cyclesCompleted: 0
@@ -106,6 +109,26 @@
       gatherTimer: 0
     };
 
+    var builder = {
+      id: 'builder_1',
+      type: 'builder',
+      owner: 'player',
+      tx: 9,
+      ty: 5,
+      hp: C.UNIT_HP,
+      maxHp: C.UNIT_HP,
+      selected: false,
+      moving: false,
+      moveTarget: null,
+      moveProgress: 0,
+      moveFrom: null,
+      path: null,
+      pathIndex: 0,
+      speed: C.BUILDER_SPEED,
+      buildState: 'idle',
+      buildOrder: null
+    };
+
     var resourceNodes = [
       createMineralNode('mineral_node_1', 14, 8),
       createMineralNode('mineral_node_2', 10, 14),
@@ -141,7 +164,7 @@
       camPanStartY: 0,
 
       buildings: [hq, separator],
-      units: [testUnit, harvester],
+      units: [testUnit, harvester, builder],
       resourceNodes: resourceNodes,
 
       resources: {

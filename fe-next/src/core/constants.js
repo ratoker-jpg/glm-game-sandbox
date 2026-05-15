@@ -40,6 +40,7 @@
     // Unit
     UNIT_SPEED: 3.0,            // tiles per second
     HARVESTER_SPEED: 2.0,       // tiles per second
+    BUILDER_SPEED: 2.5,         // tiles per second
     UNIT_RADIUS: 0.35,          // in tile units
     UNIT_HP: 100,
 
@@ -81,6 +82,9 @@
     SEPARATOR_OUTPUT_ENERGY: 10,
     SEPARATOR_OUTPUT_CYAN_EL: 1,
     SEPARATOR_CYCLE_TIME: 6.0,
+    SEPARATOR_BUILD_ENERGY_COST: 30,
+    SEPARATOR_BUILD_TIME: 8.0,
+    BUILD_SEARCH_RADIUS: 8,
 
     // Tick
     TARGET_FPS: 60,

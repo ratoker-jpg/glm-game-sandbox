@@ -24,6 +24,7 @@
     var selTitle = document.getElementById('sel-title');
     var selType = document.getElementById('sel-type');
     var selPos = document.getElementById('sel-pos');
+    var buildSeparator = document.getElementById('build-separator');
 
     if (!selInfo) return;
 
@@ -36,8 +37,13 @@
       if (selTitle) selTitle.textContent = selectedUnit.type || 'Unit';
       if (selType) selType.textContent = 'HP: ' + selectedUnit.hp + '/' + selectedUnit.maxHp;
       if (selPos) selPos.textContent = formatSelectionLine(selectedUnit);
+      if (buildSeparator) {
+        buildSeparator.style.display = selectedUnit.type === 'builder' ? 'block' : 'none';
+        buildSeparator.disabled = selectedUnit.buildState !== 'idle' || state.resources.energy < window.FE_NEXT_CONSTANTS.SEPARATOR_BUILD_ENERGY_COST;
+      }
     } else {
       selInfo.style.display = 'none';
+      if (buildSeparator) buildSeparator.style.display = 'none';
     }
   }
 
@@ -58,6 +64,9 @@
     var text = 'Position: (' + Math.round(unit.tx) + ', ' + Math.round(unit.ty) + ')';
     if (unit.type === 'harvester') {
       text += ' Cargo: ' + unit.cargo + '/' + unit.maxCargo + ' ' + unit.harvestState;
+    } else if (unit.type === 'builder') {
+      text += ' Build: ' + unit.buildState;
+      if (unit.buildOrder) text += ' ' + unit.buildOrder.buildingType;
     }
     return text;
   }

@@ -190,15 +190,20 @@
     var hw = C.TILE_W / 2 * s * z;
     var hh = C.TILE_H / 2 * s * z;
     var bHeight = 14 * z;
+    var isConstructing = building.complete === false || building.constructionState === 'constructing';
+    ctx.save();
+    if (isConstructing) ctx.globalAlpha = 0.58;
     drawDiamond(ctx, canvasPos.x, canvasPos.y - bHeight, hw, hh, '#67d9dc', '#1c6870');
 
     ctx.fillStyle = '#12383d';
     ctx.font = (9 * z) + 'px "Trebuchet MS", Arial, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('SEP', canvasPos.x, canvasPos.y - bHeight);
+    ctx.fillText(isConstructing ? 'SITE' : 'SEP', canvasPos.x, canvasPos.y - bHeight);
 
-    var progress = Math.max(0, Math.min(1, (building.cycleProgress || 0) / C.SEPARATOR_CYCLE_TIME));
+    var progress = isConstructing
+      ? Math.max(0, Math.min(1, building.progress || 0))
+      : Math.max(0, Math.min(1, (building.cycleProgress || 0) / C.SEPARATOR_CYCLE_TIME));
     var barW = 42 * z;
     var barH = 4 * z;
     var barX = canvasPos.x - barW / 2;
@@ -207,6 +212,7 @@
     ctx.fillRect(barX, barY, barW, barH);
     ctx.fillStyle = '#7df7ff';
     ctx.fillRect(barX, barY, barW * progress, barH);
+    ctx.restore();
   }
 
   function renderResourceNode(ctx, node, state, canvasW, canvasH) {
@@ -280,6 +286,19 @@
       ctx.fillRect(canvasPos.x - hr, canvasPos.y - hr - 8 * z, hr * 2, 3 * z);
       ctx.fillStyle = '#ffe070';
       ctx.fillRect(canvasPos.x - hr, canvasPos.y - hr - 8 * z, hr * 2 * cargoRatio, 3 * z);
+    } else if (unit.type === 'builder') {
+      var br = C.UNIT_RADIUS * C.TILE_W / 2 * z;
+      ctx.beginPath();
+      ctx.moveTo(canvasPos.x, canvasPos.y - br);
+      ctx.lineTo(canvasPos.x + br, canvasPos.y);
+      ctx.lineTo(canvasPos.x, canvasPos.y + br);
+      ctx.lineTo(canvasPos.x - br, canvasPos.y);
+      ctx.closePath();
+      ctx.fillStyle = '#e0c45c';
+      ctx.fill();
+      ctx.strokeStyle = '#725b19';
+      ctx.lineWidth = 1.5 * z;
+      ctx.stroke();
     } else if (unitSprite && unit.type === 'light_tank') {
       // Draw unit sprite
       // sprite_profiles says size 104x104, groundFactor 0.76

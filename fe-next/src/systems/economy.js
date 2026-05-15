@@ -6,12 +6,17 @@
   'use strict';
 
   var C = window.FE_NEXT_CONSTANTS;
-  var STATE = window.FE_NEXT_STATE;
 
   function updateEconomy(state, dt) {
-    var separator = STATE.findBuildingByType(state, 'separator');
-    if (!separator) return;
+    if (!state.buildings) return;
+    for (var i = 0; i < state.buildings.length; i++) {
+      var separator = state.buildings[i];
+      if (separator.type !== 'separator' || separator.complete === false || separator.constructionState === 'constructing') continue;
+      updateSeparator(state, separator, dt);
+    }
+  }
 
+  function updateSeparator(state, separator, dt) {
     if (!canRunSeparator(state)) {
       separator.separatorState = getBlockedReason(state);
       separator.cycleProgress = 0;

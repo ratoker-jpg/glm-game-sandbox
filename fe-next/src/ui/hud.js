@@ -1,16 +1,10 @@
-// FEN-02: Minimal HUD updater.
+// FEN-03: Minimal HUD updater.
 // Reads game state and updates DOM HUD elements.
-// No state mutation — pure read + DOM write.
 // Exposed as window.FE_NEXT_HUD.
 
 (function () {
   'use strict';
 
-  /**
-   * Format time as M:SS.
-   * @param {number} sec
-   * @returns {string}
-   */
   function formatTime(sec) {
     sec = Math.floor(sec || 0);
     var m = Math.floor(sec / 60);
@@ -18,21 +12,14 @@
     return m + ':' + String(s).padStart(2, '0');
   }
 
-  /**
-   * Update HUD elements from game state.
-   * @param {object} state
-   */
   function updateHUD(state) {
-    // Resources
-    var mineralsEl = document.getElementById('hud-minerals');
-    var energyEl = document.getElementById('hud-energy');
-    var timeEl = document.getElementById('hud-time');
+    var caps = state.resources.caps || {};
+    setText('hud-minerals', state.resources.minerals + '/' + caps.minerals);
+    setText('hud-energy', state.resources.energy + '/' + caps.energy);
+    setText('hud-cyan', state.resources.cyanEl + '/' + caps.cyanEl);
+    setText('hud-time', formatTime(state.time));
+    setText('hud-separator', formatSeparator(state));
 
-    if (mineralsEl) mineralsEl.textContent = state.resources.minerals;
-    if (energyEl) energyEl.textContent = state.resources.energy;
-    if (timeEl) timeEl.textContent = formatTime(state.time);
-
-    // Selection info
     var selInfo = document.getElementById('selection-info');
     var selTitle = document.getElementById('sel-title');
     var selType = document.getElementById('sel-type');
@@ -48,10 +35,31 @@
       selInfo.style.display = 'block';
       if (selTitle) selTitle.textContent = selectedUnit.type || 'Unit';
       if (selType) selType.textContent = 'HP: ' + selectedUnit.hp + '/' + selectedUnit.maxHp;
-      if (selPos) selPos.textContent = 'Позиция: (' + Math.round(selectedUnit.tx) + ', ' + Math.round(selectedUnit.ty) + ')';
+      if (selPos) selPos.textContent = formatSelectionLine(selectedUnit);
     } else {
       selInfo.style.display = 'none';
     }
+  }
+
+  function setText(id, value) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = value;
+  }
+
+  function formatSeparator(state) {
+    var separator = window.FE_NEXT_STATE.findBuildingByType(state, 'separator');
+    if (!separator) return 'missing';
+    var cycleTime = window.FE_NEXT_CONSTANTS.SEPARATOR_CYCLE_TIME;
+    var progress = Math.floor(((separator.cycleProgress || 0) / cycleTime) * 100);
+    return separator.separatorState + ' ' + progress + '%';
+  }
+
+  function formatSelectionLine(unit) {
+    var text = 'Position: (' + Math.round(unit.tx) + ', ' + Math.round(unit.ty) + ')';
+    if (unit.type === 'harvester') {
+      text += ' Cargo: ' + unit.cargo + '/' + unit.maxCargo + ' ' + unit.harvestState;
+    }
+    return text;
   }
 
   window.FE_NEXT_HUD = {

@@ -101,7 +101,7 @@
   }
 
   /**
-   * Render a building (HQ) with optional sprite.
+   * Render a building with optional HQ sprite.
    * Falls back to raised isometric box if sprite is unavailable.
    *
    * @param {CanvasRenderingContext2D} ctx
@@ -132,6 +132,11 @@
         spriteW,
         spriteH
       );
+      return;
+    }
+
+    if (building.type === 'separator') {
+      renderSeparator(ctx, building, canvasPos, z);
       return;
     }
 
@@ -180,6 +185,56 @@
     ctx.fillText('HQ', canvasPos.x, canvasPos.y - bHeight);
   }
 
+  function renderSeparator(ctx, building, canvasPos, z) {
+    var s = building.size || 1;
+    var hw = C.TILE_W / 2 * s * z;
+    var hh = C.TILE_H / 2 * s * z;
+    var bHeight = 14 * z;
+    drawDiamond(ctx, canvasPos.x, canvasPos.y - bHeight, hw, hh, '#67d9dc', '#1c6870');
+
+    ctx.fillStyle = '#12383d';
+    ctx.font = (9 * z) + 'px "Trebuchet MS", Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('SEP', canvasPos.x, canvasPos.y - bHeight);
+
+    var progress = Math.max(0, Math.min(1, (building.cycleProgress || 0) / C.SEPARATOR_CYCLE_TIME));
+    var barW = 42 * z;
+    var barH = 4 * z;
+    var barX = canvasPos.x - barW / 2;
+    var barY = canvasPos.y - bHeight - 20 * z;
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.fillRect(barX, barY, barW, barH);
+    ctx.fillStyle = '#7df7ff';
+    ctx.fillRect(barX, barY, barW * progress, barH);
+  }
+
+  function renderResourceNode(ctx, node, state, canvasW, canvasH) {
+    var camera = state.camera;
+    var scr = COORDS.tileToScreen(node.tx + 0.5, node.ty + 0.5);
+    var canvasPos = COORDS.worldToCanvas(scr.x, scr.y, camera, canvasW, canvasH);
+    var z = camera.zoom;
+    var alpha = node.depleted ? 0.42 : 1;
+    var r = 12 * z;
+
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.beginPath();
+    ctx.arc(canvasPos.x, canvasPos.y - 8 * z, r, 0, Math.PI * 2);
+    ctx.fillStyle = node.depleted ? '#8e8e8e' : '#7de1ff';
+    ctx.fill();
+    ctx.strokeStyle = node.depleted ? '#575757' : '#1a768c';
+    ctx.lineWidth = 2 * z;
+    ctx.stroke();
+
+    ctx.fillStyle = node.depleted ? '#555' : '#e8fbff';
+    ctx.font = (9 * z) + 'px "Trebuchet MS", Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(node.remaining), canvasPos.x, canvasPos.y - 8 * z);
+    ctx.restore();
+  }
+
   /**
    * Render a unit with optional sprite.
    * Falls back to colored circle if sprite is unavailable.
@@ -210,7 +265,22 @@
       ctx.stroke();
     }
 
-    if (unitSprite && unit.type === 'light_tank') {
+    if (unit.type === 'harvester') {
+      var hr = C.UNIT_RADIUS * C.TILE_W / 2 * z;
+      ctx.beginPath();
+      ctx.rect(canvasPos.x - hr, canvasPos.y - hr * 0.7, hr * 2, hr * 1.4);
+      ctx.fillStyle = '#6bd6c6';
+      ctx.fill();
+      ctx.strokeStyle = '#236a61';
+      ctx.lineWidth = 1.5 * z;
+      ctx.stroke();
+
+      var cargoRatio = unit.maxCargo ? unit.cargo / unit.maxCargo : 0;
+      ctx.fillStyle = 'rgba(0,0,0,0.45)';
+      ctx.fillRect(canvasPos.x - hr, canvasPos.y - hr - 8 * z, hr * 2, 3 * z);
+      ctx.fillStyle = '#ffe070';
+      ctx.fillRect(canvasPos.x - hr, canvasPos.y - hr - 8 * z, hr * 2 * cargoRatio, 3 * z);
+    } else if (unitSprite && unit.type === 'light_tank') {
       // Draw unit sprite
       // sprite_profiles says size 104x104, groundFactor 0.76
       var spriteW = 104 * z * 0.76;
@@ -333,6 +403,13 @@
       entities.push({ type: 'building', entity: b, sortKey: (b.tx + b.ty) * 10 });
     }
 
+    if (state.resourceNodes) {
+      for (var r = 0; r < state.resourceNodes.length; r++) {
+        var n = state.resourceNodes[r];
+        entities.push({ type: 'resourceNode', entity: n, sortKey: (n.tx + n.ty) * 10 });
+      }
+    }
+
     for (var j = 0; j < state.units.length; j++) {
       var u = state.units[j];
       entities.push({ type: 'unit', entity: u, sortKey: (u.tx + u.ty) * 10 + 1 });
@@ -371,6 +448,8 @@
         renderBuilding(ctx, sorted[i].entity, state.camera, canvasW, canvasH, hqSprite);
       } else if (sorted[i].type === 'unit') {
         renderUnit(ctx, sorted[i].entity, state, canvasW, canvasH, assets);
+      } else if (sorted[i].type === 'resourceNode') {
+        renderResourceNode(ctx, sorted[i].entity, state, canvasW, canvasH);
       }
     }
   }

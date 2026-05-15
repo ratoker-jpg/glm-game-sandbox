@@ -140,7 +140,7 @@
         continue;
       }
 
-      var speed = C.UNIT_SPEED;
+      var speed = (typeof u.speed === 'number' && u.speed > 0) ? u.speed : C.UNIT_SPEED;
       u.moveProgress += (speed * dt) / pathLen;
 
       if (u.moveProgress >= 1) {

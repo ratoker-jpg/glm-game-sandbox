@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>Four Elements Next — FEN-02</title>
+  <title>Four Elements Next - FEN-03</title>
   <style>
     :root {
       --sand-1:#efd79a; --sand-2:#d9b66f; --sand-3:#b9823e;
@@ -35,7 +35,7 @@
       border:1px solid rgba(255,214,118,.5);
       box-shadow:0 14px 40px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.08);
       padding:14px 18px 16px;
-      min-width:320px;
+      min-width:340px;
       color:var(--white);
       font-size:14px;
     }
@@ -44,7 +44,7 @@
       text-shadow:0 2px 0 rgba(0,0,0,.5);
     }
     .hud-row {
-      display:flex; gap:12px; align-items:center;
+      display:flex; gap:12px; align-items:center; flex-wrap:wrap;
       min-height:26px; margin-bottom:4px;
     }
     .hud-item {
@@ -64,7 +64,7 @@
       border:1px solid rgba(255,213,116,.5);
       box-shadow:0 14px 40px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.08);
       padding:14px 18px 16px;
-      min-width:220px;
+      min-width:260px;
       font-size:14px;
     }
     #selection-info h4 {
@@ -80,7 +80,7 @@
       background:rgba(39,24,9,.84);
       border:1px solid rgba(255,211,116,.4);
       border-radius:12px; padding:10px 12px;
-      max-width:280px; user-select:none; opacity:.88;
+      max-width:300px; user-select:none; opacity:.88;
     }
     #help-text b { color:#ffe28b; font-weight:950; }
   </style>
@@ -92,25 +92,27 @@
   <div id="hud">
     <h3>Four Elements Next</h3>
     <div class="hud-row">
-      <div class="hud-item"><span class="hud-label">Сырьё</span><span class="hud-val" id="hud-minerals">0</span></div>
-      <div class="hud-item"><span class="hud-label">Энергия</span><span class="hud-val" id="hud-energy">160</span></div>
+      <div class="hud-item"><span class="hud-label">Minerals</span><span class="hud-val" id="hud-minerals">100/200</span></div>
+      <div class="hud-item"><span class="hud-label">Energy</span><span class="hud-val" id="hud-energy">160/300</span></div>
+      <div class="hud-item"><span class="hud-label">Cyan</span><span class="hud-val" id="hud-cyan">0/20</span></div>
     </div>
     <div class="hud-row">
-      <div class="hud-item"><span class="hud-label">Время</span><span class="hud-val" id="hud-time">0:00</span></div>
+      <div class="hud-item"><span class="hud-label">Time</span><span class="hud-val" id="hud-time">0:00</span></div>
+      <div class="hud-item"><span class="hud-label">Separator</span><span class="hud-val" id="hud-separator">idle 0%</span></div>
     </div>
   </div>
 
   <div id="selection-info">
-    <h4 id="sel-title">—</h4>
+    <h4 id="sel-title">-</h4>
     <div class="sel-row" id="sel-type"></div>
     <div class="sel-row" id="sel-pos"></div>
   </div>
 
   <div id="help-text">
-    <b>Камера:</b> WASD / колёсико зажать<br>
-    <b>Zoom:</b> колесо мыши<br>
-    <b>ЛКМ:</b> выбрать юнит<br>
-    <b>ПКМ:</b> двигать юнит
+    <b>Camera:</b> WASD / middle mouse<br>
+    <b>Zoom:</b> mouse wheel<br>
+    <b>LMB:</b> select unit<br>
+    <b>RMB:</b> move, or harvest node with harvester
   </div>
 </div>
 
@@ -121,6 +123,8 @@
 <script src="src/systems/pathfinding.js"></script>
 <script src="src/systems/movement.js"></script>
 <script src="src/game/state.js"></script>
+<script src="src/systems/harvesting.js"></script>
+<script src="src/systems/economy.js"></script>
 <script src="src/render/renderer.js"></script>
 <script src="src/input/input.js"></script>
 <script src="src/ui/hud.js"></script>

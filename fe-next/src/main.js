@@ -1,4 +1,4 @@
-// FEN-02: FE Next composition root.
+// FEN-03: FE Next composition root.
 // Thin wiring layer that initializes state, canvas, input,
 // asset loading, occupancy, and starts the requestAnimationFrame loop.
 // Movement runtime lives in systems/movement.js.
@@ -17,6 +17,8 @@
   var INPUT = window.FE_NEXT_INPUT;
   var HUD = window.FE_NEXT_HUD;
   var MOVEMENT = window.FE_NEXT_MOVEMENT;
+  var HARVESTING = window.FE_NEXT_HARVESTING;
+  var ECONOMY = window.FE_NEXT_ECONOMY;
   var OCCUPANCY = window.FE_NEXT_OCCUPANCY;
   var ASSETS_LIB = window.FE_NEXT_ASSETS;
 
@@ -65,6 +67,8 @@
 
     INPUT.update(state, dt);
     MOVEMENT.updateMovement(state, dt);
+    HARVESTING.updateHarvesting(state, dt);
+    ECONOMY.updateEconomy(state, dt);
     MOVEMENT.updateMoveMarkers(state, dt);
 
     state.time += dt;
@@ -96,6 +100,8 @@
     getCanvas: function () { return canvas; },
     getContext: function () { return ctx; },
     getAssets: function () { return assets; },
+    getHarvesting: function () { return HARVESTING; },
+    getEconomy: function () { return ECONOMY; },
     isRunning: function () { return running; },
     pause: function () { running = false; },
     resume: function () {
@@ -112,5 +118,5 @@
     debug: window.FE_NEXT_DEBUG
   };
 
-  console.info('[FE Next] FEN-02 initialized. Occupancy grid built. Assets loading:', assets.stats());
+  console.info('[FE Next] FEN-03 initialized. Economy loop ready. Assets loading:', assets.stats());
 })();

@@ -64,10 +64,10 @@ test('FE Next scaffold: boot -> canvas -> HUD -> select -> move unit', async ({ 
   await expect(hud, 'FE Next HUD should be visible').toBeVisible({ timeout: 5000 });
 
   const mineralsEl = page.locator('#hud-minerals');
-  await expect(mineralsEl, 'HUD minerals should show initial value').toHaveText('200');
+  await expect(mineralsEl, 'HUD minerals should show initial value/cap').toHaveText('100/200');
 
   const energyEl = page.locator('#hud-energy');
-  await expect(energyEl, 'HUD energy should show initial value').toHaveText('160');
+  await expect(energyEl, 'HUD energy should show initial value/cap').toHaveText('160/300');
 
   // ---- Step 4: FE_NEXT_GAME state exists ----
   const gameState = await page.evaluate(() => {
@@ -81,6 +81,7 @@ test('FE Next scaffold: boot -> canvas -> HUD -> select -> move unit', async ({ 
       buildingCount: s.buildings ? s.buildings.length : 0,
       unitCount: s.units ? s.units.length : 0,
       resources: s.resources,
+      resourceNodeCount: s.resourceNodes ? s.resourceNodes.length : 0,
       selectedUnitId: s.selectedUnitId,
       cameraZoom: s.camera ? s.camera.zoom : null
     };
@@ -89,17 +90,22 @@ test('FE Next scaffold: boot -> canvas -> HUD -> select -> move unit', async ({ 
   expect(gameState.hasState, 'window.FE_NEXT_GAME.state should exist').toBe(true);
   expect(gameState.mapW, 'Map width should be 24').toBe(24);
   expect(gameState.mapH, 'Map height should be 24').toBe(24);
-  expect(gameState.buildingCount, 'Should have 1 building (HQ)').toBe(1);
-  expect(gameState.unitCount, 'Should have 1 unit').toBe(1);
-  expect(gameState.resources.minerals, 'Initial minerals should be 200').toBe(200);
+  expect(gameState.buildingCount, 'Should have HQ + separator').toBe(2);
+  expect(gameState.unitCount, 'Should have tank + harvester').toBe(2);
+  expect(gameState.resourceNodeCount, 'Should have 3 mineral nodes').toBe(3);
+  expect(gameState.resources.minerals, 'Initial minerals should be 100').toBe(100);
   expect(gameState.resources.energy, 'Initial energy should be 160').toBe(160);
+  expect(gameState.resources.cyanEl, 'Initial cyanEl should be 0').toBe(0);
+  expect(gameState.resources.caps, 'Resource caps should exist').toEqual({ minerals: 200, energy: 300, cyanEl: 20 });
 
   // ---- Step 5: Verify HQ and unit in state ----
   const entities = await page.evaluate(() => {
     const s = window.FE_NEXT_GAME.state;
     return {
-      hq: s.buildings[0],
-      unit: s.units[0]
+      hq: s.buildings.find((b) => b.type === 'hq'),
+      separator: s.buildings.find((b) => b.type === 'separator'),
+      unit: s.units.find((u) => u.type === 'light_tank'),
+      harvester: s.units.find((u) => u.type === 'harvester')
     };
   });
 
@@ -107,6 +113,11 @@ test('FE Next scaffold: boot -> canvas -> HUD -> select -> move unit', async ({ 
   expect(entities.hq.owner, 'HQ should be player-owned').toBe('player');
   expect(entities.unit.type, 'Unit should be light_tank').toBe('light_tank');
   expect(entities.unit.owner, 'Unit should be player-owned').toBe('player');
+  expect(entities.harvester.cargo, 'Harvester should start empty').toBe(0);
+  expect(entities.harvester.maxCargo, 'Harvester should have cargo capacity').toBe(10);
+  expect(entities.harvester.harvestState, 'Harvester should have harvest state').toBe('idle');
+  expect(typeof entities.separator.cycleProgress, 'Separator should have cycle progress').toBe('number');
+  expect(entities.separator.cyclesCompleted, 'Separator should have cycle counter').toBe(0);
 
   // ---- Step 6: Left-click to select unit ----
   const clickResult = await page.evaluate(() => {
@@ -369,4 +380,111 @@ test('FE Next FEN-02: asset store created and stats available', async ({ page })
   expect(assetResult.canGet, 'Asset store should have get method').toBe(true);
   // Asset loading is async — we just verify the store exists and is functional
   expect(typeof assetResult.loaded, 'loaded should be a number').toBe('number');
+});
+
+test('FE Next FEN-03: harvester command gathers and unloads minerals', async ({ page }) => {
+  await page.goto(FE_NEXT_URL, { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(1000);
+
+  const commandResult = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    const harvester = s.units.find((u) => u.type === 'harvester');
+    const node = s.resourceNodes[0];
+    s.selectedUnitId = harvester.id;
+    harvester.selected = true;
+    const issued = window.FE_NEXT_HARVESTING.issueHarvestCommand(s, harvester.id, node.id);
+    return {
+      issued,
+      harvestState: harvester.harvestState,
+      harvestTarget: harvester.harvestTarget
+    };
+  });
+
+  expect(commandResult.issued, 'Harvest command should route to node').toBe(true);
+  expect(commandResult.harvestTarget, 'Harvester target should be selected node').toBe('mineral_node_1');
+  expect(commandResult.harvestState, 'Harvester should start moving to node').toBe('moving_to_node');
+
+  const loopResult = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    const harvester = s.units.find((u) => u.type === 'harvester');
+    const node = s.resourceNodes[0];
+    harvester.tx = node.tx;
+    harvester.ty = node.ty;
+    harvester.moving = false;
+    harvester.harvestState = 'gathering';
+    harvester.harvestTarget = node.id;
+    window.FE_NEXT_HARVESTING.updateHarvesting(s, 2.1);
+    const afterGather = {
+      cargo: harvester.cargo,
+      nodeRemaining: node.remaining,
+      harvestState: harvester.harvestState
+    };
+    harvester.tx = 3;
+    harvester.ty = 5;
+    harvester.moving = false;
+    harvester.harvestState = 'moving_to_hq';
+    s.resources.minerals = 100;
+    window.FE_NEXT_HARVESTING.updateHarvesting(s, 0.1);
+    window.FE_NEXT_HARVESTING.updateHarvesting(s, 0.1);
+    return {
+      afterGather,
+      minerals: s.resources.minerals,
+      cargo: harvester.cargo,
+      nextState: harvester.harvestState
+    };
+  });
+
+  expect(loopResult.afterGather.cargo, 'Harvester should fill cargo on gather tick').toBe(10);
+  expect(loopResult.afterGather.nodeRemaining, 'Node remaining should decrease').toBe(7);
+  expect(loopResult.minerals, 'Dropoff should increase minerals').toBe(110);
+  expect(loopResult.cargo, 'Cargo should empty after dropoff').toBe(0);
+});
+
+test('FE Next FEN-03: separator converts minerals and respects caps', async ({ page }) => {
+  await page.goto(FE_NEXT_URL, { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(1000);
+
+  const convertResult = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    const separator = s.buildings.find((b) => b.type === 'separator');
+    s.resources.minerals = 100;
+    s.resources.energy = 160;
+    s.resources.cyanEl = 0;
+    window.FE_NEXT_ECONOMY.updateEconomy(s, 6.1);
+    return {
+      minerals: s.resources.minerals,
+      energy: s.resources.energy,
+      cyanEl: s.resources.cyanEl,
+      cyclesCompleted: separator.cyclesCompleted
+    };
+  });
+
+  expect(convertResult.minerals, 'Separator should spend 15 minerals').toBe(85);
+  expect(convertResult.energy, 'Separator should add 10 energy').toBe(170);
+  expect(convertResult.cyanEl, 'Separator should add 1 cyanEl').toBe(1);
+  expect(convertResult.cyclesCompleted, 'Separator should count completed cycle').toBe(1);
+
+  const capResult = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    const separator = s.buildings.find((b) => b.type === 'separator');
+    s.resources.minerals = 100;
+    s.resources.energy = s.resources.caps.energy;
+    s.resources.cyanEl = 0;
+    const beforeCycles = separator.cyclesCompleted;
+    window.FE_NEXT_ECONOMY.updateEconomy(s, 10);
+    return {
+      minerals: s.resources.minerals,
+      energy: s.resources.energy,
+      cyanEl: s.resources.cyanEl,
+      cyclesCompleted: separator.cyclesCompleted,
+      beforeCycles,
+      separatorState: separator.separatorState
+    };
+  });
+
+  expect(capResult.minerals, 'Separator should not spend minerals when energy is capped').toBe(100);
+  expect(capResult.energy, 'Energy should stay at cap').toBe(300);
+  expect(capResult.cyanEl, 'cyanEl should not change while blocked by cap').toBe(0);
+  expect(capResult.cyclesCompleted, 'No extra cycle should complete at cap').toBe(capResult.beforeCycles);
+  expect(capResult.separatorState, 'Separator should report cap block').toBe('energy_cap');
 });

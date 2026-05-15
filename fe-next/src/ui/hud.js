@@ -25,25 +25,60 @@
     var selType = document.getElementById('sel-type');
     var selPos = document.getElementById('sel-pos');
     var buildSeparator = document.getElementById('build-separator');
+    var buildFactory = document.getElementById('build-factory');
+    var produceHarvester = document.getElementById('produce-harvester');
+    var produceBuilder = document.getElementById('produce-builder');
 
     if (!selInfo) return;
 
     var selectedUnit = state.selectedUnitId
       ? window.FE_NEXT_MOVEMENT.findUnit(state, state.selectedUnitId)
       : null;
+    var selectedBuilding = state.selectedBuildingId
+      ? window.FE_NEXT_STATE.findBuildingById(state, state.selectedBuildingId)
+      : null;
+
+    hideActionButtons(buildSeparator, buildFactory, produceHarvester, produceBuilder);
 
     if (selectedUnit) {
       selInfo.style.display = 'block';
       if (selTitle) selTitle.textContent = selectedUnit.type || 'Unit';
       if (selType) selType.textContent = 'HP: ' + selectedUnit.hp + '/' + selectedUnit.maxHp;
       if (selPos) selPos.textContent = formatSelectionLine(selectedUnit);
-      if (buildSeparator) {
-        buildSeparator.style.display = selectedUnit.type === 'builder' ? 'block' : 'none';
-        buildSeparator.disabled = selectedUnit.buildState !== 'idle' || state.resources.energy < window.FE_NEXT_CONSTANTS.SEPARATOR_BUILD_ENERGY_COST;
+      if (selectedUnit.type === 'builder') {
+        if (buildSeparator) {
+          buildSeparator.style.display = 'block';
+          buildSeparator.disabled = selectedUnit.buildState !== 'idle' || state.resources.energy < window.FE_NEXT_CONSTANTS.SEPARATOR_BUILD_ENERGY_COST;
+        }
+        if (buildFactory) {
+          buildFactory.style.display = 'block';
+          buildFactory.disabled = selectedUnit.buildState !== 'idle' || state.resources.energy < window.FE_NEXT_CONSTANTS.UNITS_FACTORY_BUILD_ENERGY_COST;
+        }
+      }
+    } else if (selectedBuilding) {
+      selInfo.style.display = 'block';
+      if (selTitle) selTitle.textContent = selectedBuilding.type || 'Building';
+      if (selType) selType.textContent = formatBuildingLine(selectedBuilding);
+      if (selPos) selPos.textContent = 'Position: (' + selectedBuilding.tx + ', ' + selectedBuilding.ty + ')';
+      if (selectedBuilding.type === 'units_factory' && selectedBuilding.complete === true) {
+        var queueLength = selectedBuilding.productionQueue ? selectedBuilding.productionQueue.length : 0;
+        if (produceHarvester) {
+          produceHarvester.style.display = 'block';
+          produceHarvester.disabled = queueLength >= window.FE_NEXT_CONSTANTS.PRODUCTION_QUEUE_MAX || state.resources.cyanEl < 1;
+        }
+        if (produceBuilder) {
+          produceBuilder.style.display = 'block';
+          produceBuilder.disabled = queueLength >= window.FE_NEXT_CONSTANTS.PRODUCTION_QUEUE_MAX || state.resources.cyanEl < 1;
+        }
       }
     } else {
       selInfo.style.display = 'none';
-      if (buildSeparator) buildSeparator.style.display = 'none';
+    }
+  }
+
+  function hideActionButtons() {
+    for (var i = 0; i < arguments.length; i++) {
+      if (arguments[i]) arguments[i].style.display = 'none';
     }
   }
 
@@ -69,6 +104,15 @@
       if (unit.buildOrder) text += ' ' + unit.buildOrder.buildingType;
     }
     return text;
+  }
+
+  function formatBuildingLine(building) {
+    if (building.type === 'units_factory') {
+      var queue = building.productionQueue || [];
+      var progress = Math.floor((building.productionProgress || 0) * 100);
+      return 'Queue: ' + queue.length + '/' + window.FE_NEXT_CONSTANTS.PRODUCTION_QUEUE_MAX + ' Progress: ' + progress + '%';
+    }
+    return 'HP: ' + building.hp + '/' + building.maxHp;
   }
 
   window.FE_NEXT_HUD = {

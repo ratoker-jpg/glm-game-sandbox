@@ -179,6 +179,7 @@
       },
 
       selectedUnitId: null,
+      selectedBuildingId: null,
       moveMarkers: []
     };
   }
@@ -217,11 +218,32 @@
     return null;
   }
 
+  function findBuildingAtTile(state, tx, ty) {
+    if (!state.buildings) return null;
+    for (var i = state.buildings.length - 1; i >= 0; i--) {
+      var b = state.buildings[i];
+      var s = b.size || 1;
+      if (b.complete === false) continue;
+      if (tx >= b.tx && tx < b.tx + s && ty >= b.ty && ty < b.ty + s) return b;
+    }
+    return null;
+  }
+
+  function findBuildingById(state, id) {
+    if (!state.buildings) return null;
+    for (var i = 0; i < state.buildings.length; i++) {
+      if (state.buildings[i].id === id) return state.buildings[i];
+    }
+    return null;
+  }
+
   window.FE_NEXT_STATE = {
     createInitialState: createInitialState,
     findUnitAtTile: findUnitAtTile,
     findResourceNodeAtTile: findResourceNodeAtTile,
     findResourceNodeById: findResourceNodeById,
-    findBuildingByType: findBuildingByType
+    findBuildingByType: findBuildingByType,
+    findBuildingAtTile: findBuildingAtTile,
+    findBuildingById: findBuildingById
   };
 })();

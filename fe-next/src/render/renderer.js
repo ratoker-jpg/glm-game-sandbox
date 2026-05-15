@@ -139,6 +139,10 @@
       renderSeparator(ctx, building, canvasPos, z);
       return;
     }
+    if (building.type === 'units_factory') {
+      renderUnitsFactory(ctx, building, canvasPos, z);
+      return;
+    }
 
     // Geometric fallback: isometric box
     var hw = C.TILE_W / 2 * s * z;
@@ -211,6 +215,36 @@
     ctx.fillStyle = 'rgba(0,0,0,0.55)';
     ctx.fillRect(barX, barY, barW, barH);
     ctx.fillStyle = '#7df7ff';
+    ctx.fillRect(barX, barY, barW * progress, barH);
+    ctx.restore();
+  }
+
+  function renderUnitsFactory(ctx, building, canvasPos, z) {
+    var s = building.size || 1;
+    var hw = C.TILE_W / 2 * s * z;
+    var hh = C.TILE_H / 2 * s * z;
+    var bHeight = 16 * z;
+    var isConstructing = building.complete === false || building.constructionState === 'constructing';
+    ctx.save();
+    if (isConstructing) ctx.globalAlpha = 0.58;
+
+    drawDiamond(ctx, canvasPos.x, canvasPos.y - bHeight, hw, hh, '#8bb6e8', '#294e79');
+    ctx.fillStyle = '#152b42';
+    ctx.font = (9 * z) + 'px "Trebuchet MS", Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(isConstructing ? 'SITE' : 'FACT', canvasPos.x, canvasPos.y - bHeight);
+
+    var progress = isConstructing
+      ? Math.max(0, Math.min(1, building.progress || 0))
+      : Math.max(0, Math.min(1, building.productionProgress || 0));
+    var barW = 42 * z;
+    var barH = 4 * z;
+    var barX = canvasPos.x - barW / 2;
+    var barY = canvasPos.y - bHeight - 20 * z;
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.fillRect(barX, barY, barW, barH);
+    ctx.fillStyle = isConstructing ? '#d6ecff' : '#9dff9d';
     ctx.fillRect(barX, barY, barW * progress, barH);
     ctx.restore();
   }

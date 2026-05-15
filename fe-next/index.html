@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>Four Elements Next - FEN-04</title>
+  <title>Four Elements Next - FEN-05</title>
   <style>
     :root {
       --sand-1:#efd79a; --sand-2:#d9b66f; --sand-3:#b9823e;
@@ -73,7 +73,7 @@
     #selection-info .sel-row {
       color:#e4c48b; font-weight:800; margin-bottom:3px;
     }
-    #build-separator {
+    #build-separator, #build-factory, #produce-harvester, #produce-builder {
       display:none; margin-top:8px; padding:7px 10px;
       border:1px solid rgba(255,214,118,.65);
       border-radius:8px; background:#314b46; color:#f5ffe8;
@@ -113,6 +113,9 @@
     <div class="sel-row" id="sel-type"></div>
     <div class="sel-row" id="sel-pos"></div>
     <button id="build-separator" type="button">Build Separator - 30 Energy</button>
+    <button id="build-factory" type="button">Build Factory - 55 Energy</button>
+    <button id="produce-harvester" type="button">Build Harvester - 1 Cyan</button>
+    <button id="produce-builder" type="button">Build Builder - 1 Cyan</button>
   </div>
 
   <div id="help-text">
@@ -132,6 +135,7 @@
 <script src="src/game/state.js"></script>
 <script src="src/systems/harvesting.js"></script>
 <script src="src/systems/construction.js"></script>
+<script src="src/systems/production.js"></script>
 <script src="src/systems/economy.js"></script>
 <script src="src/render/renderer.js"></script>
 <script src="src/input/input.js"></script>

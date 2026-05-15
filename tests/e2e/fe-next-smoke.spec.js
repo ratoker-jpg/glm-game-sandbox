@@ -639,3 +639,168 @@ test('FE Next FEN-04: invalid build orders are rejected before spending energy',
   expect(noAccess.ok, 'Build plan should reject when no access path exists').toBe(false);
   expect(noAccess.reason, 'No access path should be reported').toBe('no_access_path');
 });
+
+test('FE Next FEN-05: builder constructs units factory and produces harvester/builder', async ({ page }) => {
+  await page.goto(FE_NEXT_URL, { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(1000);
+
+  const factoryBuild = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    const builder = s.units.find((u) => u.type === 'builder');
+    s.selectedUnitId = builder.id;
+    s.selectedBuildingId = null;
+    builder.selected = true;
+    s.resources.energy = 160;
+    s.resources.cyanEl = 3;
+    window.FE_NEXT_HUD.updateHUD(s);
+    const buildFactoryButton = document.getElementById('build-factory');
+    const beforeEnergy = s.resources.energy;
+    const order = window.FE_NEXT_CONSTRUCTION.issueBuildCommand(s, builder.id, 'units_factory');
+    const site = s.buildings.find((b) => b.id === order.buildingId);
+    const access = builder.buildOrder.accessTile;
+    builder.tx = access.tx;
+    builder.ty = access.ty;
+    builder.moving = false;
+    builder.moveTarget = null;
+    builder.moveFrom = null;
+    window.FE_NEXT_CONSTRUCTION.updateConstruction(s, 0.1);
+    window.FE_NEXT_CONSTRUCTION.updateConstruction(s, 10.1);
+    return {
+      buttonExists: !!buildFactoryButton,
+      buttonVisible: buildFactoryButton ? buildFactoryButton.style.display : '',
+      order,
+      beforeEnergy,
+      afterEnergy: s.resources.energy,
+      complete: site.complete,
+      constructionState: site.constructionState,
+      productionQueue: site.productionQueue,
+      productionProgress: site.productionProgress,
+      producing: site.producing,
+      factoryId: site.id,
+      builderState: builder.buildState,
+      selectedBuildingBeforeClick: s.selectedBuildingId
+    };
+  });
+
+  expect(factoryBuild.buttonExists, 'Build Factory button should exist').toBe(true);
+  expect(factoryBuild.buttonVisible, 'Build Factory button should show for selected builder').toBe('block');
+  expect(factoryBuild.order.ok, 'units_factory build order should be accepted').toBe(true);
+  expect(factoryBuild.afterEnergy, 'Factory build should spend 55 energy').toBe(factoryBuild.beforeEnergy - 55);
+  expect(factoryBuild.complete, 'Factory should complete through accelerated construction').toBe(true);
+  expect(factoryBuild.constructionState, 'Factory construction state should complete').toBe('completed');
+  expect(factoryBuild.productionQueue, 'Completed factory should initialize queue').toEqual([]);
+  expect(factoryBuild.productionProgress, 'Completed factory should initialize production progress').toBe(0);
+  expect(factoryBuild.producing, 'Completed factory should not be producing initially').toBe(null);
+  expect(factoryBuild.builderState, 'Builder should return to idle after factory completion').toBe('idle');
+
+  const selection = await page.evaluate((factoryId) => {
+    const s = window.FE_NEXT_GAME.state;
+    const factory = s.buildings.find((b) => b.id === factoryId);
+    s.selectedUnitId = null;
+    s.selectedBuildingId = factory.id;
+    window.FE_NEXT_HUD.updateHUD(s);
+    const produceHarvester = document.getElementById('produce-harvester');
+    const produceBuilder = document.getElementById('produce-builder');
+    return {
+      selectedBuildingId: s.selectedBuildingId,
+      harvesterVisible: produceHarvester ? produceHarvester.style.display : '',
+      builderVisible: produceBuilder ? produceBuilder.style.display : ''
+    };
+  }, factoryBuild.factoryId);
+
+  expect(selection.selectedBuildingId, 'Completed factory should be selectable').toBe(factoryBuild.factoryId);
+  expect(selection.harvesterVisible, 'Factory selection should show harvester production').toBe('block');
+  expect(selection.builderVisible, 'Factory selection should show builder production').toBe('block');
+
+  const queueChecks = await page.evaluate((factoryId) => {
+    const s = window.FE_NEXT_GAME.state;
+    const factory = s.buildings.find((b) => b.id === factoryId);
+    s.resources.cyanEl = 3;
+    const cyanBefore = s.resources.cyanEl;
+    const q1 = window.FE_NEXT_PRODUCTION.queueUnit(s, factory.id, 'harvester');
+    const cyanAfterFirst = s.resources.cyanEl;
+    const q2 = window.FE_NEXT_PRODUCTION.queueUnit(s, factory.id, 'builder');
+    const q3 = window.FE_NEXT_PRODUCTION.queueUnit(s, factory.id, 'harvester');
+    return {
+      q1,
+      q2,
+      q3,
+      cyanBefore,
+      cyanAfterFirst,
+      cyanAfterSecond: s.resources.cyanEl,
+      queueLength: factory.productionQueue.length,
+      firstItem: factory.productionQueue[0],
+      secondItem: factory.productionQueue[1]
+    };
+  }, factoryBuild.factoryId);
+
+  expect(queueChecks.q1.ok, 'queueUnit should accept harvester with cyanEl').toBe(true);
+  expect(queueChecks.cyanAfterFirst, 'queueUnit should spend 1 cyanEl on start').toBe(queueChecks.cyanBefore - 1);
+  expect(queueChecks.q2.ok, 'queueUnit should accept builder as second item').toBe(true);
+  expect(queueChecks.q3.ok, 'queue max 2 should be enforced').toBe(false);
+  expect(queueChecks.q3.reason, 'Queue full should be reported').toBe('queue_full');
+  expect(queueChecks.queueLength, 'Queue should contain two items').toBe(2);
+  expect(queueChecks.firstItem.unitType, 'First queue item should be harvester object').toBe('harvester');
+  expect(queueChecks.secondItem.unitType, 'Second queue item should be builder object').toBe('builder');
+
+  const noCyan = await page.evaluate((factoryId) => {
+    const s = window.FE_NEXT_GAME.state;
+    const factory = s.buildings.find((b) => b.id === factoryId);
+    factory.productionQueue = [];
+    factory.productionProgress = 0;
+    factory.producing = null;
+    s.resources.cyanEl = 0;
+    return window.FE_NEXT_PRODUCTION.queueUnit(s, factory.id, 'harvester');
+  }, factoryBuild.factoryId);
+
+  expect(noCyan.ok, 'queueUnit should reject without cyanEl').toBe(false);
+  expect(noCyan.reason, 'Missing cyanEl should be reported').toBe('not_enough_cyanEl');
+
+  const produced = await page.evaluate((factoryId) => {
+    const s = window.FE_NEXT_GAME.state;
+    const factory = s.buildings.find((b) => b.id === factoryId);
+    factory.productionQueue = [];
+    factory.productionProgress = 0;
+    factory.producing = null;
+    s.resources.cyanEl = 3;
+    const beforeUnits = s.units.length;
+    window.FE_NEXT_PRODUCTION.queueUnit(s, factory.id, 'harvester');
+    window.FE_NEXT_PRODUCTION.queueUnit(s, factory.id, 'builder');
+    window.FE_NEXT_PRODUCTION.updateProduction(s, 10.1);
+    const harvester = s.units[s.units.length - 1];
+    const harvesterBeforeCommand = {
+      cargo: harvester.cargo,
+      maxCargo: harvester.maxCargo,
+      harvestState: harvester.harvestState
+    };
+    const harvesterAdjacent = Math.abs(harvester.tx - (factory.tx + 0.5)) <= 2 &&
+      Math.abs(harvester.ty - (factory.ty + 0.5)) <= 2 &&
+      !window.FE_NEXT_OCCUPANCY.isTileBlocked(s.occupancyGrid, harvester.tx, harvester.ty);
+    const node = s.resourceNodes[0];
+    const harvestCommand = window.FE_NEXT_HARVESTING.issueHarvestCommand(s, harvester.id, node.id);
+    window.FE_NEXT_PRODUCTION.updateProduction(s, 10.1);
+    const builder = s.units[s.units.length - 1];
+    return {
+      beforeUnits,
+      afterUnits: s.units.length,
+      harvester,
+      harvesterBeforeCommand,
+      harvesterAdjacent,
+      harvestCommand,
+      builder,
+      queueLength: factory.productionQueue.length
+    };
+  }, factoryBuild.factoryId);
+
+  expect(produced.afterUnits, 'Two produced units should spawn').toBe(produced.beforeUnits + 2);
+  expect(produced.harvester.type, 'First produced unit should be harvester').toBe('harvester');
+  expect(produced.harvesterAdjacent, 'Produced harvester should spawn on adjacent passable tile').toBe(true);
+  expect(produced.harvesterBeforeCommand.cargo, 'Produced harvester should have cargo field').toBe(0);
+  expect(produced.harvesterBeforeCommand.maxCargo, 'Produced harvester should have maxCargo').toBe(10);
+  expect(produced.harvesterBeforeCommand.harvestState, 'Produced harvester should start harvest idle').toBe('idle');
+  expect(produced.harvestCommand, 'Produced harvester should receive harvest command').toBe(true);
+  expect(produced.builder.type, 'Second produced unit should be builder').toBe('builder');
+  expect(produced.builder.buildState, 'Produced builder should start build idle').toBe('idle');
+  expect(produced.builder.buildOrder, 'Produced builder should have no build order').toBe(null);
+  expect(produced.queueLength, 'Queue should empty after producing both units').toBe(0);
+});

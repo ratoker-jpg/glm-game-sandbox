@@ -1042,3 +1042,65 @@ test('FE Next FEN-06: light tank production and basic combat loop', async ({ pag
 
   expect(pageErrors, `Page JS errors: ${pageErrors.join('\n')}`).toEqual([]);
 });
+
+test('FE Next FEN-06 fix: construction sites block occupancy, destroyed buildings do not', async ({ page }) => {
+  await page.goto(FE_NEXT_URL, { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(1000);
+
+  // Issue a build command to create an incomplete construction site
+  const siteOccupancy = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    const builder = s.units.find((u) => u.type === 'builder');
+    s.resources.energy = 160;
+    const order = window.FE_NEXT_CONSTRUCTION.issueBuildCommand(s, builder.id, 'separator');
+    const site = s.buildings.find((b) => b.id === order.buildingId);
+    // Rebuild occupancy grid after adding the site
+    s.occupancyGrid = window.FE_NEXT_OCCUPANCY.buildOccupancyGrid(s);
+    // Check that the construction site (complete=false) blocks occupancy
+    const siteBlocked = s.occupancyGrid[site.ty][site.tx] &&
+      s.occupancyGrid[site.ty][site.tx + 1] &&
+      s.occupancyGrid[site.ty + 1][site.tx] &&
+      s.occupancyGrid[site.ty + 1][site.tx + 1];
+    // Check that pathfinding rejects the construction site tile
+    const nearbyPassable = window.FE_NEXT_OCCUPANCY.isTilePassable(s.occupancyGrid, site.tx - 1, site.ty);
+    const pathIntoSite = window.FE_NEXT_PATHFINDING.findPath(s.occupancyGrid, site.tx - 1, site.ty, site.tx, site.ty);
+    return {
+      siteComplete: site.complete,
+      siteTx: site.tx,
+      siteTy: site.ty,
+      siteBlocked,
+      nearbyPassable,
+      pathIntoSiteFound: !!pathIntoSite
+    };
+  });
+
+  expect(siteOccupancy.siteComplete, 'Construction site should be incomplete').toBe(false);
+  expect(siteOccupancy.siteBlocked, 'Construction site should block occupancy even while incomplete').toBe(true);
+  expect(siteOccupancy.nearbyPassable, 'Tile next to construction site should be passable').toBe(true);
+  expect(siteOccupancy.pathIntoSiteFound, 'Pathfinding should reject construction site tile').toBe(false);
+
+  // Verify that a destroyed building no longer blocks occupancy
+  const destroyedOccupancy = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    const bunker = s.buildings.find((b) => b.type === 'enemy_bunker');
+    // Before destruction, bunker should block its tile
+    const beforeDestroy = s.occupancyGrid[bunker.ty][bunker.tx];
+    // Destroy the bunker
+    bunker.hp = 0;
+    bunker.destroyed = true;
+    // Rebuild occupancy grid
+    s.occupancyGrid = window.FE_NEXT_OCCUPANCY.buildOccupancyGrid(s);
+    const afterDestroy = s.occupancyGrid[bunker.ty][bunker.tx];
+    // Pathfinding should now be able to route through the destroyed building tile
+    const pathThrough = window.FE_NEXT_PATHFINDING.findPath(s.occupancyGrid, bunker.tx - 1, bunker.ty, bunker.tx, bunker.ty);
+    return {
+      beforeDestroy,
+      afterDestroy,
+      pathThroughFound: !!pathThrough
+    };
+  });
+
+  expect(destroyedOccupancy.beforeDestroy, 'Alive bunker should block occupancy').toBe(true);
+  expect(destroyedOccupancy.afterDestroy, 'Destroyed bunker should not block occupancy').toBe(false);
+  expect(destroyedOccupancy.pathThroughFound, 'Pathfinding should route through destroyed building tile').toBe(true);
+});

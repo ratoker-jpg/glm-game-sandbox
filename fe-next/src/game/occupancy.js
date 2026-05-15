@@ -51,10 +51,9 @@
    * @param {number} h - Map height
    */
   function markBuilding(grid, building, w, h) {
-    // FEN-06: destroyed buildings no longer block occupancy
+    // FEN-06: destroyed buildings do not block occupancy
     if (building.destroyed) return;
-    // Incomplete construction sites do not block movement
-    if (building.complete === false) return;
+    // Construction sites still block occupancy (intentional per FEN-04)
     var s = building.size || 1;
     for (var dy = 0; dy < s; dy++) {
       for (var dx = 0; dx < s; dx++) {

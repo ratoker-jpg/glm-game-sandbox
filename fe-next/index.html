@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>Four Elements Next - FEN-05</title>
+  <title>Four Elements Next - FEN-06</title>
   <style>
     :root {
       --sand-1:#efd79a; --sand-2:#d9b66f; --sand-3:#b9823e;
@@ -73,7 +73,7 @@
     #selection-info .sel-row {
       color:#e4c48b; font-weight:800; margin-bottom:3px;
     }
-    #build-separator, #build-factory, #produce-harvester, #produce-builder {
+    #build-separator, #build-factory, #produce-harvester, #produce-builder, #produce-light-tank {
       display:none; margin-top:8px; padding:7px 10px;
       border:1px solid rgba(255,214,118,.65);
       border-radius:8px; background:#314b46; color:#f5ffe8;
@@ -116,13 +116,14 @@
     <button id="build-factory" type="button">Build Factory - 55 Energy</button>
     <button id="produce-harvester" type="button">Build Harvester - 1 Cyan</button>
     <button id="produce-builder" type="button">Build Builder - 1 Cyan</button>
+    <button id="produce-light-tank" type="button">Build Tank - 2 Cyan</button>
   </div>
 
   <div id="help-text">
     <b>Camera:</b> WASD / middle mouse<br>
     <b>Zoom:</b> mouse wheel<br>
     <b>LMB:</b> select unit<br>
-    <b>RMB:</b> move, or harvest node with harvester
+    <b>RMB:</b> move, harvest node, or attack enemy with tank
   </div>
 </div>
 
@@ -136,6 +137,7 @@
 <script src="src/systems/harvesting.js"></script>
 <script src="src/systems/construction.js"></script>
 <script src="src/systems/production.js"></script>
+<script src="src/systems/combat.js"></script>
 <script src="src/systems/economy.js"></script>
 <script src="src/render/renderer.js"></script>
 <script src="src/input/input.js"></script>

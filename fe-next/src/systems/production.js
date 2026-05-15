@@ -113,6 +113,16 @@
       base.speed = C.BUILDER_SPEED;
       base.buildState = 'idle';
       base.buildOrder = null;
+    } else if (unitType === 'light_tank') {
+      base.hp = C.LIGHT_TANK_HP;
+      base.maxHp = C.LIGHT_TANK_HP;
+      base.speed = C.LIGHT_TANK_SPEED;
+      base.damage = C.LIGHT_TANK_DAMAGE;
+      base.range = C.LIGHT_TANK_RANGE;
+      base.attackCooldownMax = C.LIGHT_TANK_ATTACK_COOLDOWN;
+      base.attackCooldown = 0;
+      base.attackTarget = null;
+      base.attackState = 'idle';
     }
 
     return base;
@@ -129,6 +139,12 @@
       return {
         cost: { cyanEl: C.PRODUCE_BUILDER_CYAN_COST },
         productionTime: C.PRODUCE_BUILDER_TIME
+      };
+    }
+    if (unitType === 'light_tank') {
+      return {
+        cost: { cyanEl: C.PRODUCE_LIGHT_TANK_CYAN_COST },
+        productionTime: C.PRODUCE_LIGHT_TANK_TIME
       };
     }
     return null;

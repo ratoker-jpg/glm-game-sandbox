@@ -28,6 +28,7 @@
     var buildFactory = document.getElementById('build-factory');
     var produceHarvester = document.getElementById('produce-harvester');
     var produceBuilder = document.getElementById('produce-builder');
+    var produceLightTank = document.getElementById('produce-light-tank');
 
     if (!selInfo) return;
 
@@ -38,13 +39,16 @@
       ? window.FE_NEXT_STATE.findBuildingById(state, state.selectedBuildingId)
       : null;
 
-    hideActionButtons(buildSeparator, buildFactory, produceHarvester, produceBuilder);
+    hideActionButtons(buildSeparator, buildFactory, produceHarvester, produceBuilder, produceLightTank);
 
     if (selectedUnit) {
       selInfo.style.display = 'block';
       if (selTitle) selTitle.textContent = selectedUnit.type || 'Unit';
       if (selType) selType.textContent = 'HP: ' + selectedUnit.hp + '/' + selectedUnit.maxHp;
       if (selPos) selPos.textContent = formatSelectionLine(selectedUnit);
+      if (selectedUnit.type === 'light_tank') {
+        if (selPos) selPos.textContent = formatSelectionLine(selectedUnit);
+      }
       if (selectedUnit.type === 'builder') {
         if (buildSeparator) {
           buildSeparator.style.display = 'block';
@@ -69,6 +73,10 @@
         if (produceBuilder) {
           produceBuilder.style.display = 'block';
           produceBuilder.disabled = queueLength >= window.FE_NEXT_CONSTANTS.PRODUCTION_QUEUE_MAX || state.resources.cyanEl < 1;
+        }
+        if (produceLightTank) {
+          produceLightTank.style.display = 'block';
+          produceLightTank.disabled = queueLength >= window.FE_NEXT_CONSTANTS.PRODUCTION_QUEUE_MAX || state.resources.cyanEl < window.FE_NEXT_CONSTANTS.PRODUCE_LIGHT_TANK_CYAN_COST;
         }
       }
     } else {
@@ -102,6 +110,9 @@
     } else if (unit.type === 'builder') {
       text += ' Build: ' + unit.buildState;
       if (unit.buildOrder) text += ' ' + unit.buildOrder.buildingType;
+    } else if (unit.type === 'light_tank') {
+      text += ' ' + (unit.attackState || 'idle');
+      if (unit.attackTarget) text += ' -> ' + unit.attackTarget.id;
     }
     return text;
   }

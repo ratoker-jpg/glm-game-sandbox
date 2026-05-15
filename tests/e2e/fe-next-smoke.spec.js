@@ -90,7 +90,7 @@ test('FE Next scaffold: boot -> canvas -> HUD -> select -> move unit', async ({ 
   expect(gameState.hasState, 'window.FE_NEXT_GAME.state should exist').toBe(true);
   expect(gameState.mapW, 'Map width should be 24').toBe(24);
   expect(gameState.mapH, 'Map height should be 24').toBe(24);
-  expect(gameState.buildingCount, 'Should have HQ + separator').toBe(2);
+  expect(gameState.buildingCount, 'Should have HQ + separator + enemy bunker').toBe(3);
   expect(gameState.unitCount, 'Should have tank + harvester + builder').toBe(3);
   expect(gameState.resourceNodeCount, 'Should have 3 mineral nodes').toBe(3);
   expect(gameState.resources.minerals, 'Initial minerals should be 100').toBe(100);
@@ -803,4 +803,242 @@ test('FE Next FEN-05: builder constructs units factory and produces harvester/bu
   expect(produced.builder.buildState, 'Produced builder should start build idle').toBe('idle');
   expect(produced.builder.buildOrder, 'Produced builder should have no build order').toBe(null);
   expect(produced.queueLength, 'Queue should empty after producing both units').toBe(0);
+});
+
+test('FE Next FEN-06: light tank production and basic combat loop', async ({ page }) => {
+  const pageErrors = [];
+  page.on('pageerror', (err) => {
+    pageErrors.push(err && err.message ? err.message : String(err));
+  });
+
+  await page.goto(FE_NEXT_URL, { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(1000);
+
+  // Verify enemy bunker exists
+  const enemyCheck = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    const bunker = s.buildings.find((b) => b.type === 'enemy_bunker');
+    const C = window.FE_NEXT_CONSTANTS;
+    return {
+      bunkerExists: !!bunker,
+      bunkerId: bunker ? bunker.id : null,
+      bunkerOwner: bunker ? bunker.owner : null,
+      bunkerHp: bunker ? bunker.hp : null,
+      bunkerMaxHp: bunker ? bunker.maxHp : null,
+      bunkerDestroyed: bunker ? bunker.destroyed : null,
+      bunkerTx: bunker ? bunker.tx : null,
+      bunkerTy: bunker ? bunker.ty : null,
+      bunkerSize: bunker ? bunker.size : null,
+      expectedHp: C.ENEMY_DUMMY_HP,
+      combatApi: !!window.FE_NEXT_COMBAT,
+      tankConstants: {
+        hp: C.LIGHT_TANK_HP,
+        damage: C.LIGHT_TANK_DAMAGE,
+        range: C.LIGHT_TANK_RANGE,
+        cooldown: C.LIGHT_TANK_ATTACK_COOLDOWN,
+        cost: C.PRODUCE_LIGHT_TANK_CYAN_COST,
+        time: C.PRODUCE_LIGHT_TANK_TIME
+      }
+    };
+  });
+
+  expect(enemyCheck.bunkerExists, 'Enemy bunker should exist in initial state').toBe(true);
+  expect(enemyCheck.bunkerOwner, 'Enemy bunker should be enemy-owned').toBe('enemy');
+  expect(enemyCheck.bunkerHp, 'Enemy bunker should have 100 HP').toBe(100);
+  expect(enemyCheck.bunkerMaxHp, 'Enemy bunker should have maxHp 100').toBe(100);
+  expect(enemyCheck.bunkerDestroyed, 'Enemy bunker should not be destroyed initially').toBe(false);
+  expect(enemyCheck.combatApi, 'FE_NEXT_COMBAT should exist').toBe(true);
+  expect(enemyCheck.tankConstants.hp, 'LIGHT_TANK_HP should be 100').toBe(100);
+  expect(enemyCheck.tankConstants.damage, 'LIGHT_TANK_DAMAGE should be 20').toBe(20);
+  expect(enemyCheck.tankConstants.range, 'LIGHT_TANK_RANGE should be 3').toBe(3);
+  expect(enemyCheck.tankConstants.cooldown, 'LIGHT_TANK_ATTACK_COOLDOWN should be 1.0').toBe(1.0);
+  expect(enemyCheck.tankConstants.cost, 'PRODUCE_LIGHT_TANK_CYAN_COST should be 2').toBe(2);
+
+  // Verify test_unit_1 has combat fields
+  const tankFields = await page.evaluate(() => {
+    const tank = window.FE_NEXT_GAME.state.units.find((u) => u.type === 'light_tank');
+    return {
+      hasDamage: typeof tank.damage === 'number',
+      hasRange: typeof tank.range === 'number',
+      hasAttackCooldown: typeof tank.attackCooldown === 'number',
+      hasAttackCooldownMax: typeof tank.attackCooldownMax === 'number',
+      hasAttackTarget: tank.attackTarget === null,
+      hasAttackState: tank.attackState === 'idle',
+      damage: tank.damage,
+      range: tank.range
+    };
+  });
+
+  expect(tankFields.hasDamage, 'Light tank should have damage field').toBe(true);
+  expect(tankFields.hasRange, 'Light tank should have range field').toBe(true);
+  expect(tankFields.hasAttackCooldown, 'Light tank should have attackCooldown field').toBe(true);
+  expect(tankFields.hasAttackCooldownMax, 'Light tank should have attackCooldownMax field').toBe(true);
+  expect(tankFields.hasAttackTarget, 'Light tank should start with null attackTarget').toBe(true);
+  expect(tankFields.hasAttackState, 'Light tank should start idle').toBe(true);
+
+  // Produce a light_tank from factory
+  const factorySetup = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    const builder = s.units.find((u) => u.type === 'builder');
+    s.resources.energy = 160;
+    s.resources.cyanEl = 5;
+    const order = window.FE_NEXT_CONSTRUCTION.issueBuildCommand(s, builder.id, 'units_factory');
+    const site = s.buildings.find((b) => b.id === order.buildingId);
+    const access = builder.buildOrder.accessTile;
+    builder.tx = access.tx;
+    builder.ty = access.ty;
+    builder.moving = false;
+    builder.moveTarget = null;
+    builder.moveFrom = null;
+    window.FE_NEXT_CONSTRUCTION.updateConstruction(s, 0.1);
+    window.FE_NEXT_CONSTRUCTION.updateConstruction(s, 10.1);
+    return { factoryId: site.id, complete: site.complete };
+  });
+
+  expect(factorySetup.complete, 'Factory should complete').toBe(true);
+
+  // Queue and produce light_tank
+  const tankProduction = await page.evaluate((factoryId) => {
+    const s = window.FE_NEXT_GAME.state;
+    const factory = s.buildings.find((b) => b.id === factoryId);
+    s.resources.cyanEl = 5;
+    const cyanBefore = s.resources.cyanEl;
+    const queueResult = window.FE_NEXT_PRODUCTION.queueUnit(s, factory.id, 'light_tank');
+    const cyanAfter = s.resources.cyanEl;
+    const beforeUnits = s.units.length;
+    window.FE_NEXT_PRODUCTION.updateProduction(s, 12.1);
+    const producedTank = s.units[s.units.length - 1];
+    return {
+      queueResult,
+      cyanBefore,
+      cyanAfter,
+      beforeUnits,
+      afterUnits: s.units.length,
+      tankType: producedTank.type,
+      tankHp: producedTank.hp,
+      tankMaxHp: producedTank.maxHp,
+      tankDamage: producedTank.damage,
+      tankRange: producedTank.range,
+      tankAttackState: producedTank.attackState,
+      tankAttackTarget: producedTank.attackTarget,
+      tankAttackCooldownMax: producedTank.attackCooldownMax
+    };
+  }, factorySetup.factoryId);
+
+  expect(tankProduction.queueResult.ok, 'Queue light_tank should succeed').toBe(true);
+  expect(tankProduction.cyanAfter, 'Light tank should cost 2 cyanEl').toBe(tankProduction.cyanBefore - 2);
+  expect(tankProduction.afterUnits, 'Light tank should be produced').toBe(tankProduction.beforeUnits + 1);
+  expect(tankProduction.tankType, 'Produced unit should be light_tank').toBe('light_tank');
+  expect(tankProduction.tankHp, 'Produced light_tank should have 100 HP').toBe(100);
+  expect(tankProduction.tankDamage, 'Produced light_tank should have 20 damage').toBe(20);
+  expect(tankProduction.tankRange, 'Produced light_tank should have 3 range').toBe(3);
+  expect(tankProduction.tankAttackState, 'Produced light_tank should start idle').toBe('idle');
+  expect(tankProduction.tankAttackTarget, 'Produced light_tank should have null attackTarget').toBe(null);
+
+  // Issue attack command with test_unit_1 against enemy bunker
+  const attackCommand = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    const tank = s.units.find((u) => u.type === 'light_tank' && u.id === 'test_unit_1');
+    const bunker = s.buildings.find((b) => b.type === 'enemy_bunker');
+    // Place tank in range of bunker
+    tank.tx = bunker.tx - 2;
+    tank.ty = bunker.ty;
+    tank.moving = false;
+    tank.moveTarget = null;
+    tank.moveFrom = null;
+    tank.path = null;
+    const result = window.FE_NEXT_COMBAT.issueAttackCommand(s, tank.id, bunker.id, 'building');
+    return {
+      result,
+      attackState: tank.attackState,
+      attackTarget: tank.attackTarget,
+      bunkerHp: bunker.hp
+    };
+  });
+
+  expect(attackCommand.result.ok, 'Attack command should succeed').toBe(true);
+  expect(attackCommand.attackState, 'Tank should be attacking when in range').toBe('attacking');
+  expect(attackCommand.attackTarget.id, 'Attack target should be enemy bunker').toBe('enemy_bunker_1');
+  expect(attackCommand.attackTarget.kind, 'Attack target kind should be building').toBe('building');
+
+  // Run combat update - should deal damage
+  const combatDamage = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    const tank = s.units.find((u) => u.type === 'light_tank' && u.id === 'test_unit_1');
+    const bunker = s.buildings.find((b) => b.type === 'enemy_bunker');
+    const hpBefore = bunker.hp;
+    window.FE_NEXT_COMBAT.updateCombat(s, 1.1);
+    return {
+      hpBefore,
+      hpAfter: bunker.hp,
+      destroyed: bunker.destroyed,
+      tankState: tank.attackState
+    };
+  });
+
+  expect(combatDamage.hpAfter, 'Bunker HP should decrease after combat').toBeLessThan(combatDamage.hpBefore);
+  expect(combatDamage.hpAfter, 'Bunker should have 80 HP after one hit').toBe(80);
+  expect(combatDamage.destroyed, 'Bunker should not be destroyed after one hit').toBe(false);
+
+  // Destroy bunker with repeated combat
+  const destroyBunker = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    const tank = s.units.find((u) => u.type === 'light_tank' && u.id === 'test_unit_1');
+    const bunker = s.buildings.find((b) => b.type === 'enemy_bunker');
+    // Run enough combat ticks to destroy bunker (100 HP / 20 damage = 5 hits)
+    for (var i = 0; i < 10; i++) {
+      window.FE_NEXT_COMBAT.updateCombat(s, 1.1);
+      if (bunker.destroyed) break;
+    }
+    return {
+      bunkerHp: bunker.hp,
+      bunkerDestroyed: bunker.destroyed,
+      tankAttackState: tank.attackState,
+      tankAttackTarget: tank.attackTarget,
+      occupancyBlocked: s.occupancyGrid[bunker.ty][bunker.tx]
+    };
+  });
+
+  expect(destroyBunker.bunkerHp, 'Bunker HP should be 0').toBe(0);
+  expect(destroyBunker.bunkerDestroyed, 'Bunker should be destroyed').toBe(true);
+  expect(destroyBunker.tankAttackState, 'Tank should return to idle after target destroyed').toBe('idle');
+  expect(destroyBunker.tankAttackTarget, 'Tank attack target should be cleared').toBe(null);
+  expect(destroyBunker.occupancyBlocked, 'Destroyed bunker should not block occupancy').toBe(false);
+
+  // Verify attack command rejects invalid targets
+  const invalidAttack = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    const tank = s.units.find((u) => u.type === 'light_tank' && u.id === 'test_unit_1');
+    // Try attacking player HQ
+    const hq = s.buildings.find((b) => b.type === 'hq');
+    const r1 = window.FE_NEXT_COMBAT.issueAttackCommand(s, tank.id, hq.id, 'building');
+    // Try attacking already destroyed bunker
+    const bunker = s.buildings.find((b) => b.type === 'enemy_bunker');
+    const r2 = window.FE_NEXT_COMBAT.issueAttackCommand(s, tank.id, bunker.id, 'building');
+    // Try attacking with harvester
+    const harvester = s.units.find((u) => u.type === 'harvester');
+    const r3 = window.FE_NEXT_COMBAT.issueAttackCommand(s, harvester.id, 'enemy_bunker_1', 'building');
+    return { r1, r2, r3 };
+  });
+
+  expect(invalidAttack.r1.ok, 'Attack on friendly building should fail').toBe(false);
+  expect(invalidAttack.r1.reason, 'Attack on friendly should report not_enemy').toBe('not_enemy');
+  expect(invalidAttack.r2.ok, 'Attack on destroyed building should fail').toBe(false);
+  expect(invalidAttack.r2.reason, 'Attack on destroyed should report target_already_destroyed').toBe('target_already_destroyed');
+  expect(invalidAttack.r3.ok, 'Harvester cannot attack').toBe(false);
+  expect(invalidAttack.r3.reason, 'Harvester attack should report unit_cannot_attack').toBe('unit_cannot_attack');
+
+  // Verify findEnemyAtTile works (only finds alive enemies)
+  const enemySearch = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    const bunker = s.buildings.find((b) => b.type === 'enemy_bunker');
+    // Destroyed bunker should not be found by findEnemyAtTile
+    const found = window.FE_NEXT_COMBAT.findEnemyAtTile(s, bunker.tx, bunker.ty);
+    return { foundId: found ? found.id : null, destroyed: bunker.destroyed };
+  });
+
+  expect(enemySearch.foundId, 'findEnemyAtTile should skip destroyed enemies').toBe(null);
+  expect(enemySearch.destroyed, 'Bunker should be marked destroyed').toBe(true);
+
+  expect(pageErrors, `Page JS errors: ${pageErrors.join('\n')}`).toEqual([]);
 });

@@ -39,6 +39,7 @@
 
     // Unit
     UNIT_SPEED: 3.0,            // tiles per second
+    HARVESTER_SPEED: 2.0,       // tiles per second
     UNIT_RADIUS: 0.35,          // in tile units
     UNIT_HP: 100,
 
@@ -61,8 +62,25 @@
     },
 
     // Resources
-    START_MINERALS: 200,
+    START_MINERALS: 100,
     START_ENERGY: 160,
+    START_CYAN_EL: 0,
+    MINERALS_CAP: 200,
+    ENERGY_CAP: 300,
+    CYAN_EL_CAP: 20,
+
+    // Harvesting
+    HARVESTER_MAX_CARGO: 10,
+    HARVESTER_GATHER_TIME: 2.0,
+    RESOURCE_NODE_REMAINING: 8,
+    RESOURCE_NODE_YIELD: 10,
+
+    // Separator economy
+    SEPARATOR_SIZE: 2,
+    SEPARATOR_INPUT_MINERALS: 15,
+    SEPARATOR_OUTPUT_ENERGY: 10,
+    SEPARATOR_OUTPUT_CYAN_EL: 1,
+    SEPARATOR_CYCLE_TIME: 6.0,
 
     // Tick
     TARGET_FPS: 60,

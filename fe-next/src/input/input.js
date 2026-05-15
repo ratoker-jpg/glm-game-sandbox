@@ -10,6 +10,7 @@
   var COORDS = window.FE_NEXT_COORDS;
   var STATE = window.FE_NEXT_STATE;
   var MOVEMENT = window.FE_NEXT_MOVEMENT;
+  var HARVESTING = window.FE_NEXT_HARVESTING;
 
   /**
    * Initialize input handlers on the given canvas.
@@ -181,6 +182,15 @@
 
     // Bounds check
     if (tx < 0 || ty < 0 || tx >= state.mapW || ty >= state.mapH) return;
+
+    var node = STATE.findResourceNodeAtTile(state, tx, ty);
+    if (node) {
+      var selected = MOVEMENT.findUnit(state, state.selectedUnitId);
+      if (selected && selected.type === 'harvester') {
+        HARVESTING.issueHarvestCommand(state, selected.id, node.id);
+        return;
+      }
+    }
 
     MOVEMENT.issueMoveCommand(state, state.selectedUnitId, tx, ty);
   }

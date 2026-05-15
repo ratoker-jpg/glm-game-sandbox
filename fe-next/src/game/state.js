@@ -1,6 +1,5 @@
-// FEN-02: Game state factory and simple selectors.
-// Creates and manages the FE Next game state object.
-// Movement runtime logic lives in fe-next/src/systems/movement.js.
+// FEN-03: Game state factory and simple selectors.
+// Creates FE Next initial state only; runtime systems live in systems/.
 // Exposed as window.FE_NEXT_STATE.
 
 (function () {
@@ -9,21 +8,11 @@
   var C = window.FE_NEXT_CONSTANTS;
   var COORDS = window.FE_NEXT_COORDS;
 
-  /**
-   * Create a terrain grid for the given map size.
-   * Each cell is a string: 'grass', 'sand', 'dirt', 'water', 'rock'.
-   * For FEN-01/FEN-02 we use a simple deterministic pattern.
-   *
-   * @param {number} w
-   * @param {number} h
-   * @returns {string[][]}
-   */
   function generateTerrain(w, h) {
     var grid = [];
     for (var y = 0; y < h; y++) {
       var row = [];
       for (var x = 0; x < w; x++) {
-        // Simple pattern: mostly grass with sand borders and a few dirt patches
         if (x === 0 || y === 0 || x === w - 1 || y === h - 1) {
           row.push('sand');
         } else if ((x + y) % 7 === 0) {
@@ -37,14 +26,21 @@
     return grid;
   }
 
-  /**
-   * Create initial game state for FE Next.
-   * @returns {object}
-   */
+  function createMineralNode(id, tx, ty) {
+    return {
+      id: id,
+      type: 'minerals',
+      tx: tx,
+      ty: ty,
+      remaining: C.RESOURCE_NODE_REMAINING,
+      yield: C.RESOURCE_NODE_YIELD,
+      depleted: false
+    };
+  }
+
   function createInitialState() {
     var terrain = generateTerrain(C.MAP_W, C.MAP_H);
 
-    // Player HQ at tile (4, 4) — a 2x2 building
     var hq = {
       id: 'player_hq',
       type: 'hq',
@@ -56,7 +52,20 @@
       maxHp: 500
     };
 
-    // One test unit near the HQ
+    var separator = {
+      id: 'player_separator_1',
+      type: 'separator',
+      owner: 'player',
+      tx: 7,
+      ty: 3,
+      size: C.SEPARATOR_SIZE,
+      hp: 300,
+      maxHp: 300,
+      separatorState: 'idle',
+      cycleProgress: 0,
+      cyclesCompleted: 0
+    };
+
     var testUnit = {
       id: 'test_unit_1',
       type: 'light_tank',
@@ -67,38 +76,60 @@
       maxHp: C.UNIT_HP,
       selected: false,
       moving: false,
-      moveTarget: null,       // {tx, ty} — current waypoint
-      moveProgress: 0,        // 0..1 interpolation to current waypoint
-      moveFrom: null,         // {tx, ty} — origin of current segment
-      path: null,             // Array of {x, y} waypoints (from pathfinding)
-      pathIndex: 0            // Current index in path
+      moveTarget: null,
+      moveProgress: 0,
+      moveFrom: null,
+      path: null,
+      pathIndex: 0
     };
 
-    // Camera centered on HQ
+    var harvester = {
+      id: 'harvester_1',
+      type: 'harvester',
+      owner: 'player',
+      tx: 6,
+      ty: 7,
+      hp: C.UNIT_HP,
+      maxHp: C.UNIT_HP,
+      selected: false,
+      moving: false,
+      moveTarget: null,
+      moveProgress: 0,
+      moveFrom: null,
+      path: null,
+      pathIndex: 0,
+      speed: C.HARVESTER_SPEED,
+      cargo: 0,
+      maxCargo: C.HARVESTER_MAX_CARGO,
+      harvestState: 'idle',
+      harvestTarget: null,
+      gatherTimer: 0
+    };
+
+    var resourceNodes = [
+      createMineralNode('mineral_node_1', 14, 8),
+      createMineralNode('mineral_node_2', 10, 14),
+      createMineralNode('mineral_node_3', 3, 12)
+    ];
+
     var hqScreen = COORDS.tileToScreen(hq.tx + 0.5, hq.ty + 0.5);
 
     return {
-      // Meta
       running: true,
       time: 0,
       tickCount: 0,
 
-      // Map
       mapW: C.MAP_W,
       mapH: C.MAP_H,
       terrain: terrain,
-
-      // Occupancy grid (built by occupancy.js, stored here)
       occupancyGrid: null,
 
-      // Camera
       camera: {
         x: hqScreen.x,
         y: hqScreen.y,
         zoom: 1.0
       },
 
-      // Input state
       keys: {},
       mouseDown: false,
       middleMouseDown: false,
@@ -109,31 +140,26 @@
       camPanStartX: 0,
       camPanStartY: 0,
 
-      // Entities
-      buildings: [hq],
-      units: [testUnit],
+      buildings: [hq, separator],
+      units: [testUnit, harvester],
+      resourceNodes: resourceNodes,
 
-      // Resources
       resources: {
         minerals: C.START_MINERALS,
-        energy: C.START_ENERGY
+        energy: C.START_ENERGY,
+        cyanEl: C.START_CYAN_EL,
+        caps: {
+          minerals: C.MINERALS_CAP,
+          energy: C.ENERGY_CAP,
+          cyanEl: C.CYAN_EL_CAP
+        }
       },
 
-      // Selection
       selectedUnitId: null,
-
-      // Move markers (visual feedback for right-click commands)
       moveMarkers: []
     };
   }
 
-  /**
-   * Find a unit at the given tile position (within radius tolerance).
-   * @param {object} state
-   * @param {number} tx
-   * @param {number} ty
-   * @returns {object|null}
-   */
   function findUnitAtTile(state, tx, ty) {
     for (var i = 0; i < state.units.length; i++) {
       var u = state.units[i];
@@ -143,8 +169,36 @@
     return null;
   }
 
+  function findResourceNodeAtTile(state, tx, ty) {
+    if (!state.resourceNodes) return null;
+    for (var i = 0; i < state.resourceNodes.length; i++) {
+      var node = state.resourceNodes[i];
+      if (Math.floor(node.tx) === tx && Math.floor(node.ty) === ty) return node;
+    }
+    return null;
+  }
+
+  function findResourceNodeById(state, id) {
+    if (!state.resourceNodes) return null;
+    for (var i = 0; i < state.resourceNodes.length; i++) {
+      if (state.resourceNodes[i].id === id) return state.resourceNodes[i];
+    }
+    return null;
+  }
+
+  function findBuildingByType(state, type) {
+    if (!state.buildings) return null;
+    for (var i = 0; i < state.buildings.length; i++) {
+      if (state.buildings[i].type === type) return state.buildings[i];
+    }
+    return null;
+  }
+
   window.FE_NEXT_STATE = {
     createInitialState: createInitialState,
-    findUnitAtTile: findUnitAtTile
+    findUnitAtTile: findUnitAtTile,
+    findResourceNodeAtTile: findResourceNodeAtTile,
+    findResourceNodeById: findResourceNodeById,
+    findBuildingByType: findBuildingByType
   };
 })();

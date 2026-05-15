@@ -1,6 +1,5 @@
-// FEN-02: Input handler — camera pan/zoom + unit selection/move.
-// Wires DOM events to state mutations.
-// Movement commands go through FE_NEXT_MOVEMENT (path-aware).
+// FEN-05: Input handler - camera pan/zoom, selection, move, build, production.
+// Wires DOM events to state mutations and routes commands to runtime systems.
 // Exposed as window.FE_NEXT_INPUT.
 
 (function () {
@@ -12,31 +11,23 @@
   var MOVEMENT = window.FE_NEXT_MOVEMENT;
   var HARVESTING = window.FE_NEXT_HARVESTING;
   var CONSTRUCTION = window.FE_NEXT_CONSTRUCTION;
+  var PRODUCTION = window.FE_NEXT_PRODUCTION;
 
-  /**
-   * Initialize input handlers on the given canvas.
-   * Mutates the state object directly for camera and selection.
-   *
-   * @param {HTMLCanvasElement} canvas
-   * @param {object} state - Game state (will be mutated)
-   * @returns {{update: Function}} Input update function for per-frame key-based panning
-   */
   function initInput(canvas, state) {
-    // ---- Keyboard ----
     function onKeyDown(e) {
       state.keys[e.code] = true;
-      // Prevent default for game keys
       if (['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].indexOf(e.code) !== -1) {
         e.preventDefault();
       }
     }
+
     function onKeyUp(e) {
       state.keys[e.code] = false;
     }
+
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
 
-    // ---- Mouse ----
     function getCanvasCoords(e) {
       var rect = canvas.getBoundingClientRect();
       return {
@@ -49,11 +40,9 @@
       var pos = getCanvasCoords(e);
 
       if (e.button === 0) {
-        // Left click — select unit
         state.mouseDown = true;
         handleLeftClick(state, pos);
       } else if (e.button === 1) {
-        // Middle click — start camera pan
         e.preventDefault();
         state.middleMouseDown = true;
         state.panStartX = pos.x;
@@ -61,7 +50,6 @@
         state.camPanStartX = state.camera.x;
         state.camPanStartY = state.camera.y;
       } else if (e.button === 2) {
-        // Right click — move selected unit (path-aware)
         e.preventDefault();
         handleRightClick(state, pos);
       }
@@ -73,7 +61,6 @@
       state.lastMouseY = pos.y;
 
       if (state.middleMouseDown) {
-        // Camera pan with middle mouse
         var dx = (pos.x - state.panStartX) / state.camera.zoom;
         var dy = (pos.y - state.panStartY) / state.camera.zoom;
         state.camera.x = state.camPanStartX - dx;
@@ -109,127 +96,118 @@
     canvas.addEventListener('wheel', onWheel, { passive: false });
     canvas.addEventListener('contextmenu', onContextMenu);
 
-    // ---- Touch (basic support) ----
     var touchId = null;
     function onTouchStart(e) {
       if (e.touches.length === 1 && touchId === null) {
         var t = e.touches[0];
         touchId = t.identifier;
         var rect = canvas.getBoundingClientRect();
-        var pos = {
+        handleLeftClick(state, {
           x: (t.clientX - rect.left) * (canvas.width / rect.width),
           y: (t.clientY - rect.top) * (canvas.height / rect.height)
-        };
-        handleLeftClick(state, pos);
+        });
       }
     }
+
     function onTouchEnd() {
       touchId = null;
     }
+
     canvas.addEventListener('touchstart', onTouchStart, { passive: true });
     canvas.addEventListener('touchend', onTouchEnd);
 
-    var buildSeparatorButton = document.getElementById('build-separator');
-    if (buildSeparatorButton) {
-      buildSeparatorButton.addEventListener('click', function () {
-        var selected = state.selectedUnitId ? MOVEMENT.findUnit(state, state.selectedUnitId) : null;
-        if (selected && selected.type === 'builder') {
-          CONSTRUCTION.issueBuildCommand(state, selected.id, 'separator');
-        }
-      });
-    }
+    bindBuildButton(state, 'build-separator', 'separator');
+    bindBuildButton(state, 'build-factory', 'units_factory');
+    bindProductionButton(state, 'produce-harvester', 'harvester');
+    bindProductionButton(state, 'produce-builder', 'builder');
   }
 
-  /**
-   * Handle left-click: select a unit at click position.
-   * @param {object} state
-   * @param {{x: number, y: number}} canvasPos
-   */
+  function bindBuildButton(state, id, buildingType) {
+    var button = document.getElementById(id);
+    if (!button) return;
+    button.addEventListener('click', function () {
+      var selected = state.selectedUnitId ? MOVEMENT.findUnit(state, state.selectedUnitId) : null;
+      if (selected && selected.type === 'builder') {
+        CONSTRUCTION.issueBuildCommand(state, selected.id, buildingType);
+      }
+    });
+  }
+
+  function bindProductionButton(state, id, unitType) {
+    var button = document.getElementById(id);
+    if (!button) return;
+    button.addEventListener('click', function () {
+      if (state.selectedBuildingId) {
+        PRODUCTION.queueUnit(state, state.selectedBuildingId, unitType);
+      }
+    });
+  }
+
   function handleLeftClick(state, canvasPos) {
     var canvasW = document.getElementById('game').width;
     var canvasH = document.getElementById('game').height;
-
-    // Convert canvas coords to tile coords
     var tile = COORDS.canvasToTile(canvasPos.x, canvasPos.y, state.camera, canvasW, canvasH);
+    var tx = Math.floor(tile.x - 0.5);
+    var ty = Math.floor(tile.y - 0.5);
 
-    // Find unit near this tile (tile-coordinate based lookup)
     var unit = STATE.findUnitAtTile(state, tile.x - 0.5, tile.y - 0.5);
-
     if (unit) {
-      // Deselect previous
-      if (state.selectedUnitId && state.selectedUnitId !== unit.id) {
-        var prev = MOVEMENT.findUnit(state, state.selectedUnitId);
-        if (prev) prev.selected = false;
-      }
-      // Select new
+      clearUnitSelection(state);
       unit.selected = true;
       state.selectedUnitId = unit.id;
-    } else {
-      // Click on empty ground — deselect
-      if (state.selectedUnitId) {
-        var sel = MOVEMENT.findUnit(state, state.selectedUnitId);
-        if (sel) sel.selected = false;
-        state.selectedUnitId = null;
-      }
+      state.selectedBuildingId = null;
+      return;
     }
+
+    var building = STATE.findBuildingAtTile(state, tx, ty);
+    if (building) {
+      clearUnitSelection(state);
+      state.selectedUnitId = null;
+      state.selectedBuildingId = building.id;
+      return;
+    }
+
+    clearUnitSelection(state);
+    state.selectedUnitId = null;
+    state.selectedBuildingId = null;
   }
 
-  /**
-   * Handle right-click: move selected unit to click position.
-   * Uses FE_NEXT_MOVEMENT.issueMoveCommand which is path-aware.
-   *
-   * @param {object} state
-   * @param {{x: number, y: number}} canvasPos
-   */
+  function clearUnitSelection(state) {
+    if (!state.selectedUnitId) return;
+    var selected = MOVEMENT.findUnit(state, state.selectedUnitId);
+    if (selected) selected.selected = false;
+  }
+
   function handleRightClick(state, canvasPos) {
     if (!state.selectedUnitId) return;
 
     var canvasW = document.getElementById('game').width;
     var canvasH = document.getElementById('game').height;
-
     var tile = COORDS.canvasToTile(canvasPos.x, canvasPos.y, state.camera, canvasW, canvasH);
     var tx = Math.floor(tile.x - 0.5);
     var ty = Math.floor(tile.y - 0.5);
 
-    // Bounds check
     if (tx < 0 || ty < 0 || tx >= state.mapW || ty >= state.mapH) return;
 
     var selectedUnit = MOVEMENT.findUnit(state, state.selectedUnitId);
     if (selectedUnit && selectedUnit.type === 'builder' && selectedUnit.buildState !== 'idle') return;
 
     var node = STATE.findResourceNodeAtTile(state, tx, ty);
-    if (node) {
-      if (selectedUnit && selectedUnit.type === 'harvester') {
-        HARVESTING.issueHarvestCommand(state, selectedUnit.id, node.id);
-        return;
-      }
+    if (node && selectedUnit && selectedUnit.type === 'harvester') {
+      HARVESTING.issueHarvestCommand(state, selectedUnit.id, node.id);
+      return;
     }
 
     MOVEMENT.issueMoveCommand(state, state.selectedUnitId, tx, ty);
   }
 
-  /**
-   * Per-frame update for continuous key-based camera panning.
-   * Call this from the game loop with delta time.
-   *
-   * @param {object} state
-   * @param {number} dt - Seconds since last frame
-   */
   function update(state, dt) {
     var speed = C.CAMERA_PAN_SPEED * dt / state.camera.zoom;
 
-    if (state.keys['KeyW'] || state.keys['ArrowUp']) {
-      state.camera.y -= speed;
-    }
-    if (state.keys['KeyS'] || state.keys['ArrowDown']) {
-      state.camera.y += speed;
-    }
-    if (state.keys['KeyA'] || state.keys['ArrowLeft']) {
-      state.camera.x -= speed;
-    }
-    if (state.keys['KeyD'] || state.keys['ArrowRight']) {
-      state.camera.x += speed;
-    }
+    if (state.keys['KeyW'] || state.keys['ArrowUp']) state.camera.y -= speed;
+    if (state.keys['KeyS'] || state.keys['ArrowDown']) state.camera.y += speed;
+    if (state.keys['KeyA'] || state.keys['ArrowLeft']) state.camera.x -= speed;
+    if (state.keys['KeyD'] || state.keys['ArrowRight']) state.camera.x += speed;
   }
 
   window.FE_NEXT_INPUT = {

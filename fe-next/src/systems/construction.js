@@ -65,6 +65,7 @@
           if (result.ok) {
             return {
               ok: true,
+              buildingType: buildingType,
               tx: x,
               ty: y,
               accessTile: result.accessTile,
@@ -171,32 +172,46 @@
   }
 
   function getBuildingSpec(buildingType) {
+    if (buildingType === 'units_factory') {
+      return {
+        type: 'units_factory',
+        size: C.UNITS_FACTORY_SIZE,
+        cost: { energy: C.UNITS_FACTORY_BUILD_ENERGY_COST },
+        buildTime: C.UNITS_FACTORY_BUILD_TIME,
+        hp: C.UNITS_FACTORY_HP
+      };
+    }
     if (buildingType !== 'separator') return null;
     return {
       type: 'separator',
       size: C.SEPARATOR_SIZE,
       cost: { energy: C.SEPARATOR_BUILD_ENERGY_COST },
-      buildTime: C.SEPARATOR_BUILD_TIME
+      buildTime: C.SEPARATOR_BUILD_TIME,
+      hp: 300
     };
   }
 
   function createConstructionSite(state, plan) {
+    var spec = getBuildingSpec(plan.buildingType);
     return {
-      id: 'separator_site_' + state.tickCount + '_' + state.buildings.length,
-      type: 'separator',
+      id: plan.buildingType + '_site_' + state.tickCount + '_' + state.buildings.length,
+      type: plan.buildingType,
       owner: 'player',
       tx: plan.tx,
       ty: plan.ty,
-      size: C.SEPARATOR_SIZE,
-      hp: 300,
-      maxHp: 300,
+      size: spec.size,
+      hp: spec.hp,
+      maxHp: spec.hp,
       constructionState: 'constructing',
       complete: false,
       progress: 0,
-      buildTime: C.SEPARATOR_BUILD_TIME,
-      separatorState: 'constructing',
+      buildTime: spec.buildTime,
+      separatorState: plan.buildingType === 'separator' ? 'constructing' : undefined,
       cycleProgress: 0,
-      cyclesCompleted: 0
+      cyclesCompleted: 0,
+      productionQueue: plan.buildingType === 'units_factory' ? [] : undefined,
+      productionProgress: plan.buildingType === 'units_factory' ? 0 : undefined,
+      producing: plan.buildingType === 'units_factory' ? null : undefined
     };
   }
 
@@ -204,9 +219,15 @@
     site.constructionState = 'completed';
     site.complete = true;
     site.progress = 1;
-    site.separatorState = 'idle';
-    site.cycleProgress = site.cycleProgress || 0;
-    site.cyclesCompleted = site.cyclesCompleted || 0;
+    if (site.type === 'separator') {
+      site.separatorState = 'idle';
+      site.cycleProgress = site.cycleProgress || 0;
+      site.cyclesCompleted = site.cyclesCompleted || 0;
+    } else if (site.type === 'units_factory') {
+      site.productionQueue = site.productionQueue || [];
+      site.productionProgress = 0;
+      site.producing = null;
+    }
   }
 
   function rebuildOccupancy(state) {

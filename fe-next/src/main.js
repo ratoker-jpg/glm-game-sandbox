@@ -66,9 +66,7 @@
     if (dt > 0.25) dt = 0.25;
 
     INPUT.update(state, dt);
-    HARVESTING.prepareMovement(state);
     MOVEMENT.updateMovement(state, dt);
-    HARVESTING.applyHarvesterSpeed(state, dt);
     HARVESTING.updateHarvesting(state, dt);
     ECONOMY.updateEconomy(state, dt);
     MOVEMENT.updateMoveMarkers(state, dt);

@@ -30,38 +30,6 @@
     }
   }
 
-  function prepareMovement(state) {
-    if (!state.units) return;
-    for (var i = 0; i < state.units.length; i++) {
-      var unit = state.units[i];
-      if (unit.type === 'harvester' && unit.moving && unit.moveTarget && unit.moveFrom) {
-        unit._harvesterMoveProgressBefore = unit.moveProgress || 0;
-      }
-    }
-  }
-
-  function applyHarvesterSpeed(state, dt) {
-    if (!state.units) return;
-    for (var i = 0; i < state.units.length; i++) {
-      var unit = state.units[i];
-      if (unit.type !== 'harvester' || !unit.moving || !unit.moveTarget || !unit.moveFrom) continue;
-      if (typeof unit._harvesterMoveProgressBefore !== 'number') continue;
-
-      var dx = unit.moveTarget.tx - unit.moveFrom.tx;
-      var dy = unit.moveTarget.ty - unit.moveFrom.ty;
-      var pathLen = Math.hypot(dx, dy);
-      if (pathLen < 0.01) continue;
-
-      var desired = unit._harvesterMoveProgressBefore + (C.HARVESTER_SPEED * dt) / pathLen;
-      if (desired < unit.moveProgress && desired < 1) {
-        unit.moveProgress = desired;
-        unit.tx = unit.moveFrom.tx + dx * desired;
-        unit.ty = unit.moveFrom.ty + dy * desired;
-      }
-      unit._harvesterMoveProgressBefore = null;
-    }
-  }
-
   function updateHarvester(state, unit, dt) {
     var node = unit.harvestTarget ? STATE.findResourceNodeById(state, unit.harvestTarget) : null;
 
@@ -215,8 +183,6 @@
 
   window.FE_NEXT_HARVESTING = {
     issueHarvestCommand: issueHarvestCommand,
-    prepareMovement: prepareMovement,
-    applyHarvesterSpeed: applyHarvesterSpeed,
     updateHarvesting: updateHarvesting
   };
 })();

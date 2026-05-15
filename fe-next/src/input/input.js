@@ -1,5 +1,6 @@
-// FEN-01: Input handler — camera pan/zoom + unit selection/move.
+// FEN-02: Input handler — camera pan/zoom + unit selection/move.
 // Wires DOM events to state mutations.
+// Movement commands go through FE_NEXT_MOVEMENT (path-aware).
 // Exposed as window.FE_NEXT_INPUT.
 
 (function () {
@@ -8,6 +9,7 @@
   var C = window.FE_NEXT_CONSTANTS;
   var COORDS = window.FE_NEXT_COORDS;
   var STATE = window.FE_NEXT_STATE;
+  var MOVEMENT = window.FE_NEXT_MOVEMENT;
 
   /**
    * Initialize input handlers on the given canvas.
@@ -57,7 +59,7 @@
         state.camPanStartX = state.camera.x;
         state.camPanStartY = state.camera.y;
       } else if (e.button === 2) {
-        // Right click — move selected unit
+        // Right click — move selected unit (path-aware)
         e.preventDefault();
         handleRightClick(state, pos);
       }
@@ -138,13 +140,13 @@
     // Convert canvas coords to tile coords
     var tile = COORDS.canvasToTile(canvasPos.x, canvasPos.y, state.camera, canvasW, canvasH);
 
-    // Find unit near this tile
+    // Find unit near this tile (tile-coordinate based lookup)
     var unit = STATE.findUnitAtTile(state, tile.x - 0.5, tile.y - 0.5);
 
     if (unit) {
       // Deselect previous
       if (state.selectedUnitId && state.selectedUnitId !== unit.id) {
-        var prev = STATE.findUnit(state, state.selectedUnitId);
+        var prev = MOVEMENT.findUnit(state, state.selectedUnitId);
         if (prev) prev.selected = false;
       }
       // Select new
@@ -153,7 +155,7 @@
     } else {
       // Click on empty ground — deselect
       if (state.selectedUnitId) {
-        var sel = STATE.findUnit(state, state.selectedUnitId);
+        var sel = MOVEMENT.findUnit(state, state.selectedUnitId);
         if (sel) sel.selected = false;
         state.selectedUnitId = null;
       }
@@ -162,6 +164,8 @@
 
   /**
    * Handle right-click: move selected unit to click position.
+   * Uses FE_NEXT_MOVEMENT.issueMoveCommand which is path-aware.
+   *
    * @param {object} state
    * @param {{x: number, y: number}} canvasPos
    */
@@ -178,7 +182,7 @@
     // Bounds check
     if (tx < 0 || ty < 0 || tx >= state.mapW || ty >= state.mapH) return;
 
-    STATE.issueMoveCommand(state, state.selectedUnitId, tx, ty);
+    MOVEMENT.issueMoveCommand(state, state.selectedUnitId, tx, ty);
   }
 
   /**

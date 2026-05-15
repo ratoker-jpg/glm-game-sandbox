@@ -1,8 +1,9 @@
-// FEN-01: FE Next composition root.
+// FEN-02: FE Next composition root.
 // Thin wiring layer that initializes state, canvas, input,
-// and starts the requestAnimationFrame loop.
+// asset loading, occupancy, and starts the requestAnimationFrame loop.
+// Movement runtime lives in systems/movement.js.
 //
-// Target: < 500 lines. Hard stop at 700.
+// Target: < 160 lines. Hard stop at 200.
 // Exposes window.FE_NEXT_DEBUG for test/debug access.
 
 (function () {
@@ -15,6 +16,9 @@
   var RENDERER = window.FE_NEXT_RENDERER;
   var INPUT = window.FE_NEXT_INPUT;
   var HUD = window.FE_NEXT_HUD;
+  var MOVEMENT = window.FE_NEXT_MOVEMENT;
+  var OCCUPANCY = window.FE_NEXT_OCCUPANCY;
+  var ASSETS_LIB = window.FE_NEXT_ASSETS;
 
   // ---- Canvas setup ----
   var canvas = document.getElementById('game');
@@ -23,9 +27,6 @@
   }
   var ctx = canvas.getContext('2d');
 
-  /**
-   * Resize canvas to fill the viewport at device pixel ratio.
-   */
   function resizeCanvas() {
     var dpr = window.devicePixelRatio || 1;
     var w = window.innerWidth;
@@ -43,6 +44,15 @@
   // ---- Game state ----
   var state = STATE.createInitialState();
 
+  // ---- Occupancy grid ----
+  state.occupancyGrid = OCCUPANCY.buildOccupancyGrid(state);
+
+  // ---- Asset loading (optional, non-blocking) ----
+  var assets = ASSETS_LIB.createAssetStore();
+  if (C.ASSET_MANIFEST) {
+    assets.loadManifest(C.ASSET_MANIFEST);
+  }
+
   // ---- Input ----
   INPUT.initInput(canvas, state);
 
@@ -50,40 +60,22 @@
   var lastTime = 0;
   var running = true;
 
-  /**
-   * Per-frame update: process input, move units, update markers.
-   * @param {number} dt - Delta time in seconds
-   */
   function update(dt) {
-    // Clamp delta to prevent spiral of death after tab switch
     if (dt > 0.25) dt = 0.25;
 
-    // Camera panning from held keys
     INPUT.update(state, dt);
+    MOVEMENT.updateMovement(state, dt);
+    MOVEMENT.updateMoveMarkers(state, dt);
 
-    // Unit movement
-    STATE.updateMovement(state, dt);
-
-    // Move markers (fade out)
-    STATE.updateMoveMarkers(state, dt);
-
-    // Advance game clock
     state.time += dt;
     state.tickCount++;
   }
 
-  /**
-   * Per-frame render: clear, draw terrain, draw entities, update HUD.
-   */
   function render() {
-    RENDERER.render(ctx, state);
+    RENDERER.render(ctx, state, assets);
     HUD.updateHUD(state);
   }
 
-  /**
-   * Main loop tick.
-   * @param {DOMHighResTimeStamp} timestamp
-   */
   function tick(timestamp) {
     if (!running) return;
 
@@ -96,7 +88,6 @@
     requestAnimationFrame(tick);
   }
 
-  // Start the loop
   requestAnimationFrame(tick);
 
   // ---- Debug / test access ----
@@ -104,6 +95,7 @@
     getState: function () { return state; },
     getCanvas: function () { return canvas; },
     getContext: function () { return ctx; },
+    getAssets: function () { return assets; },
     isRunning: function () { return running; },
     pause: function () { running = false; },
     resume: function () {
@@ -113,12 +105,12 @@
     }
   };
 
-  // FE_NEXT_GAME: stable reference for tests that expect a game-like object
   window.FE_NEXT_GAME = {
     state: state,
     canvas: canvas,
+    assets: assets,
     debug: window.FE_NEXT_DEBUG
   };
 
-  console.info('[FE Next] FEN-01 scaffold initialized. State:', state);
+  console.info('[FE Next] FEN-02 initialized. Occupancy grid built. Assets loading:', assets.stats());
 })();

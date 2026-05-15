@@ -18,6 +18,7 @@
   var HUD = window.FE_NEXT_HUD;
   var MOVEMENT = window.FE_NEXT_MOVEMENT;
   var HARVESTING = window.FE_NEXT_HARVESTING;
+  var CONSTRUCTION = window.FE_NEXT_CONSTRUCTION;
   var ECONOMY = window.FE_NEXT_ECONOMY;
   var OCCUPANCY = window.FE_NEXT_OCCUPANCY;
   var ASSETS_LIB = window.FE_NEXT_ASSETS;
@@ -68,6 +69,7 @@
     INPUT.update(state, dt);
     MOVEMENT.updateMovement(state, dt);
     HARVESTING.updateHarvesting(state, dt);
+    CONSTRUCTION.updateConstruction(state, dt);
     ECONOMY.updateEconomy(state, dt);
     MOVEMENT.updateMoveMarkers(state, dt);
 
@@ -101,6 +103,7 @@
     getContext: function () { return ctx; },
     getAssets: function () { return assets; },
     getHarvesting: function () { return HARVESTING; },
+    getConstruction: function () { return CONSTRUCTION; },
     getEconomy: function () { return ECONOMY; },
     isRunning: function () { return running; },
     pause: function () { running = false; },
@@ -118,5 +121,5 @@
     debug: window.FE_NEXT_DEBUG
   };
 
-  console.info('[FE Next] FEN-03 initialized. Economy loop ready. Assets loading:', assets.stats());
+  console.info('[FE Next] FEN-04 initialized. Construction loop ready. Assets loading:', assets.stats());
 })();

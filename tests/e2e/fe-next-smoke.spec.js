@@ -91,7 +91,7 @@ test('FE Next scaffold: boot -> canvas -> HUD -> select -> move unit', async ({ 
   expect(gameState.mapW, 'Map width should be 24').toBe(24);
   expect(gameState.mapH, 'Map height should be 24').toBe(24);
   expect(gameState.buildingCount, 'Should have HQ + separator').toBe(2);
-  expect(gameState.unitCount, 'Should have tank + harvester').toBe(2);
+  expect(gameState.unitCount, 'Should have tank + harvester + builder').toBe(3);
   expect(gameState.resourceNodeCount, 'Should have 3 mineral nodes').toBe(3);
   expect(gameState.resources.minerals, 'Initial minerals should be 100').toBe(100);
   expect(gameState.resources.energy, 'Initial energy should be 160').toBe(160);
@@ -105,7 +105,8 @@ test('FE Next scaffold: boot -> canvas -> HUD -> select -> move unit', async ({ 
       hq: s.buildings.find((b) => b.type === 'hq'),
       separator: s.buildings.find((b) => b.type === 'separator'),
       unit: s.units.find((u) => u.type === 'light_tank'),
-      harvester: s.units.find((u) => u.type === 'harvester')
+      harvester: s.units.find((u) => u.type === 'harvester'),
+      builder: s.units.find((u) => u.type === 'builder')
     };
   });
 
@@ -116,6 +117,8 @@ test('FE Next scaffold: boot -> canvas -> HUD -> select -> move unit', async ({ 
   expect(entities.harvester.cargo, 'Harvester should start empty').toBe(0);
   expect(entities.harvester.maxCargo, 'Harvester should have cargo capacity').toBe(10);
   expect(entities.harvester.harvestState, 'Harvester should have harvest state').toBe('idle');
+  expect(entities.builder.buildState, 'Builder should start idle').toBe('idle');
+  expect(entities.builder.buildOrder, 'Builder should have no initial build order').toBe(null);
   expect(typeof entities.separator.cycleProgress, 'Separator should have cycle progress').toBe('number');
   expect(entities.separator.cyclesCompleted, 'Separator should have cycle counter').toBe(0);
 
@@ -487,4 +490,152 @@ test('FE Next FEN-03: separator converts minerals and respects caps', async ({ p
   expect(capResult.cyanEl, 'cyanEl should not change while blocked by cap').toBe(0);
   expect(capResult.cyclesCompleted, 'No extra cycle should complete at cap').toBe(capResult.beforeCycles);
   expect(capResult.separatorState, 'Separator should report cap block').toBe('energy_cap');
+});
+
+test('FE Next FEN-04: builder auto-places separator construction site and completes it', async ({ page }) => {
+  await page.goto(FE_NEXT_URL, { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(1000);
+
+  const setup = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    const builder = s.units.find((u) => u.type === 'builder');
+    s.selectedUnitId = builder.id;
+    builder.selected = true;
+    const button = document.getElementById('build-separator');
+    window.FE_NEXT_HUD.updateHUD(s);
+    const plan = window.FE_NEXT_CONSTRUCTION.findBuildPlan(s, builder, 'separator');
+    const beforeEnergy = s.resources.energy;
+    const beforeBuildings = s.buildings.length;
+    const order = window.FE_NEXT_CONSTRUCTION.issueBuildCommand(s, builder.id, 'separator');
+    const site = s.buildings.find((b) => b.id === order.buildingId);
+    return {
+      hasApi: !!window.FE_NEXT_CONSTRUCTION && typeof window.FE_NEXT_CONSTRUCTION.issueBuildCommand === 'function',
+      buttonExists: !!button,
+      buttonVisible: button ? button.style.display : '',
+      plan,
+      order,
+      beforeEnergy,
+      afterEnergy: s.resources.energy,
+      beforeBuildings,
+      afterBuildings: s.buildings.length,
+      site,
+      builderState: builder.buildState,
+      builderMoving: builder.moving
+    };
+  });
+
+  expect(setup.hasApi, 'Construction API should exist').toBe(true);
+  expect(setup.buttonExists, 'Build Separator button should exist').toBe(true);
+  expect(setup.buttonVisible, 'Build button should show for selected builder').toBe('block');
+  expect(setup.plan.ok, 'Auto-placement should find a valid build plan').toBe(true);
+  expect(setup.order.ok, 'Build order should be accepted').toBe(true);
+  expect(setup.afterEnergy, 'Energy should decrease by separator cost').toBe(setup.beforeEnergy - 30);
+  expect(setup.afterBuildings, 'Construction site should be added').toBe(setup.beforeBuildings + 1);
+  expect(setup.site.complete, 'Construction site should start incomplete').toBe(false);
+  expect(setup.site.constructionState, 'Construction site should be constructing').toBe('constructing');
+  expect(setup.builderState, 'Builder should move to construction site').toBe('moving_to_site');
+  expect(setup.builderMoving, 'Builder should have movement command to access tile').toBe(true);
+
+  const complete = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    const builder = s.units.find((u) => u.type === 'builder');
+    const site = s.buildings.find((b) => b.complete === false && b.type === 'separator');
+    const access = builder.buildOrder.accessTile;
+    builder.tx = access.tx;
+    builder.ty = access.ty;
+    builder.moving = false;
+    builder.moveTarget = null;
+    builder.moveFrom = null;
+    window.FE_NEXT_CONSTRUCTION.updateConstruction(s, 0.1);
+    window.FE_NEXT_CONSTRUCTION.updateConstruction(s, 8.1);
+    const blocked = s.occupancyGrid[site.ty][site.tx] &&
+      s.occupancyGrid[site.ty][site.tx + 1] &&
+      s.occupancyGrid[site.ty + 1][site.tx] &&
+      s.occupancyGrid[site.ty + 1][site.tx + 1];
+    const pathIntoBuilding = window.FE_NEXT_PATHFINDING.findPath(s.occupancyGrid, access.tx, access.ty, site.tx, site.ty);
+    s.resources.minerals = 100;
+    s.resources.energy = 160;
+    s.resources.cyanEl = 0;
+    const cyclesBefore = site.cyclesCompleted;
+    window.FE_NEXT_ECONOMY.updateEconomy(s, 6.1);
+    return {
+      complete: site.complete,
+      constructionState: site.constructionState,
+      progress: site.progress,
+      builderState: builder.buildState,
+      builderOrder: builder.buildOrder,
+      blocked,
+      pathIntoBuildingFound: !!pathIntoBuilding,
+      cyclesBefore,
+      cyclesAfter: site.cyclesCompleted,
+      energy: s.resources.energy,
+      cyanEl: s.resources.cyanEl
+    };
+  });
+
+  expect(complete.complete, 'Construction should complete through accelerated update').toBe(true);
+  expect(complete.constructionState, 'Completed site should become completed building').toBe('completed');
+  expect(complete.progress, 'Completed building progress should be 1').toBe(1);
+  expect(complete.builderState, 'Builder should return to idle').toBe('idle');
+  expect(complete.builderOrder, 'Builder order should clear after completion').toBe(null);
+  expect(complete.blocked, 'Completed separator footprint should block occupancy').toBe(true);
+  expect(complete.pathIntoBuildingFound, 'Pathfinding should reject completed building footprint').toBe(false);
+  expect(complete.cyclesAfter, 'Built separator should participate in economy').toBeGreaterThan(complete.cyclesBefore);
+  expect(complete.energy, 'Completed separators should add energy after cycle').toBe(180);
+  expect(complete.cyanEl, 'Completed separators should add cyanEl after cycle').toBe(2);
+});
+
+test('FE Next FEN-04: invalid build orders are rejected before spending energy', async ({ page }) => {
+  await page.goto(FE_NEXT_URL, { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(1000);
+
+  const noEnergy = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    const builder = s.units.find((u) => u.type === 'builder');
+    s.resources.energy = 0;
+    const beforeBuildings = s.buildings.length;
+    const result = window.FE_NEXT_CONSTRUCTION.issueBuildCommand(s, builder.id, 'separator');
+    return {
+      result,
+      energy: s.resources.energy,
+      beforeBuildings,
+      afterBuildings: s.buildings.length,
+      buildState: builder.buildState
+    };
+  });
+
+  expect(noEnergy.result.ok, 'Build should reject without enough energy').toBe(false);
+  expect(noEnergy.result.reason, 'Rejection reason should be not enough energy').toBe('not_enough_energy');
+  expect(noEnergy.energy, 'Rejected build should not spend energy').toBe(0);
+  expect(noEnergy.afterBuildings, 'Rejected build should not add site').toBe(noEnergy.beforeBuildings);
+  expect(noEnergy.buildState, 'Rejected build should leave builder idle').toBe('idle');
+
+  const blockedTerrain = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    const builder = s.units.find((u) => u.type === 'builder');
+    s.resources.energy = 160;
+    for (let y = 1; y < s.mapH - 1; y++) {
+      for (let x = 1; x < s.mapW - 1; x++) {
+        if (Math.abs(x - builder.tx) <= 1 && Math.abs(y - builder.ty) <= 1) continue;
+        s.terrain[y][x] = 'water';
+      }
+    }
+    s.occupancyGrid = window.FE_NEXT_OCCUPANCY.buildOccupancyGrid(s);
+    return window.FE_NEXT_CONSTRUCTION.findBuildPlan(s, builder, 'separator');
+  });
+
+  expect(blockedTerrain.ok, 'Build plan should reject blocked terrain footprints').toBe(false);
+  expect(blockedTerrain.reason, 'Blocked terrain should be reported').toBe('blocked_terrain');
+
+  const noAccess = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    const builder = s.units.find((u) => u.type === 'builder');
+    s.terrain = s.terrain.map((row) => row.map((cell) => cell === 'water' ? 'grass' : cell));
+    s.occupancyGrid = s.terrain.map((row) => row.map(() => true));
+    s.occupancyGrid[Math.round(builder.ty)][Math.round(builder.tx)] = false;
+    return window.FE_NEXT_CONSTRUCTION.findBuildPlan(s, builder, 'separator');
+  });
+
+  expect(noAccess.ok, 'Build plan should reject when no access path exists').toBe(false);
+  expect(noAccess.reason, 'No access path should be reported').toBe('no_access_path');
 });

@@ -11,6 +11,7 @@
   var STATE = window.FE_NEXT_STATE;
   var MOVEMENT = window.FE_NEXT_MOVEMENT;
   var HARVESTING = window.FE_NEXT_HARVESTING;
+  var CONSTRUCTION = window.FE_NEXT_CONSTRUCTION;
 
   /**
    * Initialize input handlers on the given canvas.
@@ -127,6 +128,16 @@
     }
     canvas.addEventListener('touchstart', onTouchStart, { passive: true });
     canvas.addEventListener('touchend', onTouchEnd);
+
+    var buildSeparatorButton = document.getElementById('build-separator');
+    if (buildSeparatorButton) {
+      buildSeparatorButton.addEventListener('click', function () {
+        var selected = state.selectedUnitId ? MOVEMENT.findUnit(state, state.selectedUnitId) : null;
+        if (selected && selected.type === 'builder') {
+          CONSTRUCTION.issueBuildCommand(state, selected.id, 'separator');
+        }
+      });
+    }
   }
 
   /**
@@ -183,11 +194,13 @@
     // Bounds check
     if (tx < 0 || ty < 0 || tx >= state.mapW || ty >= state.mapH) return;
 
+    var selectedUnit = MOVEMENT.findUnit(state, state.selectedUnitId);
+    if (selectedUnit && selectedUnit.type === 'builder' && selectedUnit.buildState !== 'idle') return;
+
     var node = STATE.findResourceNodeAtTile(state, tx, ty);
     if (node) {
-      var selected = MOVEMENT.findUnit(state, state.selectedUnitId);
-      if (selected && selected.type === 'harvester') {
-        HARVESTING.issueHarvestCommand(state, selected.id, node.id);
+      if (selectedUnit && selectedUnit.type === 'harvester') {
+        HARVESTING.issueHarvestCommand(state, selectedUnit.id, node.id);
         return;
       }
     }

@@ -147,6 +147,11 @@
       if (!building.destroyed) renderEnemyBunker(ctx, building, canvasPos, z);
       return;
     }
+    // FEN-07: Enemy HQ
+    if (building.type === 'enemy_hq') {
+      if (!building.destroyed) renderEnemyHQ(ctx, building, canvasPos, z);
+      return;
+    }
 
     // Geometric fallback: isometric box
     var hw = C.TILE_W / 2 * s * z;
@@ -390,9 +395,8 @@
       ctx.strokeStyle = '#725b19';
       ctx.lineWidth = 1.5 * z;
       ctx.stroke();
-    } else if (unitSprite && unit.type === 'light_tank') {
-      // Draw unit sprite
-      // sprite_profiles says size 104x104, groundFactor 0.76
+    } else if (unitSprite && unit.type === 'light_tank' && unit.owner === 'player') {
+      // Draw player unit sprite
       var spriteW = 104 * z * 0.76;
       var spriteH = 104 * z * 0.76;
       ctx.drawImage(
@@ -402,6 +406,39 @@
         spriteW,
         spriteH
       );
+    } else if (unit.type === 'light_tank' && unit.owner === 'enemy') {
+      // FEN-07: Enemy tank — red geometric circle
+      var etR = C.UNIT_RADIUS * C.TILE_W / 2 * z;
+      ctx.beginPath();
+      ctx.arc(canvasPos.x, canvasPos.y, etR, 0, Math.PI * 2);
+      ctx.fillStyle = '#c03030';
+      ctx.fill();
+      ctx.strokeStyle = '#7a1010';
+      ctx.lineWidth = 1.5 * z;
+      ctx.stroke();
+      // Direction indicator
+      if (unit.moving && unit.moveTarget) {
+        var edx = unit.moveTarget.tx - unit.tx;
+        var edy = unit.moveTarget.ty - unit.ty;
+        var eAngle = Math.atan2(edy, edx);
+        var eTriSize = etR * 0.7;
+        ctx.beginPath();
+        ctx.moveTo(
+          canvasPos.x + Math.cos(eAngle) * (etR + eTriSize),
+          canvasPos.y + Math.sin(eAngle) * (etR + eTriSize)
+        );
+        ctx.lineTo(
+          canvasPos.x + Math.cos(eAngle + 2.5) * etR * 0.5,
+          canvasPos.y + Math.sin(eAngle + 2.5) * etR * 0.5
+        );
+        ctx.lineTo(
+          canvasPos.x + Math.cos(eAngle - 2.5) * etR * 0.5,
+          canvasPos.y + Math.sin(eAngle - 2.5) * etR * 0.5
+        );
+        ctx.closePath();
+        ctx.fillStyle = '#ffcccc';
+        ctx.fill();
+      }
     } else {
       // Geometric fallback: circle with direction indicator
       var r = C.UNIT_RADIUS * C.TILE_W / 2 * z;
@@ -566,6 +603,11 @@
 
     // Attack indicators (red line from attacking unit to target)
     renderAttackIndicators(ctx, state, canvasW, canvasH);
+
+    // FEN-07: Result overlay
+    if (state.gameResult) {
+      renderResultOverlay(ctx, state, canvasW, canvasH);
+    }
   }
 
   function renderAttackIndicators(ctx, state, canvasW, canvasH) {
@@ -576,15 +618,26 @@
       var unit = state.units[i];
       if (unit.type !== 'light_tank' || unit.attackState !== 'attacking' || !unit.attackTarget) continue;
       var target = null;
+      var targetScrX, targetScrY;
       if (unit.attackTarget.kind === 'building') {
         target = window.FE_NEXT_STATE.findBuildingById(state, unit.attackTarget.id);
+        if (!target || target.destroyed) continue;
+        var ts = target.size || 1;
+        var tscr = COORDS.tileToScreen(target.tx + ts / 2, target.ty + ts / 2);
+        targetScrX = tscr.x;
+        targetScrY = tscr.y;
+      } else if (unit.attackTarget.kind === 'unit') {
+        // FEN-07: unit target
+        target = window.FE_NEXT_STATE.findUnitById(state, unit.attackTarget.id);
+        if (!target) continue;
+        var utscr = COORDS.tileToScreen(target.tx + 0.5, target.ty + 0.5);
+        targetScrX = utscr.x;
+        targetScrY = utscr.y;
       }
-      if (!target || target.destroyed) continue;
+      if (targetScrX === undefined) continue;
       var unitScr = COORDS.tileToScreen(unit.tx + 0.5, unit.ty + 0.5);
       var unitCanvas = COORDS.worldToCanvas(unitScr.x, unitScr.y, camera, canvasW, canvasH);
-      var ts = target.size || 1;
-      var targetScr = COORDS.tileToScreen(target.tx + ts / 2, target.ty + ts / 2);
-      var targetCanvas = COORDS.worldToCanvas(targetScr.x, targetScr.y, camera, canvasW, canvasH);
+      var targetCanvas = COORDS.worldToCanvas(targetScrX, targetScrY, camera, canvasW, canvasH);
       ctx.save();
       ctx.beginPath();
       ctx.moveTo(unitCanvas.x, unitCanvas.y);
@@ -594,6 +647,78 @@
       ctx.stroke();
       ctx.restore();
     }
+  }
+
+  // FEN-07: Render enemy HQ
+  function renderEnemyHQ(ctx, building, canvasPos, z) {
+    var s = building.size || 1;
+    var hw = C.TILE_W / 2 * s * z;
+    var hh = C.TILE_H / 2 * s * z;
+    var bHeight = 20 * z;
+
+    // Right face
+    ctx.beginPath();
+    ctx.moveTo(canvasPos.x + hw, canvasPos.y);
+    ctx.lineTo(canvasPos.x, canvasPos.y + hh);
+    ctx.lineTo(canvasPos.x, canvasPos.y + hh - bHeight);
+    ctx.lineTo(canvasPos.x + hw, canvasPos.y - bHeight);
+    ctx.closePath();
+    ctx.fillStyle = '#8b1a1a';
+    ctx.fill();
+    ctx.strokeStyle = '#5a0a0a';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Left face
+    ctx.beginPath();
+    ctx.moveTo(canvasPos.x - hw, canvasPos.y);
+    ctx.lineTo(canvasPos.x, canvasPos.y + hh);
+    ctx.lineTo(canvasPos.x, canvasPos.y + hh - bHeight);
+    ctx.lineTo(canvasPos.x - hw, canvasPos.y - bHeight);
+    ctx.closePath();
+    ctx.fillStyle = '#6b1212';
+    ctx.fill();
+    ctx.strokeStyle = '#440808';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Top face
+    drawDiamond(ctx, canvasPos.x, canvasPos.y - bHeight, hw, hh, '#b02020', '#5a0a0a');
+
+    // Label
+    ctx.fillStyle = '#ffcccc';
+    ctx.font = (10 * z) + 'px "Trebuchet MS", Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('ENM HQ', canvasPos.x, canvasPos.y - bHeight);
+
+    // HP bar
+    if (building.hp < building.maxHp) {
+      var barW = 42 * z;
+      var barH = 4 * z;
+      var barX = canvasPos.x - barW / 2;
+      var barY = canvasPos.y - bHeight - 18 * z;
+      var hpRatio = building.hp / building.maxHp;
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.fillRect(barX, barY, barW, barH);
+      ctx.fillStyle = hpRatio > 0.5 ? '#5de06b' : hpRatio > 0.25 ? '#f2d75c' : '#e05243';
+      ctx.fillRect(barX, barY, barW * hpRatio, barH);
+    }
+  }
+
+  // FEN-07: Result overlay
+  function renderResultOverlay(ctx, state, canvasW, canvasH) {
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.fillRect(0, 0, canvasW, canvasH);
+    var text = state.gameResult === 'victory' ? 'VICTORY' : 'DEFEAT';
+    var color = state.gameResult === 'victory' ? '#5de06b' : '#e05243';
+    ctx.fillStyle = color;
+    ctx.font = 'bold ' + Math.min(72, canvasW / 8) + 'px "Trebuchet MS", Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, canvasW / 2, canvasH / 2);
+    ctx.restore();
   }
 
   window.FE_NEXT_RENDERER = {

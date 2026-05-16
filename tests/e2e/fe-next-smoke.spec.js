@@ -90,7 +90,7 @@ test('FE Next scaffold: boot -> canvas -> HUD -> select -> move unit', async ({ 
   expect(gameState.hasState, 'window.FE_NEXT_GAME.state should exist').toBe(true);
   expect(gameState.mapW, 'Map width should be 24').toBe(24);
   expect(gameState.mapH, 'Map height should be 24').toBe(24);
-  expect(gameState.buildingCount, 'Should have HQ + separator + enemy bunker').toBe(3);
+  expect(gameState.buildingCount, 'Should have HQ + separator + enemy bunker + enemy HQ').toBe(4);
   expect(gameState.unitCount, 'Should have tank + harvester + builder').toBe(3);
   expect(gameState.resourceNodeCount, 'Should have 3 mineral nodes').toBe(3);
   expect(gameState.resources.minerals, 'Initial minerals should be 100').toBe(100);
@@ -1108,4 +1108,266 @@ test('FE Next FEN-06 fix: construction sites block occupancy, destroyed building
   expect(destroyedOccupancy.beforeDestroy, 'Alive bunker should block occupancy').toBe(true);
   expect(destroyedOccupancy.afterDestroy, 'Destroyed bunker should not block occupancy').toBe(false);
   expect(destroyedOccupancy.pathThroughFound, 'Pathfinding should route through destroyed building tile').toBe(true);
+});
+
+test('FE Next FEN-07: enemy HQ, enemy spawn, unit-vs-unit combat, win/lose', async ({ page }) => {
+  const pageErrors = [];
+  page.on('pageerror', (err) => {
+    pageErrors.push(err && err.message ? err.message : String(err));
+  });
+
+  await page.goto(FE_NEXT_URL, { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(1000);
+
+  // Verify enemy HQ exists
+  const enemyHqCheck = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    const enemyHq = s.buildings.find((b) => b.type === 'enemy_hq');
+    const C = window.FE_NEXT_CONSTANTS;
+    return {
+      exists: !!enemyHq,
+      id: enemyHq ? enemyHq.id : null,
+      owner: enemyHq ? enemyHq.owner : null,
+      tx: enemyHq ? enemyHq.tx : null,
+      ty: enemyHq ? enemyHq.ty : null,
+      size: enemyHq ? enemyHq.size : null,
+      hp: enemyHq ? enemyHq.hp : null,
+      maxHp: enemyHq ? enemyHq.maxHp : null,
+      destroyed: enemyHq ? enemyHq.destroyed : null,
+      expectedHp: C.ENEMY_HQ_HP,
+      expectedSize: C.ENEMY_HQ_SIZE
+    };
+  });
+
+  expect(enemyHqCheck.exists, 'Enemy HQ should exist').toBe(true);
+  expect(enemyHqCheck.id, 'Enemy HQ id should be enemy_hq').toBe('enemy_hq');
+  expect(enemyHqCheck.owner, 'Enemy HQ should be enemy-owned').toBe('enemy');
+  expect(enemyHqCheck.tx, 'Enemy HQ should be at tx=18').toBe(18);
+  expect(enemyHqCheck.ty, 'Enemy HQ should be at ty=18').toBe(18);
+  expect(enemyHqCheck.size, 'Enemy HQ should be size 2').toBe(2);
+  expect(enemyHqCheck.hp, 'Enemy HQ should have 500 HP').toBe(500);
+  expect(enemyHqCheck.destroyed, 'Enemy HQ should not be destroyed initially').toBe(false);
+
+  // Verify enemy state fields (pause game loop first for determinism)
+  const enemyStateCheck = await page.evaluate(() => {
+    window.FE_NEXT_DEBUG.pause();
+    const s = window.FE_NEXT_GAME.state;
+    const C = window.FE_NEXT_CONSTANTS;
+    return {
+      hasEnemy: !!s.enemy,
+      spawnTimer: s.enemy ? s.enemy.spawnTimer : null,
+      tanksSpawned: s.enemy ? s.enemy.tanksSpawned : null,
+      gameResult: s.gameResult,
+      winner: s.winner,
+      resultReason: s.resultReason,
+      enemyApi: !!window.FE_NEXT_ENEMY,
+      gameResultApi: !!window.FE_NEXT_GAME_RESULT,
+      maxTanks: C.ENEMY_MAX_TANKS,
+      spawnInterval: C.ENEMY_SPAWN_INTERVAL,
+      initialDelay: C.ENEMY_TANK_INITIAL_DELAY
+    };
+  });
+
+  expect(enemyStateCheck.hasEnemy, 'Enemy state should exist').toBe(true);
+  expect(enemyStateCheck.spawnTimer, 'Initial spawn timer should be close to 10').toBeGreaterThan(8);
+  expect(enemyStateCheck.spawnTimer, 'Initial spawn timer should be at most 10').toBeLessThanOrEqual(10);
+  expect(enemyStateCheck.tanksSpawned, 'Initial tanksSpawned should be 0').toBe(0);
+  expect(enemyStateCheck.gameResult, 'gameResult should be null initially').toBe(null);
+  expect(enemyStateCheck.winner, 'winner should be null initially').toBe(null);
+  expect(enemyStateCheck.resultReason, 'resultReason should be null initially').toBe(null);
+  expect(enemyStateCheck.enemyApi, 'FE_NEXT_ENEMY should exist').toBe(true);
+  expect(enemyStateCheck.gameResultApi, 'FE_NEXT_GAME_RESULT should exist').toBe(true);
+  expect(enemyStateCheck.maxTanks, 'ENEMY_MAX_TANKS should be 3').toBe(3);
+  expect(enemyStateCheck.spawnInterval, 'ENEMY_SPAWN_INTERVAL should be 20').toBe(20);
+  expect(enemyStateCheck.initialDelay, 'ENEMY_TANK_INITIAL_DELAY should be 10').toBe(10);
+
+  // Game loop is already paused above for determinism
+
+  // Manually spawn an enemy tank
+  const spawnResult = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    s.enemy.spawnTimer = 0;
+    window.FE_NEXT_ENEMY.updateEnemy(s, 0.1);
+    const enemyTanks = s.units.filter((u) => u.owner === 'enemy' && u.type === 'light_tank');
+    const tank = enemyTanks[0];
+    return {
+      tankCount: enemyTanks.length,
+      tank: tank ? {
+        id: tank.id,
+        type: tank.type,
+        owner: tank.owner,
+        hp: tank.hp,
+        maxHp: tank.maxHp,
+        damage: tank.damage,
+        range: tank.range,
+        attackState: tank.attackState,
+        attackTarget: tank.attackTarget
+      } : null,
+      tanksSpawned: s.enemy.tanksSpawned
+    };
+  });
+
+  expect(spawnResult.tankCount, 'One enemy tank should be spawned').toBe(1);
+  expect(spawnResult.tank.type, 'Spawned unit should be light_tank').toBe('light_tank');
+  expect(spawnResult.tank.owner, 'Spawned tank should be enemy-owned').toBe('enemy');
+  expect(spawnResult.tank.hp, 'Enemy tank should have 100 HP').toBe(100);
+  expect(spawnResult.tank.damage, 'Enemy tank should have 20 damage').toBe(20);
+  expect(spawnResult.tank.range, 'Enemy tank should have 3 range').toBe(3);
+  expect(spawnResult.tank.attackState, 'Enemy tank should be attacking or moving to attack').toBeTruthy();
+  expect(spawnResult.tank.attackTarget, 'Enemy tank should target player HQ').toBeTruthy();
+  expect(spawnResult.tank.attackTarget.id, 'Enemy tank should target player_hq').toBe('player_hq');
+  expect(spawnResult.tank.attackTarget.kind, 'Enemy tank target kind should be building').toBe('building');
+  expect(spawnResult.tanksSpawned, 'tanksSpawned should be 1').toBe(1);
+
+  // Enemy tank damages player HQ (place in range and run combat)
+  const enemyDamage = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    const playerHq = s.buildings.find((b) => b.id === 'player_hq');
+    const enemyTank = s.units.find((u) => u.owner === 'enemy');
+    enemyTank.tx = playerHq.tx - 2;
+    enemyTank.ty = playerHq.ty;
+    enemyTank.moving = false;
+    enemyTank.moveTarget = null;
+    enemyTank.moveFrom = null;
+    enemyTank.path = null;
+    enemyTank.attackState = 'attacking';
+    enemyTank.attackTarget = { id: 'player_hq', kind: 'building' };
+    const hpBefore = playerHq.hp;
+    window.FE_NEXT_COMBAT.updateCombat(s, 1.1);
+    return { hpBefore, hpAfter: playerHq.hp };
+  });
+
+  expect(enemyDamage.hpAfter, 'Player HQ should take damage from enemy tank').toBeLessThan(enemyDamage.hpBefore);
+
+  // Player tank attacks enemy tank (unit-vs-unit)
+  const unitVsUnit = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    const playerTank = s.units.find((u) => u.owner === 'player' && u.type === 'light_tank');
+    const enemyTank = s.units.find((u) => u.owner === 'enemy');
+    // Place player tank adjacent to enemy tank
+    playerTank.tx = enemyTank.tx + 1;
+    playerTank.ty = enemyTank.ty;
+    playerTank.moving = false;
+    playerTank.moveTarget = null;
+    playerTank.moveFrom = null;
+    playerTank.path = null;
+    const result = window.FE_NEXT_COMBAT.issueAttackCommand(s, playerTank.id, enemyTank.id, 'unit');
+    return {
+      result,
+      attackState: playerTank.attackState,
+      attackTarget: playerTank.attackTarget,
+      enemyHp: enemyTank.hp
+    };
+  });
+
+  expect(unitVsUnit.result.ok, 'Attack on enemy unit should succeed').toBe(true);
+  expect(unitVsUnit.attackTarget.id, 'Attack target should be enemy tank id').toBeTruthy();
+  expect(unitVsUnit.attackTarget.kind, 'Attack target kind should be unit').toBe('unit');
+
+  // Run combat to deal unit-vs-unit damage
+  const unitDamage = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    const playerTank = s.units.find((u) => u.owner === 'player' && u.type === 'light_tank');
+    const enemyTank = s.units.find((u) => u.owner === 'enemy');
+    const hpBefore = enemyTank.hp;
+    window.FE_NEXT_COMBAT.updateCombat(s, 1.1);
+    return { hpBefore, hpAfter: enemyTank.hp };
+  });
+
+  expect(unitDamage.hpAfter, 'Enemy tank should take damage from player tank').toBeLessThan(unitDamage.hpBefore);
+
+  // Unit death: kill enemy tank, verify removal
+  const unitDeath = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    const enemyTank = s.units.find((u) => u.owner === 'enemy');
+    enemyTank.hp = 1;
+    const beforeCount = s.units.length;
+    window.FE_NEXT_COMBAT.updateCombat(s, 1.5);
+    const afterCount = s.units.length;
+    const playerTank = s.units.find((u) => u.owner === 'player' && u.type === 'light_tank');
+    return {
+      beforeCount,
+      afterCount,
+      enemyFound: !!s.units.find((u) => u.owner === 'enemy'),
+      playerTankAttackState: playerTank ? playerTank.attackState : null
+    };
+  });
+
+  expect(unitDeath.afterCount, 'Dead enemy unit should be removed from units array').toBe(unitDeath.beforeCount - 1);
+  expect(unitDeath.enemyFound, 'Enemy unit should not be found after death').toBe(false);
+  expect(unitDeath.playerTankAttackState, 'Player tank should return to idle after target dies').toBe('idle');
+
+  // Same-owner attack rejection
+  const sameOwner = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    const playerTank = s.units.find((u) => u.owner === 'player' && u.type === 'light_tank');
+    const harvester = s.units.find((u) => u.type === 'harvester');
+    return window.FE_NEXT_COMBAT.issueAttackCommand(s, playerTank.id, harvester.id, 'unit');
+  });
+
+  expect(sameOwner.ok, 'Same-owner attack should be rejected').toBe(false);
+  expect(sameOwner.reason, 'Reason should be not_enemy').toBe('not_enemy');
+
+  // Win condition: destroy enemy HQ
+  const winCondition = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    const enemyHq = s.buildings.find((b) => b.type === 'enemy_hq');
+    enemyHq.hp = 1;
+    enemyHq.destroyed = false;
+    window.FE_NEXT_GAME_RESULT.updateGameResult(s);
+    return { gameResult: s.gameResult, winner: s.winner, resultReason: s.resultReason };
+  });
+
+  expect(winCondition.gameResult, 'gameResult should still be null (enemy HQ not destroyed yet)').toBe(null);
+
+  const winAchieved = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    const enemyHq = s.buildings.find((b) => b.type === 'enemy_hq');
+    enemyHq.hp = 0;
+    enemyHq.destroyed = true;
+    window.FE_NEXT_GAME_RESULT.updateGameResult(s);
+    return { gameResult: s.gameResult, winner: s.winner, resultReason: s.resultReason };
+  });
+
+  expect(winAchieved.gameResult, 'gameResult should be victory').toBe('victory');
+  expect(winAchieved.winner, 'winner should be player').toBe('player');
+  expect(winAchieved.resultReason, 'resultReason should be enemy_hq_destroyed').toBe('enemy_hq_destroyed');
+
+  // Lose condition: destroy player HQ
+  const loseCondition = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    // Reset game result and restore enemy HQ so only player HQ destruction triggers defeat
+    s.gameResult = null;
+    s.winner = null;
+    s.resultReason = null;
+    const enemyHq = s.buildings.find((b) => b.type === 'enemy_hq');
+    enemyHq.hp = enemyHq.maxHp;
+    enemyHq.destroyed = false;
+    const playerHq = s.buildings.find((b) => b.id === 'player_hq');
+    playerHq.hp = 0;
+    playerHq.destroyed = true;
+    window.FE_NEXT_GAME_RESULT.updateGameResult(s);
+    return { gameResult: s.gameResult, winner: s.winner, resultReason: s.resultReason };
+  });
+
+  expect(loseCondition.gameResult, 'gameResult should be defeat').toBe('defeat');
+  expect(loseCondition.winner, 'winner should be enemy').toBe('enemy');
+  expect(loseCondition.resultReason, 'resultReason should be player_hq_destroyed').toBe('player_hq_destroyed');
+
+  // gameResult stops spawning
+  const noSpawnAfterResult = await page.evaluate(() => {
+    const s = window.FE_NEXT_GAME.state;
+    s.gameResult = 'victory';
+    s.winner = 'player';
+    s.resultReason = 'enemy_hq_destroyed';
+    s.enemy.spawnTimer = 0;
+    const enemyTankCountBefore = window.FE_NEXT_ENEMY.countEnemyTanks(s);
+    window.FE_NEXT_ENEMY.updateEnemy(s, 0.1);
+    const enemyTankCountAfter = window.FE_NEXT_ENEMY.countEnemyTanks(s);
+    return { before: enemyTankCountBefore, after: enemyTankCountAfter };
+  });
+
+  expect(noSpawnAfterResult.after, 'Enemy should not spawn when gameResult is set').toBe(noSpawnAfterResult.before);
+
+  expect(pageErrors, `Page JS errors: ${pageErrors.join('\n')}`).toEqual([]);
 });

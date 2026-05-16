@@ -20,6 +20,17 @@
     setText('hud-time', formatTime(state.time));
     setText('hud-separator', formatSeparator(state));
 
+    // FEN-07: Game result status
+    if (state.gameResult) {
+      var resultEl = document.getElementById('hud-result');
+      var resultRow = document.getElementById('hud-result-row');
+      if (resultEl) {
+        resultEl.textContent = state.gameResult === 'victory' ? 'VICTORY' : 'DEFEAT';
+        resultEl.style.color = state.gameResult === 'victory' ? '#5de06b' : '#e05243';
+      }
+      if (resultRow) resultRow.style.display = 'flex';
+    }
+
     var selInfo = document.getElementById('selection-info');
     var selTitle = document.getElementById('sel-title');
     var selType = document.getElementById('sel-type');

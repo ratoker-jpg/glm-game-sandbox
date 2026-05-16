@@ -109,6 +109,15 @@
     // Enemy dummy
     ENEMY_DUMMY_HP: 100,
 
+    // Enemy HQ (FEN-07)
+    ENEMY_HQ_HP: 500,
+    ENEMY_HQ_SIZE: 2,
+
+    // Enemy spawning (FEN-07)
+    ENEMY_TANK_INITIAL_DELAY: 10.0,   // seconds before first spawn
+    ENEMY_SPAWN_INTERVAL: 20.0,       // seconds between spawns
+    ENEMY_MAX_TANKS: 3,
+
     // Tick
     TARGET_FPS: 60,
     FRAME_BUDGET_MS: 16.67

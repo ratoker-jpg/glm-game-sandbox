@@ -148,6 +148,19 @@
       destroyed: false
     };
 
+    // FEN-07: Enemy HQ
+    var enemyHq = {
+      id: 'enemy_hq',
+      type: 'enemy_hq',
+      owner: 'enemy',
+      tx: 18,
+      ty: 18,
+      size: C.ENEMY_HQ_SIZE,
+      hp: C.ENEMY_HQ_HP,
+      maxHp: C.ENEMY_HQ_HP,
+      destroyed: false
+    };
+
     var resourceNodes = [
       createMineralNode('mineral_node_1', 14, 8),
       createMineralNode('mineral_node_2', 10, 14),
@@ -182,7 +195,7 @@
       camPanStartX: 0,
       camPanStartY: 0,
 
-      buildings: [hq, separator, enemyBunker],
+      buildings: [hq, separator, enemyBunker, enemyHq],
       units: [testUnit, harvester, builder],
       resourceNodes: resourceNodes,
 
@@ -199,7 +212,18 @@
 
       selectedUnitId: null,
       selectedBuildingId: null,
-      moveMarkers: []
+      moveMarkers: [],
+
+      // FEN-07: Enemy state
+      enemy: {
+        spawnTimer: C.ENEMY_TANK_INITIAL_DELAY,
+        tanksSpawned: 0
+      },
+
+      // FEN-07: Game result
+      gameResult: null,     // null | 'victory' | 'defeat'
+      winner: null,         // null | 'player' | 'enemy'
+      resultReason: null    // null | 'enemy_hq_destroyed' | 'player_hq_destroyed'
     };
   }
 
@@ -268,9 +292,19 @@
     return null;
   }
 
+  // FEN-07: Find unit by ID
+  function findUnitById(state, id) {
+    if (!state.units) return null;
+    for (var i = 0; i < state.units.length; i++) {
+      if (state.units[i].id === id) return state.units[i];
+    }
+    return null;
+  }
+
   window.FE_NEXT_STATE = {
     createInitialState: createInitialState,
     findUnitAtTile: findUnitAtTile,
+    findUnitById: findUnitById,
     findResourceNodeAtTile: findResourceNodeAtTile,
     findResourceNodeById: findResourceNodeById,
     findBuildingByType: findBuildingByType,

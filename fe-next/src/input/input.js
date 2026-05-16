@@ -207,6 +207,15 @@
       return;
     }
 
+    // FEN-07: right-click enemy unit with selected light_tank = attack unit
+    if (selectedUnit && selectedUnit.type === 'light_tank') {
+      var enemyUnit = COMBAT.findEnemyUnitAtTile(state, tx, ty);
+      if (enemyUnit) {
+        COMBAT.issueAttackCommand(state, selectedUnit.id, enemyUnit.id, 'unit');
+        return;
+      }
+    }
+
     MOVEMENT.issueMoveCommand(state, state.selectedUnitId, tx, ty);
   }
 

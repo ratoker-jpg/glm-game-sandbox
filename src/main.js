@@ -13380,6 +13380,11 @@ if (window.FE_EXTERNAL_RENDER_DEBUG_ENABLED) {
     }
     drawDragSelectionBox();
     FE_PATCH_06DDrawGameResultOverlay();
+
+    // ASSET-PREVIEW-01: debug-only candidate preview overlay
+    if (window.FE_ASSET_PREVIEW && window.FE_ASSET_PREVIEW.state.enabled) {
+      window.FE_ASSET_PREVIEW.draw(ctx);
+    }
   }
 
   // ============================================================
